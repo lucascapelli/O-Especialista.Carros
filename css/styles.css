@@ -1,0 +1,485 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Fonte padrão e fundo geral */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f7fc;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Cabeçalho / Menu de Navegação */
+header {
+    background-color: #005aa7; /* azul forte */
+    padding: 15px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 16px;
+    transition: background 0.3s;
+}
+
+nav ul li a:hover {
+    background-color: #0074d9;
+    border-radius: 5px;
+}
+
+/* Título das seções */
+main h1 {
+    text-align: center;
+    margin: 30px 0;
+    color: #005aa7;
+}
+
+
+
+/* estilização própia index */
+.img-index-container {
+    display: block;
+    margin: 20px auto;
+    max-width: 80%;
+    height: auto;
+    border: 3px solid #005aa7;  /* Azul escuro */
+    border-radius: 10px;        /* Bordas arredondadas */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Sombra suave */
+    transition: transform 0.3s ease;  /* Efeito de zoom ao passar o mouse */
+  }
+  
+  .img-index-container:hover {
+    transform: scale(1.03);  /* Efeito de zoom leve */
+  }
+  
+  /* Garantir que as imagens estejam sempre dentro de limites responsivos */
+  img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  .index-page h1 {
+    font-family: 'Arial', sans-serif;
+    color: #005aa7;                    
+    text-align: center;                
+    font-size: 2.5em;                  
+    margin-bottom: 20px;               
+    text-transform: uppercase;         
+  }
+  
+  .index-page h2 {
+    font-family: 'Arial', sans-serif;
+    color: #003366;                    
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 15px;               
+    padding-bottom: 5px;
+    border-bottom: 2px solid #005aa7; 
+    text-transform: uppercase;
+  }
+  
+  .index-page p {
+    font-family: 'Arial', sans-serif;  
+    color: #333;                       
+    font-size: 1.2em;                  
+    line-height: 1.6;                  
+    text-align: center;                
+    margin: 10px 0;                    
+  }
+
+/* Produtos */
+.produtos-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    padding: 20px;
+}
+
+/* Cartão do produto */
+.produto {
+    background-color: #ffffff;
+    border: 1px solid #cce0f7;
+    border-radius: 10px;
+    width: 250px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 90, 167, 0.1);
+    transition: transform 0.3s;
+}
+
+.produto:hover {
+    transform: translateY(-5px);
+}
+
+.produto img {
+    width: 80%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* Título e preço */
+.produto h2 {
+    font-size: 18px;
+    color: #003366;
+    margin: 10px 0 5px;
+}
+
+.produto p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.produto strong {
+    color: #0074d9;
+    font-size: 16px;
+}
+
+/* Galeria */
+.galeria-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .galeria-container img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #0074d9;
+    transition: transform 0.3s;
+    cursor: pointer;
+  }
+  
+  .galeria-container img:hover {
+    transform: scale(1.05);
+  }
+  
+  .galeria-p {
+    color: #003366; /* Azul escuro */
+    font-size: 18px;
+    text-align: center;
+    margin: 20px 0;
+    font-weight: 400;
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal:target {
+    display: flex;
+  }
+  
+  .modal img {
+    max-width: 90%;
+    max-height: 80vh;
+    height: auto;
+    width: auto;
+    object-fit: contain; /* Mantém a proporção correta */
+    border-radius: 10px;
+    box-shadow: 0 0 20px #0074d9;
+  }
+  
+  .modal a {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    font-size: 40px;
+    text-decoration: none;
+    color: #fff;
+  }
+  
+
+/* Rodapé */
+footer {
+    background-color: #003366;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+}
+
+footer a {
+    color: #aad4ff;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .produtos-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+    /* Estilo extra para a galeria */
+    .galeria-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .galeria-container img {
+      width: 250px;
+      height: 170px;
+      object-fit: cover;
+      border-radius: 8px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .galeria-container img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(0, 90, 167, 0.5);
+    }
+
+    /* Modal simples com HTML/CSS */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal:target {
+      display: flex;
+    }
+
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+    }
+
+    .modal a {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      font-size: 30px;
+      color: #fff;
+      text-decoration: none;
+      background: rgba(0,0,0,0.4);
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    /* Estilo extra para a página de contato */
+    .contato-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #f4f8ff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 90, 167, 0.2);
+    }
+
+    .contato-container h2 {
+      text-align: center;
+      color: #005aa7;
+      margin-bottom: 20px;
+    }
+
+    .contato-container form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .contato-container input,
+    .contato-container textarea {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .contato-container button {
+      background-color: #005aa7;
+      color: #fff;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .contato-container button:hover {
+      background-color: #00407a;
+    }
+        
+    /* Estilo extra para a página de Serviços */
+
+    .servicos-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .servicos-container h2 {
+      color: #005aa7;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .servicos-descricao {
+      margin-bottom: 40px;
+      line-height: 1.6;
+      color: #333;
+      font-size: 17px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+
+    table th, table td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: left;
+    }
+
+    table th {
+      background-color: #005aa7;
+      color: white;
+    }
+
+    table tr:nth-child(even) {
+      background-color: #f0f8ff;
+    }
+
+    /* Estilos específicos para a tela de login */
+.login-container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.login-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-container .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.login-container label {
+    font-size: 1.1em;
+    color: #003366;
+    margin-bottom: 8px;
+}
+
+.login-container input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.login-container .btn-submit {
+    background-color: #005aa7;
+    color: #fff;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-container .btn-submit:hover {
+    background-color: #00407a;
+}
+
+.login-container .links {
+    text-align: center;
+    font-size: 14px;
+}
+
+.login-container .links a {
+    color: #005aa7;
+    text-decoration: none;
+}
+
+.login-container .links a:hover {
+    text-decoration: underline;
+}
+    /* Estilos específicos para a tela de Admin */
+.admin-menu {
+    background-color: #f1f1f1;
+    padding: 10px;
+}
+.admin-nav {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+.admin-nav a {
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+}
+.admin-section {
+    padding: 20px;
+    border-top: 1px solid #ccc;
+}
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
