@@ -77,9 +77,9 @@ WSGI_APPLICATION = 'especialista_carros.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  # Alterando para MySQL
-        'NAME': 'nome_do_banco',  # Nome do banco que você quer usar
-        'USER': 'seu_usuario',    # Seu usuário do MySQL
-        'PASSWORD': 'sua_senha',  # Sua senha do MySQL
+        'NAME': 'especialista_carros',  # Nome do banco que você quer usar
+        'USER': 'root',    # Seu usuário do MySQL
+        'PASSWORD': 'Root@123',  # Sua senha do MySQL
         'HOST': 'localhost',      # Geralmente 'localhost' ou '127.0.0.1'
         'PORT': '3306',           # Porta padrão do MySQL
     }
@@ -103,6 +103,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'core.User'  # Onde 'core' é o nome do seu app e 'User' é o nome da classe
 
 
 # Internationalization
