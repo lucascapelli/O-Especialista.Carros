@@ -1,6 +1,7 @@
 from django.urls import path
-from . import views
+from .views import home, LoginView
 
 urlpatterns = [
-    path('', views.home, name='home'),  # Definindo a URL para a página inicial
+    path('', home, name='home'),
+    path('api/login/', LoginView.as_view(), name='api-login'),
 ]

@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 
 # Modelos existentes
@@ -23,7 +23,7 @@ class Servico(models.Model):
         return self.nome
 
 
-# Model de Usuário Personalizado
+# Manager customizado para User
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -37,10 +37,17 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser precisa ter is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser precisa ter is_superuser=True.')
+
         return self.create_user(email, password, **extra_fields)
 
 
-class User(AbstractBaseUser):
+# Model de Usuário Personalizado
+class User(AbstractBaseUser, PermissionsMixin):  # adiciona PermissionsMixin para is_superuser, permissões
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
