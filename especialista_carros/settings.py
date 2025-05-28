@@ -41,9 +41,11 @@ INSTALLED_APPS = [
     'core',
     # Django REST Framework
     'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -130,3 +132,25 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configurações do Django REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ]
+}
+
+# Configurações de autenticação
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Configurações de sessão (opcional)
+SESSION_COOKIE_AGE = 1209600  # 2 semanas em segundos
+
+# Configurações de CORS (desenvolvimento)
+CORS_ALLOW_ALL_ORIGINS = True  # Permite todas as origens (APENAS PARA DESENVOLVIMENTO)
+CORS_ALLOW_CREDENTIALS = True

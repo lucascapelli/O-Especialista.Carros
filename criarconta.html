@@ -115,46 +115,46 @@
                         </div>
                         
                         <!-- Register Form -->
-                        <form class="register-form">
+                        <form id="registerForm" class="register-form">
                             <!-- Name Input -->
-                            <div class="input-group">
-                                <span class="input-icon">
-                                    <i class="fas fa-user"></i>
-                                </span>
-                                <input type="text" class="input-field" placeholder="Seu nome completo" required>
-                            </div>
-                            
-                            <!-- Email Input -->
-                            <div class="input-group">
-                                <span class="input-icon">
-                                    <i class="fas fa-envelope"></i>
-                                </span>
-                                <input type="email" class="input-field" placeholder="Seu e-mail" required>
-                            </div>
-                            
-                            <!-- Phone Input -->
-                            <div class="input-group">
-                                <span class="input-icon">
-                                    <i class="fas fa-phone"></i>
-                                </span>
-                                <input type="tel" class="input-field" placeholder="Seu telefone" required>
-                            </div>
-                            
-                            <!-- Password Input -->
-                            <div class="input-group">
-                                <span class="input-icon">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-                                <input type="password" class="input-field" placeholder="Crie uma senha" required>
-                            </div>
-                            
-                            <!-- Confirm Password Input -->
-                            <div class="input-group">
-                                <span class="input-icon">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-                                <input type="password" class="input-field" placeholder="Confirme sua senha" required>
-                            </div>
+<div class="input-group">
+    <span class="input-icon">
+        <i class="fas fa-user"></i>
+    </span>
+    <input type="text" id="fullName" class="input-field" placeholder="Seu nome completo" required>
+</div>
+
+<!-- Email Input -->
+<div class="input-group">
+    <span class="input-icon">
+        <i class="fas fa-envelope"></i>
+    </span>
+    <input type="email" id="email" class="input-field" placeholder="Seu e-mail" required>
+</div>
+
+<!-- Phone Input -->
+<div class="input-group">
+    <span class="input-icon">
+        <i class="fas fa-phone"></i>
+    </span>
+    <input type="tel" id="phone" class="input-field" placeholder="Seu telefone">
+</div>
+
+<!-- Password Input -->
+<div class="input-group">
+    <span class="input-icon">
+        <i class="fas fa-lock"></i>
+    </span>
+    <input type="password" id="password" class="input-field" placeholder="Crie uma senha" required>
+</div>
+
+<!-- Confirm Password Input -->
+<div class="input-group">
+    <span class="input-icon">
+        <i class="fas fa-lock"></i>
+    </span>
+    <input type="password" id="password2" class="input-field" placeholder="Confirme sua senha" required>
+</div>
                             
                             <!-- Terms Checkbox -->
                             <div class="terms-checkbox">
@@ -252,6 +252,7 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="scripts.js"></script>
+    <script src="js/register.js"></script>
 </body>
 </html>
