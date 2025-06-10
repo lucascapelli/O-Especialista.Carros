@@ -16,13 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include  
-from core.views import RegisterView  # Importe a RegisterView do seu app core
+from core.views import RegisterView,LoginView  # Importe a RegisterView do seu app core
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),  # Isso inclui as URLs definidas na app 'core'
     path('api/register/', RegisterView.as_view()),
+    path('api/login/', LoginView.as_view()), 
 
 
 ]

@@ -14,6 +14,7 @@ class LoginView(APIView):
     permission_classes = [AllowAny]  # Permite acesso sem autenticação
     
     def post(self, request):
+        print("LoginView POST recebido")
         email = request.data.get('email')
         password = request.data.get('senha')  # Mantendo 'senha' como no seu frontend
 
