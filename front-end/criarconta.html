@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | O Especialista.Carros</title>
+    <title>Criar Conta | O Especialista.Carros</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
-     <script>
+    <script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -88,18 +88,18 @@
         </div>
     </nav>
 
-    <!-- Login Section -->
-    <div class="login-container py-12">
+    <!-- Register Section -->
+    <div class="register-container py-12">
         <div class="w-full px-4 sm:px-6 lg:px-8">
             <div class="flex justify-center">
-                <div class="login-card bg-white rounded-lg">
+                <div class="register-card bg-white rounded-lg">
                     <div class="gradient-bg text-white py-6 px-8 text-center">
-                        <h1 class="text-2xl font-bold">Bem-vindo de volta!</h1>
-                        <p class="mt-2 opacity-90">Faça login para acessar sua conta</p>
+                        <h1 class="text-2xl font-bold">Crie sua conta</h1>
+                        <p class="mt-2 opacity-90">Junte-se a nós e aproveite todos os benefícios</p>
                     </div>
                     
                     <div class="p-8">
-                        <!-- Social Login Buttons -->
+                        <!-- Social Register Buttons -->
                         <div class="grid grid-cols-2 gap-4">
                             <a href="#" class="social-btn bg-blue-600 text-white hover:bg-blue-700">
                                 <i class="fab fa-facebook-f mr-2"></i> Facebook
@@ -114,47 +114,69 @@
                             <span>ou</span>
                         </div>
                         
-                        <!-- Login Form -->
-    <form class="login-form">
-    <!-- Email Input -->
-    <div class="input-group">
-        <span class="input-icon">
-            <i class="fas fa-envelope"></i>
-        </span>
-        <input type="email" id="email" class="input-field" placeholder="Seu e-mail" required>
-    </div>
-    
-    <!-- Password Input -->
-    <div class="input-group">
-        <span class="input-icon">
-            <i class="fas fa-lock"></i>
-        </span>
-        <input type="password" id="senha" class="input-field" placeholder="Sua senha" required>
-    </div>
-    
-    <!-- Remember Me & Forgot Password -->
-    <div class="remember-forgot">
-        <label class="remember-me">
-            <input type="checkbox" class="rounded text-blue-600 focus:ring-blue-500">
-            <span class="text-gray-600">Lembrar-me</span>
-        </label>
-        <a href="esqueceusenha.html" class="forgot-password">Esqueceu a senha?</a>
-    </div>
-    
-    <!-- Submit Button -->
-    <button type="submit" class="w-full gradient-bg text-white py-3 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-        Entrar
-    </button>
-    
-    <!-- Register Link -->
-    <div class="mt-6 text-center">
-        <p class="text-gray-600">
-            Não tem uma conta? 
-            <a href="criarconta.html" class="text-blue-600 font-medium hover:text-blue-700">Cadastre-se</a>
-        </p>
-    </div>
-</form>
+                        <!-- Register Form -->
+                        <form id="registerForm" class="register-form">
+                            <!-- Name Input -->
+<div class="input-group">
+    <span class="input-icon">
+        <i class="fas fa-user"></i>
+    </span>
+    <input type="text" id="fullName" class="input-field" placeholder="Seu nome completo" required>
+</div>
 
+<!-- Email Input -->
+<div class="input-group">
+    <span class="input-icon">
+        <i class="fas fa-envelope"></i>
+    </span>
+    <input type="email" id="email" class="input-field" placeholder="Seu e-mail" required>
+</div>
+
+<!-- Phone Input -->
+<div class="input-group">
+    <span class="input-icon">
+        <i class="fas fa-phone"></i>
+    </span>
+    <input type="tel" id="phone" class="input-field" placeholder="Seu telefone">
+</div>
+
+<!-- Password Input -->
+<div class="input-group">
+    <span class="input-icon">
+        <i class="fas fa-lock"></i>
+    </span>
+    <input type="password" id="password" class="input-field" placeholder="Crie uma senha" required>
+</div>
+
+<!-- Confirm Password Input -->
+<div class="input-group">
+    <span class="input-icon">
+        <i class="fas fa-lock"></i>
+    </span>
+    <input type="password" id="password2" class="input-field" placeholder="Confirme sua senha" required>
+</div>
+                            
+                            <!-- Terms Checkbox -->
+                            <div class="terms-checkbox">
+                                <input type="checkbox" id="terms" class="rounded text-blue-600 focus:ring-blue-500" required>
+                                <label for="terms" class="terms-text">
+                                    Eu concordo com os <a href="#" class="terms-link">Termos de Serviço</a> e <a href="#" class="terms-link">Política de Privacidade</a>
+                                </label>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <button type="submit" class="w-full gradient-bg text-white py-3 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Criar Conta
+                            </button>
+                            
+                            <!-- Login Link -->
+                            <div class="mt-6 text-center">
+                                <p class="text-gray-600">
+                                    Já tem uma conta? 
+                                    <a href="login.html" class="text-blue-600 font-medium hover:text-blue-700">Faça login</a>
+                                </p>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -210,7 +232,7 @@
                             <img src="imgs/American Express.jfif" alt="American Express" class="h-8">
                         </div>
                         <div class="bg-white p-2 rounded flex items-center justify-center">
--impls/Hipercard.png" alt="Hipercard" class="h-8">
+                            <img src="imgs/Hipercard.png" alt="Hipercard" class="h-8">
                         </div>
                         <div class="bg-white p-2 rounded flex items-center justify-center">
                             <img src="imgs/pix.png" alt="Pix" class="h-8">
@@ -231,6 +253,6 @@
     </footer>
 
     <script src="scripts.js"></script>
-    <script src="js/login.js"></script>
+    <script src="../js/register.js"></script>
 </body>
 </html>
