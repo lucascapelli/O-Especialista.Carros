@@ -3,9 +3,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, RegisterSerializer
+from .serializers import UserSerializer, RegisterSerializer,ProdutoSerializer
 from rest_framework.permissions import AllowAny
-from .models import User
+from .models import User,Produto
+from rest_framework import viewsets #alteração recente para corrigir o erro de migrations da model produtos
+
 
 def home(request):
     return HttpResponse("Bem-vindo ao especialista de carros!")
@@ -61,3 +63,7 @@ class RegisterView(APIView):
             "error": "Dados inválidos",
             "details": errors
         }, status=status.HTTP_400_BAD_REQUEST)
+    
+class ProdutoViewSet(viewsets.ModelViewSet):
+    queryset = Produto.objects.all()
+    serializer_class = ProdutoSerializer

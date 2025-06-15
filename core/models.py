@@ -8,6 +8,7 @@ class Produto(models.Model):
     preco = models.DecimalField(max_digits=10, decimal_places=2)
     imagem = models.ImageField(upload_to='produtos/')  # Para salvar imagens dos produtos
     data_criacao = models.DateTimeField(auto_now_add=True)
+    estoque = models.IntegerField(default=0)
 
     def __str__(self):
         return self.nome
