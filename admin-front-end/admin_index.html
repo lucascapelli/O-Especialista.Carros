@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -39,8 +40,8 @@
                     <i class="fas fa-user"></i>
                 </div>
                 <div class="sidebar-text">
-                    <p class="font-medium">Admin</p>
-                    <p class="text-xs text-blue-200">Administrador</p>
+                    <p class="font-medium">{{ user.username }}</p>
+                    <p class="text-xs text-blue-200">{{ user.get_user_type_display|default:'Administrador' }}</p>
                 </div>
             </div>
 
@@ -85,7 +86,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="login.html" class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-blue-700 transition duration-300">
+                            <a href="{% url 'logout' %}" class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-blue-700 transition duration-300">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span class="sidebar-text">Sair</span>
                             </a>
@@ -124,7 +125,7 @@
                             <div class="w-8 h-8 rounded-full bg-primary-start flex items-center justify-center text-white">
                                 <i class="fas fa-user"></i>
                             </div>
-                            <span class="hidden md:inline text-gray-700">Admin</span>
+                            <span class="hidden md:inline text-gray-700">{{ user.username }}</span>
                         </div>
                     </div>
                 </div>
@@ -132,7 +133,7 @@
 
             <!-- Main Content -->
             <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
-                <!-- Dashboard Section -->
+                <!-- Dashboard ga Section -->
                 <section id="dashboard-section" class="section-content">
                     <div class="mb-6">
                         <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
@@ -145,52 +146,52 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-gray-500">Total de Vendas</p>
-                                    <h3 class="text-2xl font-bold text-gray-800">R$ 24.580,00</h3>
+                                    <h3 class="text-2xl font-bold text-gray-800">R$ {{ dashboard_stats.total_sales|floatformat:2 }}</h3>
                                 </div>
                                 <div class="p-3 rounded-full bg-blue-100 text-primary-start">
                                     <i class="fas fa-shopping-cart text-xl"></i>
                                 </div>
                             </div>
-                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> 12% desde o último mês</p>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{ dashboard_stats.sales_growth }}% desde o último mês</p>
                         </div>
 
                         <div class="bg-white rounded-lg shadow p-6">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-gray-500">Produtos</p>
-                                    <h3 class="text-2xl font-bold text-gray-800">48</h3>
+                                    <h3 class="text-2xl font-bold text-gray-800">{{ dashboard_stats.total_products }}</h3>
                                 </div>
                                 <div class="p-3 rounded-full bg-yellow-100 text-accent">
                                     <i class="fas fa-box-open text-xl"></i>
                                 </div>
                             </div>
-                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> 5 novos produtos</p>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{ dashboard_stats.new_products }} novos produtos</p>
                         </div>
 
                         <div class="bg-white rounded-lg shadow p-6">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-gray-500">Clientes</p>
-                                    <h3 class="text-2xl font-bold text-gray-800">124</h3>
+                                    <h3 class="text-2xl font-bold text-gray-800">{{ dashboard_stats.total_customers }}</h3>
                                 </div>
                                 <div class="p-3 rounded-full bg-green-100 text-green-600">
                                     <i class="fas fa-users text-xl"></i>
                                 </div>
                             </div>
-                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> 8 novos clientes</p>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{ dashboard_stats.new_customers }} novos clientes</p>
                         </div>
 
                         <div class="bg-white rounded-lg shadow p-6">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-gray-500">Pedidos Pendentes</p>
-                                    <h3 class="text-2xl font-bold text-gray-800">7</h3>
+                                    <h3 class="text-2xl font-bold text-gray-800">{{ dashboard_stats.pending_orders }}</h3>
                                 </div>
                                 <div class="p-3 rounded-full bg-red-100 text-red-600">
                                     <i class="fas fa-clock text-xl"></i>
                                 </div>
                             </div>
-                            <p class="mt-2 text-sm text-red-500"><i class="fas fa-arrow-down mr-1"></i> 2 desde ontem</p>
+                            <p class="mt-2 text-sm text-red-500"><i class="fas fa-arrow-down mr-1"></i> {{ dashboard_stats.pending_orders_change }} desde ontem</p>
                         </div>
                     </div>
 
@@ -212,53 +213,39 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for order in recent_orders %}
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#ORD-2023-001</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">João Silva</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/06/2023</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ 580,00</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.order_number }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.customer_name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.order_date|date:"d/m/Y" }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{ order.order_value|floatformat:2 }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Entregue</span>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if order.status == 'Entregue' %}bg-green-100 text-green-800
+                                                {% elif order.status == 'Processando' %}bg-yellow-100 text-yellow-800
+                                                {% elif order.status == 'Enviado' %}bg-blue-100 text-blue-800
+                                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {{ order.status }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver pedido"><i class="fas fa-eye"></i></button>
-                                            <button class="text-yellow-600 hover:text-yellow-900" aria-label="Editar pedido"><i class="fas fa-edit"></i></button>
+                                            <a href="{% url 'order_detail' order.id %}" class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver pedido"><i class="fas fa-eye"></i></a>
+                                            <a href="{% url 'order_edit' order.id %}" class="text-yellow-600 hover:text-yellow-900" aria-label="Editar pedido"><i class="fas fa-edit"></i></a>
                                         </td>
                                     </tr>
+                                    {% empty %}
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#ORD-2023-002</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Maria Oliveira</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">14/06/2023</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ 1.250,00</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Processando</span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver pedido"><i class="fas fa-eye"></i></button>
-                                            <button class="text-yellow-600 hover:text-yellow-900" aria-label="Editar pedido"><i class="fas fa-edit"></i></button>
-                                        </td>
+                                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum pedido encontrado</td>
                                     </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#ORD-2023-003</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Carlos Souza</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">13/06/2023</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ 320,00</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Enviado</span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver pedido"><i class="fas fa-eye"></i></button>
-                                            <button class="text-yellow-600 hover:text-yellow-900" aria-label="Editar pedido"><i class="fas fa-edit"></i></button>
-                                        </td>
-                                    </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                         <div class="px-6 py-4 border-t border-gray-200">
-                            <button class="text-primary-start hover:text-blue-700 font-medium">Ver todos os pedidos</button>
+                            <a href="#" class="text-primary-start hover:text-blue-700 font-medium" data-section="vendas" onclick="showSection('vendas')">Ver todos os pedidos</a>
                         </div>
                     </div>
-                    <!-- área de produtos com conflitos no Kit Polimento PremiumKit saindo duplicado -->
+
                     <!-- Recent Products -->
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-200">
@@ -277,83 +264,53 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for product in recent_products|dictsort:"id" %}
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
                                                 <div class="flex-shrink-0 h-10 w-10">
-                                                    <img class="h-10 w-10 rounded" src="https://via.placeholder.com/40" alt="Kit Polimento Premium">
+                                                    {% if product.image %}
+                                                    <img class="h-10 w-10 rounded" src="{{ product.image.url }}" alt="{{ product.name }}">
+                                                    {% else %}
+                                                    <img class="h-10 w-10 rounded" src="https://via.placeholder.com/40" alt="{{ product.name }}">
+                                                    {% endif %}
                                                 </div>
                                                 <div class="ml-4">
-                                                    <div class="text-sm font-medium text-gray-900">Kit Polimento Premium</div>
-                                                    <div class="text-sm text-gray-500">SKU: POL-001</div>
+                                                    <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
+                                                    <div class="text-sm text-gray-500">SKU: {{ product.sku }}</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Polimento</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ 189,90</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.category }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{ product.price|floatformat:2 }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.stock }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Disponível</span>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if product.status == 'Disponível' or product.status == 'Ativo' %}bg-green-100 text-green-800
+                                                {% elif product.status == 'Últimas unidades' %}bg-yellow-100 text-yellow-800
+                                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                                {{ product.status }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver produto"><i class="fas fa-eye"></i></button>
-                                            <button class="text-yellow-600 hover:text-yellow-900 mr-3" aria-label="Editar produto"><i class="fas fa-edit"></i></button>
-                                            <button class="text-red-600 hover:text-red-900" aria-label="Excluir produto"><i class="fas fa-trash"></i></button>
+                                            <a href="{% url 'product_detail' product.id %}" class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver produto"><i class="fas fa-eye"></i></a>
+                                            <a href="{% url 'product_edit' product.id %}" class="text-yellow-600 hover:text-yellow-900 mr-3" aria-label="Editar produto"><i class="fas fa-edit"></i></a>
+                                            <form action="{% url 'product_delete' product.id %}" method="post" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este produto?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-600 hover:text-red-900" aria-label="Excluir produto"><i class="fas fa-trash"></i></button>
+                                            </form>
                                         </td>
                                     </tr>
+                                    {% empty %}
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-10 w-10">
-                                                    <img class="h-10 w-10 rounded" src="https://via.placeholder.com/40" alt="Cera Líquida">
-                                                </div>
-                                                <div class="ml-4">
-                                                    <div class="text-sm font-medium text-gray-900">Cera Líquida</div>
-                                                    <div class="text-sm text-gray-500">SKU: CERA-005</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Proteção</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ 79,90</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">8</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Últimas unidades</span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver produto"><i class="fas fa-eye"></i></button>
-                                            <button class="text-yellow-600 hover:text-yellow-900 mr-3" aria-label="Editar produto"><i class="fas fa-edit"></i></button>
-                                            <button class="text-red-600 hover:text-red-900" aria-label="Excluir produto"><i class="fas fa-trash"></i></button>
-                                        </td>
+                                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum produto encontrado</td>
                                     </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-10 w-10">
-                                                    <img class="h-10 w-10 rounded" src="https://via.placeholder.com/40" alt="Shampoo Automotivo">
-                                                </div>
-                                                <div class="ml-4">
-                                                    <div class="text-sm font-medium text-gray-900">Shampoo Automotivo</div>
-                                                    <div class="text-sm text-gray-500">SKU: SHM-012</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Lavagem</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ 42,50</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">25</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Disponível</span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver produto"><i class="fas fa-eye"></i></button>
-                                            <button class="text-yellow-600 hover:text-yellow-900 mr-3" aria-label="Editar produto"><i class="fas fa-edit"></i></button>
-                                            <button class="text-red-600 hover:text-red-900" aria-label="Excluir produto"><i class="fas fa-trash"></i></button>
-                                        </td>
-                                    </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
-                        <div class="px-6 py-4 border-t border-gray-200">                       <!--necessário que o acionamento desse botão leve a section de produtos-->
-                            <button class="text-primary-start hover:text-blue-700 font-medium">Ver todos os produtos</button>
+                        <div class="px-6 py-4 border-t border-gray-200">
+                            <a href="#" class="text-primary-start hover:text-blue-700 font-medium" data-section="produtos" onclick="showSection('produtos')">Ver todos os produtos</a>
                         </div>
                     </div>
                 </section>
@@ -371,51 +328,50 @@
                     </div>
 
                     <!-- Add Product Form -->
-                     <!-- as necessário alterações de end point para cadastro na table core_user -->
                     <div id="add-product-form" class="bg-white rounded-lg shadow p-6 mb-6 hidden">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Adicionar Novo Produto</h3>
-                        <form onsubmit="handleProductSubmit(event)">
+                        <form action="{% url 'product_create' %}" method="post" enctype="multipart/form-data" onsubmit="handleProductSubmit(event)">
+                            {% csrf_token %}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
-                                    <input type="text" id="product-name" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="text" id="product-name" name="name" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label for="product-sku" class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                                    <input type="text" id="product-sku" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="text" id="product-sku" name="sku" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label for="product-price" class="block text-sm font-medium text-gray-700 mb-1">Preço</label>
-                                    <input type="number" id="product-price" required min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="number" id="product-price" name="price" required min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label for="product-stock" class="block text-sm font-medium text-gray-700 mb-1">Estoque</label>
-                                    <input type="number" id="product-stock" required min="0" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="number" id="product-stock" name="stock" required min="0" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label for="product-category" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                                    <select id="product-category" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="product-category" name="category" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                         <option value="">Selecione uma categoria</option>
-                                        <option value="Lavagem">Lavagem</option>
-                                        <option value="Polimento">Polimento</option>
-                                        <option value="Proteção">Proteção</option>
-                                        <option value="Acessórios">Acessórios</option>
+                                        {% for category in categories %}
+                                        <option value="{{ category }}">{{ category }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div>
                                     <label for="product-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                    <select id="product-status" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="product-status" name="status" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                         <option value="Ativo">Ativo</option>
                                         <option value="Inativo">Inativo</option>
                                     </select>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label for="product-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                                    <textarea id="product-description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                    <textarea id="product-description" name="description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label for="product-image" class="block text-sm font-medium text-gray-700 mb-1">Imagem do Produto</label>
-                                    <input type="file" id="product-image" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="file" id="product-image" name="image" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                             </div>
                             <div class="mt-6 flex justify-end space-x-3">
@@ -426,14 +382,13 @@
                     </div>
 
                     <!-- Products Table -->
-                    <!--tabelas de produto ainda estão apenas estáticas e necessário implememtação do backend-->>
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                             <h3 class="text-lg font-semibold text-gray-800">Lista de Produtos</h3>
-                            <div class="relative">                                                                                                                                                            <!-- necessário implementação da funcionalidade de busca-->>
-                                <input type="text" placeholder="Buscar produtos..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Buscar produtos">
+                            <form action="{% url 'product_list' %}" method="get" class="relative">
+                                <input type="text" name="search" placeholder="Buscar produtos..." value="{{ request.GET.search }}" class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Buscar produtos">
                                 <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                            </div>
+                            </form>
                         </div>
                         <div class="table-responsive">
                             <table class="min-w-full divide-y divide-gray-200">
@@ -448,44 +403,69 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for product in products|dictsort:"id" %}
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
                                                 <div class="flex-shrink-0 h-10 w-10">
-                                                    <img class="h-10 w-10 rounded" src="https://via.placeholder.com/40" alt="Kit Polimento Premium">
+                                                    {% if product.image %}
+                                                    <img class="h-10 w-10 rounded" src="{{ product.image.url }}" alt="{{ product.name }}">
+                                                    {% else %}
+                                                    <img class="h-10 w-10 rounded" src="https://via.placeholder.com/40" alt="{{ product.name }}">
+                                                    {% endif %}
                                                 </div>
-                                                <div class="ml-4">                                 <!--tem algum conflito que faz com que o kit polimento saia duplicado e sobrepost descentralizado-->>
-                                                    <div class="text-sm font-medium text-gray-900">Kit Polimento Premium</div>
-                                                    <div class="text-sm text-gray-500">SKU: POL-001</div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
+                                                    <div class="text-sm text-gray-500">SKU: {{ product.sku }}</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Polimento</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ 189,90</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.category }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{ product.price|floatformat:2 }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.stock }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Ativo</span>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if product.status == 'Ativo' %}bg-green-100 text-green-800
+                                                {% elif product.status == 'Últimas unidades' %}bg-yellow-100 text-yellow-800
+                                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                                {{ product.status }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver produto"><i class="fas fa-eye"></i></button>
-                                            <button class="text-yellow-600 hover:text-yellow-900 mr-3" aria-label="Editar produto"><i class="fas fa-edit"></i></button>
-                                            <button class="text-red-600 hover:text-red-900" aria-label="Excluir produto"><i class="fas fa-trash"></i></button>
+                                            <a href="{% url 'product_detail' product.id %}" class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver produto"><i class="fas fa-eye"></i></a>
+                                            <a href="{% url 'product_edit' product.id %}" class="text-yellow-600 hover:text-yellow-900 mr-3" aria-label="Editar produto"><i class="fas fa-edit"></i></a>
+                                            <form action="{% url 'product_delete' product.id %}" method="post" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este produto?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-600 hover:text-red-900" aria-label="Excluir produto"><i class="fas fa-trash"></i></button>
+                                            </form>
                                         </td>
                                     </tr>
-                                    <!-- Other product rows remain unchanged -->
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum produto encontrado</td>
+                                    </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                         <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                             <div class="text-sm text-gray-500">
-                                Mostrando <span class="font-medium">1</span> a <span class="font-medium">5</span> de <span class="font-medium">12</span> resultados
+                                Mostrando <span class="font-medium">{{ products.start_index }}</span> a <span class="font-medium">{{ products.end_index }}</span> de <span class="font-medium">{{ products.paginator.count }}</span> resultados
                             </div>
-                            <div class="flex space-x-2">                                                                                                                             <!--necessário implementação do backend para o funcionamento dos botões da lista-->>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página anterior">Anterior</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" aria-label="Página 1">1</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página 2">2</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página 3">3</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Próxima página">Próximo</button>
+                            <div class="flex space-x-2">
+                                {% if products.has_previous %}
+                                <a href="{% url 'product_list' %}?page={{ products.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página anterior">Anterior</a>
+                                {% else %}
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed" disabled aria-label="Página anterior">Anterior</button>
+                                {% endif %}
+                                {% for num in products.paginator.page_range %}
+                                <a href="{% url 'product_list' %}?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium {% if products.number == num %}text-white bg-blue-600 hover:bg-blue-700{% else %}text-gray-700 bg-white hover:bg-gray-50{% endif %}" aria-label="Página {{ num }}">{{ num }}</a>
+                                {% endfor %}
+                                {% if products.has_next %}
+                                <a href="{% url 'product_list' %}?page={{ products.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Próxima página">Próximo</a>
+                                {% else %}
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed" disabled aria-label="Próxima página">Próximo</button>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -504,52 +484,52 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-gray-500">Total de Vendas</p>
-                                    <h3 class="text-2xl font-bold text-gray-800">R$ 24.580,00</h3>
+                                    <h3 class="text-2xl font-bold text-gray-800">R$ {{ sales_stats.total_sales|floatformat:2 }}</h3>
                                 </div>
                                 <div class="p-3 rounded-full bg-blue-100 text-primary-start">
                                     <i class="fas fa-shopping-cart text-xl"></i>
                                 </div>
                             </div>
-                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> 12% desde o último mês</p>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{ sales_stats.sales_growth }}% desde o último mês</p>
                         </div>
 
                         <div class="bg-white rounded-lg shadow p-6">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-gray-500">Pedidos Hoje</p>
-                                    <h3 class="text-2xl font-bold text-gray-800">8</h3>
+                                    <h3 class="text-2xl font-bold text-gray-800">{{ sales_stats.orders_today }}</h3>
                                 </div>
                                 <div class="p-3 rounded-full bg-green-100 text-green-600">
                                     <i class="fas fa-calendar-day text-xl"></i>
                                 </div>
                             </div>
-                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> 2 desde ontem</p>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{ sales_stats.orders_today_change }} desde ontem</p>
                         </div>
 
                         <div class="bg-white rounded-lg shadow p-6">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-gray-500">Pedidos Pendentes</p>
-                                    <h3 class="text-2xl font-bold text-gray-800">7</h3>
+                                    <h3 class="text-2xl font-bold text-gray-800">{{ sales_stats.pending_orders }}</h3>
                                 </div>
                                 <div class="p-3 rounded-full bg-yellow-100 text-accent">
                                     <i class="fas fa-clock text-xl"></i>
                                 </div>
                             </div>
-                            <p class="mt-2 text-sm text-red-500"><i class="fas fa-arrow-down mr-1"></i> 2 desde ontem</p>
+                            <p class="mt-2 text-sm text-red-500"><i class="fas fa-arrow-down mr-1"></i> {{ sales_stats.pending_orders_change }} desde ontem</p>
                         </div>
 
                         <div class="bg-white rounded-lg shadow p-6">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-gray-500">Ticket Médio</p>
-                                    <h3 class="text-2xl font-bold text-gray-800">R$ 198,23</h3>
+                                    <h3 class="text-2xl font-bold text-gray-800">R$ {{ sales_stats.average_ticket|floatformat:2 }}</h3>
                                 </div>
                                 <div class="p-3 rounded-full bg-purple-100 text-purple-600">
                                     <i class="fas fa-receipt text-xl"></i>
                                 </div>
                             </div>
-                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> 5% desde o último mês</p>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{ sales_stats.average_ticket_growth }}% desde o último mês</p>
                         </div>
                     </div>
 
@@ -559,20 +539,24 @@
                             <h3 class="text-lg font-semibold text-gray-800">Todos os Pedidos</h3>
                             <div class="flex space-x-3">
                                 <div class="relative">
-                                    <select class="appearance-none pl-3 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Filtrar por status">
-                                        <option>Filtrar por status</option>
-                                        <option>Todos</option>
-                                        <option>Pendente</option>
-                                        <option>Processando</option>
-                                        <option>Enviado</option>
-                                        <option>Entregue</option>
-                                        <option>Cancelado</option>
-                                    </select>
-                                    <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400"></i>
+                                    <form action="{% url 'order_list' %}" method="get">
+                                        <select name="status" class="appearance-none pl-3 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Filtrar por status">
+                                            <option value="">Filtrar por status</option>
+                                            <option value="Todos" {% if request.GET.status == 'Todos' %}selected{% endif %}>Todos</option>
+                                            <option value="Pendente" {% if request.GET.status == 'Pendente' %}selected{% endif %}>Pendente</option>
+                                            <option value="Processando" {% if request.GET.status == 'Processando' %}selected{% endif %}>Processando</option>
+                                            <option value="Enviado" {% if request.GET.status == 'Enviado' %}selected{% endif %}>Enviado</option>
+                                            <option value="Entregue" {% if request.GET.status == 'Entregue' %}selected{% endif %}>Entregue</option>
+                                            <option value="Cancelado" {% if request.GET.status == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+                                        </select>
+                                        <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400"></i>
+                                    </form>
                                 </div>
                                 <div class="relative">
-                                    <input type="text" placeholder="Buscar pedidos..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Buscar pedidos">
-                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                    <form action="{% url 'order_list' %}" method="get">
+                                        <input type="text" name="search" placeholder="Buscar pedidos..." value="{{ request.GET.search }}" class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Buscar pedidos">
+                                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -589,33 +573,52 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for order in orders %}
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#ORD-2023-001</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">João Silva</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/06/2023</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ 580,00</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.order_number }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.customer_name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.order_date|date:"d/m/Y" }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{ order.order_value|floatformat:2 }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Entregue</span>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if order.status == 'Entregue' %}bg-green-100 text-green-800
+                                                {% elif order.status == 'Processando' %}bg-yellow-100 text-yellow-800
+                                                {% elif order.status == 'Enviado' %}bg-blue-100 text-blue-800
+                                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {{ order.status }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver pedido"><i class="fas fa-eye"></i></button>
-                                            <button class="text-yellow-600 hover:text-yellow-900" aria-label="Editar pedido"><i class="fas fa-edit"></i></button>
+                                            <a href="{% url 'order_detail' order.id %}" class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver pedido"><i class="fas fa-eye"></i></a>
+                                            <a href="{% url 'order_edit' order.id %}" class="text-yellow-600 hover:text-yellow-900" aria-label="Editar pedido"><i class="fas fa-edit"></i></a>
                                         </td>
                                     </tr>
-                                    <!-- Other order rows remain unchanged -->
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum pedido encontrado</td>
+                                    </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                         <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                             <div class="text-sm text-gray-500">
-                                Mostrando <span class="font-medium">1</span> a <span class="font-medium">5</span> de <span class="font-medium">15</span> resultados
+                                Mostrando <span class="font-medium">{{ orders.start_index }}</span> a <span class="font-medium">{{ orders.end_index }}</span> de <span class="font-medium">{{ orders.paginator.count }}</span> resultados
                             </div>
                             <div class="flex space-x-2">
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página anterior">Anterior</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" aria-label="Página 1">1</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página 2">2</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página 3">3</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Próxima página">Próximo</button>
+                                {% if orders.has_previous %}
+                                <a href="{% url 'order_list' %}?page={{ orders.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página anterior">Anterior</a>
+                                {% else %}
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed" disabled aria-label="Página anterior">Anterior</button>
+                                {% endif %}
+                                {% for num in orders.paginator.page_range %}
+                                <a href="{% url 'order_list' %}?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium {% if orders.number == num %}text-white bg-blue-600 hover:bg-blue-700{% else %}text-gray-700 bg-white hover:bg-gray-50{% endif %}" aria-label="Página {{ num }}">{{ num }}</a>
+                                {% endfor %}
+                                {% if orders.has_next %}
+                                <a href="{% url 'order_list' %}?page={{ orders.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Próxima página">Próximo</a>
+                                {% else %}
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed" disabled aria-label="Próxima página">Próximo</button>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -636,32 +639,33 @@
                     <!-- Add User Form -->
                     <div id="add-user-form" class="bg-white rounded-lg shadow p-6 mb-6 hidden">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Adicionar Novo Usuário</h3>
-                        <form onsubmit="handleUserSubmit(event)">
+                        <form action="{% url 'user_create' %}" method="post" onsubmit="handleUserSubmit(event)">
+                            {% csrf_token %}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="user-name" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-                                    <input type="text" id="user-name" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="text" id="user-name" name="name" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label for="user-email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                                    <input type="email" id="user-email" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="email" id="user-email" name="email" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label for="user-password" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                                    <input type="password" id="user-password" required minlength="8" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="password" id="user-password" name="password" required minlength="8" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label for="user-role" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Usuário</label>
-                                    <select id="user-role" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="user-role" name="role" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                         <option value="">Selecione um tipo</option>
-                                        <option value="Administrador">Administrador</option>
-                                        <option value="Editor">Editor</option>
-                                        <option value="Cliente">Cliente</option>
+                                        {% for role in user_roles %}
+                                        <option value="{{ role }}">{{ role }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div>
                                     <label for="user-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                    <select id="user-status" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="user-status" name="status" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                         <option value="Ativo">Ativo</option>
                                         <option value="Inativo">Inativo</option>
                                     </select>
@@ -678,10 +682,10 @@
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                             <h3 class="text-lg font-semibold text-gray-800">Lista de Usuários</h3>
-                            <div class="relative">
-                                <input type="text" placeholder="Buscar usuários..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Buscar usuários">
+                            <form action="{% url 'user_list' %}" method="get" class="relative">
+                                <input type="text" name="search" placeholder="Buscar usuários..." value="{{ request.GET.search }}" class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Buscar usuários">
                                 <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                            </div>
+                            </form>
                         </div>
                         <div class="table-responsive">
                             <table class="min-w-full divide-y divide-gray-200">
@@ -695,32 +699,52 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for user in users %}
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Admin</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">admin@especialista.carros</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Administrador</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.username }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.get_user_type_display|default:'Administrador' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Ativo</span>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if user.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                                {{ user.is_active|yesno:"Ativo,Inativo" }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver usuário"><i class="fas fa-eye"></i></button>
-                                            <button class="text-yellow-600 hover:text-yellow-900 mr-3" aria-label="Editar usuário"><i class="fas fa-edit"></i></button>
-                                            <button class="text-red-600 hover:text-red-900" aria-label="Excluir usuário"><i class="fas fa-trash"></i></button>
+                                            <a href="{% url 'user_detail' user.id %}" class="text-blue-600 hover:text-blue-900 mr-3" aria-label="Ver usuário"><i class="fas fa-eye"></i></a>
+                                            <a href="{% url 'user_edit' user.id %}" class="text-yellow-600 hover:text-yellow-900 mr-3" aria-label="Editar usuário"><i class="fas fa-edit"></i></a>
+                                            <form action="{% url 'user_delete' user.id %}" method="post" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-600 hover:text-red-900" aria-label="Excluir usuário"><i class="fas fa-trash"></i></button>
+                                            </form>
                                         </td>
                                     </tr>
-                                    <!-- Other user rows remain unchanged -->
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum usuário encontrado</td>
+                                    </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                         <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                             <div class="text-sm text-gray-500">
-                                Mostrando <span class="font-medium">1</span> a <span class="font-medium">5</span> de <span class="font-medium">8</span> resultados
+                                Mostrando <span class="font-medium">{{ users.start_index }}</span> a <span class="font-medium">{{ users.end_index }}</span> de <span class="font-medium">{{ users.paginator.count }}</span> resultados
                             </div>
                             <div class="flex space-x-2">
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página anterior">Anterior</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" aria-label="Página 1">1</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página 2">2</button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Próxima página">Próximo</button>
+                                {% if users.has_previous %}
+                                <a href="{% url 'user_list' %}?page={{ users.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Página anterior">Anterior</a>
+                                {% else %}
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed" disabled aria-label="Página anterior">Anterior</button>
+                                {% endif %}
+                                {% for num in users.paginator.page_range %}
+                                <a href="{% url 'user_list' %}?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium {% if users.number == num %}text-white bg-blue-600 hover:bg-blue-700{% else %}text-gray-700 bg-white hover:bg-gray-50{% endif %}" aria-label="Página {{ num }}">{{ num }}</a>
+                                {% endfor %}
+                                {% if users.has_next %}
+                                <a href="{% url 'user_list' %}?page={{ users.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" aria-label="Próxima página">Próximo</a>
+                                {% else %}
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed" disabled aria-label="Próxima página">Próximo</button>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -734,26 +758,27 @@
                     </div>
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Configurações Gerais</h3>
-                        <form>
+                        <form action="{% url 'settings_update' %}" method="post">
+                            {% csrf_token %}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="site-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Site</label>
-                                    <input type="text" id="site-name" value="Especialista.Carros" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="text" id="site-name" name="site_name" value="{{ settings.site_name|default:'Especialista.Carros' }}" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label for="site-email" class="block text-sm font-medium text-gray-700 mb-1">E-mail de Contato</label>
-                                    <input type="email" id="site-email" value="contato@especialista.carros" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="email" id="site-email" name="site_email" value="{{ settings.site_email|default:'contato@especialista.carros' }}" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label for="site-whatsapp" class="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
-                                    <input type="tel" id="site-whatsapp" value="+5511995366395" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="tel" id="site-whatsapp" name="site_whatsapp" value="{{ settings.site_whatsapp|default:'+5511995366395' }}" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label for="site-language" class="block text-sm font-medium text-gray-700 mb-1">Idioma</label>
-                                    <select id="site-language" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                        <option value="pt-BR">Português (Brasil)</option>
-                                        <option value="en">English</option>
-                                        <option value="es">Español</option>
+                                    <select id="site-language" name="site_language" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="pt-BR" {% if settings.site_language == 'pt-BR' %}selected{% endif %}>Português (Brasil)</option>
+                                        <option value="en" {% if settings.site_language == 'en' %}selected{% endif %}>English</option>
+                                        <option value="es" {% if settings.site_language == 'es' %}selected{% endif %}>Español</option>
                                     </select>
                                 </div>
                             </div>
@@ -769,5 +794,6 @@
     </div>
 
     <script src="admin-scripts.js"></script>
+    <script src="js/products.js"></script>
 </body>
 </html>

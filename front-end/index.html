@@ -109,99 +109,45 @@
         </div>
     </section>
 
-    <!-- Featured Products -->
-    <section id="products" class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Nossos Produtos</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Produtos de alta qualidade para manutenção e estética automotiva</p>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Product 1 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300 hover-scale">
-                    <div class="relative pb-48 overflow-hidden">
-                        <img class="absolute inset-0 h-full w-full object-cover" 
-                             src="imgs/shampoo-automotivo.jpg" 
-                             alt="Shampoo automotivo">
-                    </div>
-                    <div class="p-4">
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Shampoo Automotivo Premium</h3>
-                        <p class="text-gray-600 text-sm mb-4">Limpeza profunda sem danificar a pintura</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-lg font-bold text-primary-start">R$ 39,90</span>
-                            <button class="bg-primary-end text-white px-4 py-2 rounded hover:bg-primary-start transition duration-300">
-                                <i class="fas fa-cart-plus mr-2"></i>Comprar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Product 2 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300 hover-scale">
-                    <div class="relative pb-48 overflow-hidden">
-                        <img class="absolute inset-0 h-full w-full object-cover" 
-                             src="imgs/ceraAutomotiva.jpg" 
-                             alt="Cera automotiva">
-                    </div>
-                    <div class="p-4">
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Cera Líquida Protetora</h3>
-                        <p class="text-gray-600 text-sm mb-4">Proteção de longa duração e brilho intenso</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-lg font-bold text-primary-start">R$ 59,90</span>
-                            <button class="bg-primary-end text-white px-4 py-2 rounded hover:bg-primary-start transition duration-300">
-                                <i class="fas fa-cart-plus mr-2"></i>Comprar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Product 3 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300 hover-scale">
-                    <div class="relative pb-48 overflow-hidden">
-                        <img class="absolute inset-0 h-full w-full object-cover" 
-                             src="imgs/flanela-microfibra.jpg" 
-                             alt="Flanela Micro fibra">
-                    </div>
-                    <div class="p-4">
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Kit Completo de Polimento</h3>
-                        <p class="text-gray-600 text-sm mb-4">Tudo que você precisa para um polimento profissional</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-lg font-bold text-primary-start">R$ 249,90</span>
-                            <button class="bg-primary-end text-white px-4 py-2 rounded hover:bg-primary-start transition duration-300">
-                                <i class="fas fa-cart-plus mr-2"></i>Comprar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Product 4 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300 hover-scale">
-                    <div class="relative pb-48 overflow-hidden">
-                        <img class="absolute inset-0 h-full w-full object-cover" 
-                             src="imgs/pneu-pretinho.jpg" 
-                             alt="pneu pretinho">
-                    </div>
-                    <div class="p-4">
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Aromatizante Automotivo Premium</h3>
-                        <p class="text-gray-600 text-sm mb-4">Fragrância exclusiva que dura até 30 dias</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-lg font-bold text-primary-start">R$ 29,90</span>
-                            <button class="bg-primary-end text-white px-4 py-2 rounded hover:bg-primary-start transition duration-300">
-                                <i class="fas fa-cart-plus mr-2"></i>Comprar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="text-center mt-12">
-                <a href="#" class="inline-block bg-primary-end text-white px-8 py-3 rounded-lg font-medium hover:bg-primary-start transition duration-300">
-                    Ver Todos os Produtos
-                </a>
-            </div>
+   <!-- Featured Products -->
+<section id="products" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Nossos Produtos</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Produtos de alta qualidade para manutenção e estética automotiva</p>
         </div>
-    </section>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {% for produto in produtos %}
+                <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300 hover-scale">
+                    <div class="relative pb-48 overflow-hidden">
+                        <img class="absolute inset-0 h-full w-full object-cover"
+                             src="{{ produto.imagem.url }}"
+                             alt="{{ produto.nome }}">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ produto.nome }}</h3>
+                        <p class="text-gray-600 text-sm mb-4">{{ produto.descricao }}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-bold text-primary-start">R$ {{ produto.preco }}</span>
+                            <button class="bg-primary-end text-white px-4 py-2 rounded hover:bg-primary-start transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center text-gray-500 col-span-4">Nenhum produto disponível no momento.</p>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-12">
+            <a href="#" class="inline-block bg-primary-end text-white px-8 py-3 rounded-lg font-medium hover:bg-primary-start transition duration-300">
+                Ver Todos os Produtos
+            </a>
+        </div>
+    </div>
+</section>
 
     <!-- Services Section -->
     <section id="services" class="py-16 bg-gray-50">

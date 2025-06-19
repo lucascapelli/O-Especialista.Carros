@@ -7,6 +7,7 @@ from .serializers import UserSerializer, RegisterSerializer,ProdutoSerializer
 from rest_framework.permissions import AllowAny
 from .models import User,Produto
 from rest_framework import viewsets #alteração recente para corrigir o erro de migrations da model produtos
+from django.shortcuts import render
 
 
 def home(request):
@@ -67,3 +68,8 @@ class RegisterView(APIView):
 class ProdutoViewSet(viewsets.ModelViewSet):
     queryset = Produto.objects.all()
     serializer_class = ProdutoSerializer
+
+
+def produtos_listagem(request):
+    produtos = Produto.objects.all()
+    return render(request, 'index.html', {'produtos': produtos})
