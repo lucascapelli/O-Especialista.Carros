@@ -2,12 +2,13 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate,logout
 from .serializers import UserSerializer, RegisterSerializer,ProdutoSerializer
 from rest_framework.permissions import AllowAny
 from .models import User,Produto
 from rest_framework import viewsets #alteração recente para corrigir o erro de migrations da model produtos
-from django.shortcuts import render
+from django.shortcuts import render,redirect
+from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 
 
 def home(request):
@@ -68,8 +69,26 @@ class RegisterView(APIView):
 class ProdutoViewSet(viewsets.ModelViewSet):
     queryset = Produto.objects.all()
     serializer_class = ProdutoSerializer
-
+    parser_classes = [FormParser, MultiPartParser, JSONParser]
 
 def produtos_listagem(request):
     produtos = Produto.objects.all()
     return render(request, 'index.html', {'produtos': produtos})
+
+def admin_index(request):
+    site_language = request.GET.get('site_language', 'pt-BR')
+    allowed_status = ['Todos', 'Pendente', 'Processando', 'Enviado', 'Entregue', 'Cancelado']
+    status = request.GET.get('status', 'Todos')
+    if status not in allowed_status:
+        status = 'Todos'
+    
+    context = {
+        'status': status,
+        'site_language': site_language,
+    }
+    
+    return render(request, 'core/admin-front-end/admin_index.html', context)
+
+def logout_view(request):
+    logout(request)
+    return redirect('admin_index')  # Ou redirecione pra qualquer outra página sua

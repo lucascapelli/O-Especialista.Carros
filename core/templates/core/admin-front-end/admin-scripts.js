@@ -1,3 +1,4 @@
+// Tailwind Config
 tailwind.config = {
     theme: {
         extend: {
@@ -13,7 +14,7 @@ tailwind.config = {
             },
         }
     }
-}
+};
 
 // Toggle Sidebar
 function toggleSidebar() {
@@ -47,6 +48,7 @@ function showSection(sectionId) {
             link.classList.add('active');
         }
     });
+
     // Close mobile menu if open
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('backdrop');
@@ -68,16 +70,9 @@ function toggleAddUserForm() {
     form.classList.toggle('hidden');
 }
 
-// Handle Product Form Submission
-function handleProductSubmit(event) {
-    event.preventDefault();
-    alert('Produto salvo com sucesso!'); // Placeholder for actual submission logic
-    toggleAddProductForm();
-}
-
 // Handle User Form Submission
 function handleUserSubmit(event) {
     event.preventDefault();
-    alert('Usuário salvo com sucesso!'); // Placeholder for actual submission logic
+    alert('Usuário salvo com sucesso!'); // Placeholder para futura implementação real
     toggleAddUserForm();
 }

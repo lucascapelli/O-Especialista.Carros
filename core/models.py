@@ -1,17 +1,30 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 
+
 # Modelos existentes
 class Produto(models.Model):
     nome = models.CharField(max_length=255)
-    descricao = models.TextField()
+    sku = models.CharField(max_length=50, unique=True, blank=True, null=True)  # SKU único
+    descricao = models.TextField(blank=True)  # Permite descrição vazia
     preco = models.DecimalField(max_digits=10, decimal_places=2)
-    imagem = models.ImageField(upload_to='produtos/')  # Para salvar imagens dos produtos
-    data_criacao = models.DateTimeField(auto_now_add=True)
+    imagem = models.ImageField(upload_to='produtos/', blank=True, null=True)  # Permite imagem opcional
     estoque = models.IntegerField(default=0)
+    categoria = models.CharField(max_length=50, choices=[
+        ('Lavagem', 'Lavagem'),
+        ('Polimento', 'Polimento'),
+        ('Proteção', 'Proteção'),
+        ('Acessórios', 'Acessórios'),
+    ], blank=True)  # Categorias predefinidas
+    status = models.CharField(max_length=20, choices=[
+        ('Ativo', 'Ativo'),
+        ('Inativo', 'Inativo'),
+        ('Últimas unidades', 'Últimas unidades'),
+    ], default='Ativo')  # Status com opções
+    data_criacao = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.nome
+        return f"{self.nome} ({self.sku or 'Sem SKU'})"
 
 class Servico(models.Model):
     nome = models.CharField(max_length=255)

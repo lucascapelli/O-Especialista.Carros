@@ -1,0 +1,1073 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo | O Especialista.Carros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'core/admin-front-end/admin.css' %}">
+</head>
+
+<body class="font-sans bg-gray-50">
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/5511995366395"
+        class="fixed bottom-6 right-6 bg-green-500 text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-green-600 transition duration-300 z-50"
+        target="_blank" aria-label="Contato via WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Backdrop for Mobile Menu -->
+    <div class="backdrop" id="backdrop"></div>
+
+    <!-- Admin Layout -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-gradient-to-b from-primary-start to-primary-end text-white w-64 flex-shrink-0 flex flex-col md:relative fixed z-40 h-full"
+            id="sidebar">
+            <!-- Logo -->
+            <div class="flex items-center justify-between p-4 border-b border-blue-700">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-car text-accent text-2xl"></i>
+                    <span class="logo-text text-xl font-bold">Especialista.Carros</span>
+                </div>
+                <button class="toggle-btn text-white focus:outline-none hidden md:block"
+                    aria-label="Alternar barra lateral" onclick="toggleSidebar()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+
+            <!-- User Profile -->
+            <div class="p-4 flex items-center space-x-3 border-b border-blue-700">
+                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary-start">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="sidebar-text">
+                    <p class="font-medium">{{ user.username }}</p>
+                    <p class="text-xs text-blue-200">{{ user.get_user_type_display|default:'Administrador' }}</p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 overflow-y-auto">
+                <div class="p-2">
+                    <h3 class="sidebar-text px-3 py-2 text-xs uppercase text-blue-300 font-semibold">Menu</h3>
+                    <ul>
+                        <li>
+                            <a href="#"
+                                class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-blue-700 transition duration-300 active"
+                                data-section="dashboard" onclick="showSection('dashboard')">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span class="sidebar-text">Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-blue-700 transition duration-300"
+                                data-section="produtos" onclick="showSection('produtos')">
+                                <i class="fas fa-box-open"></i>
+                                <span class="sidebar-text">Produtos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-blue-700 transition duration-300"
+                                data-section="vendas" onclick="showSection('vendas')">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="sidebar-text">Vendas</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-blue-700 transition duration-300"
+                                data-section="usuarios" onclick="showSection('usuarios')">
+                                <i class="fas fa-users"></i>
+                                <span class="sidebar-text">Usuários</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="p-2 border-t border-blue-700">
+                    <ul>
+                        <li>
+                            <a href="#"
+                                class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-blue-700 transition duration-300"
+                                data-section="configuracoes" onclick="showSection('configuracoes')">
+                                <i class="fas fa-cog"></i>
+                                <span class="sidebar-text">Configurações</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'logout' %}"
+                                class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-blue-700 transition duration-300">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span class="sidebar-text">Sair</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area flex-1 flex flex-col overflow-hidden md:ml-64" id="content-area">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button class="mobile-menu-btn mr-4 text-gray-600 focus:outline-none md:hidden"
+                            aria-label="Abrir menu lateral" onclick="toggleMobileMenu()">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-xl font-bold text-gray-800">Painel Administrativo</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button class="text-gray-600 hover:text-gray-900 focus:outline-none"
+                                aria-label="Notificações">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button class="text-gray-600 hover:text-gray-900 focus:outline-none" aria-label="Mensagens">
+                                <i class="fas fa-envelope text-xl"></i>
+                                <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div
+                                class="w-8 h-8 rounded-full bg-primary-start flex items-center justify-center text-white">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span class="hidden md:inline text-gray-700">{{ user.username }}</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="section-content">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                        <p class="text-gray-600">Visão geral do sistema</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Total de Vendas</p>
+                                    <h3 class="text-2xl font-bold text-gray-800">R$ {{
+                                        dashboard_stats.total_sales|floatformat:2 }}</h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-blue-100 text-primary-start">
+                                    <i class="fas fa-shopping-cart text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{
+                                dashboard_stats.sales_growth }}% desde o último mês</p>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Produtos</p>
+                                    <h3 class="text-2xl font-bold text-gray-800">{{ dashboard_stats.total_products }}
+                                    </h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-yellow-100 text-accent">
+                                    <i class="fas fa-box-open text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{
+                                dashboard_stats.new_products }} novos produtos</p>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Clientes</p>
+                                    <h3 class="text-2xl font-bold text-gray-800">{{ dashboard_stats.total_customers }}
+                                    </h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                    <i class="fas fa-users text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{
+                                dashboard_stats.new_customers }} novos clientes</p>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Pedidos Pendentes</p>
+                                    <h3 class="text-2xl font-bold text-gray-800">{{ dashboard_stats.pending_orders }}
+                                    </h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-red-100 text-red-600">
+                                    <i class="fas fa-clock text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-red-500"><i class="fas fa-arrow-down mr-1"></i> {{
+                                dashboard_stats.pending_orders_change }} desde ontem</p>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Pedidos Recentes</h3>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Pedido</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Cliente</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Data</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Valor</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for order in recent_orders %}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
+                                            order.order_number }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
+                                            order.customer_name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
+                                            order.order_date|date:"d/m/Y" }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{
+                                            order.order_value|floatformat:2 }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if order.status == 'Entregue' %}bg-green-100 text-green-800
+                                                {% elif order.status == 'Processando' %}bg-yellow-100 text-yellow-800
+                                                {% elif order.status == 'Enviado' %}bg-blue-100 text-blue-800
+                                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {{ order.status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <a href="{% url 'order_detail' order.id %}"
+                                                class="text-blue-600 hover:text-blue-900 mr-3"
+                                                aria-label="Ver pedido"><i class="fas fa-eye"></i></a>
+                                            <a href="{% url 'order_edit' order.id %}"
+                                                class="text-yellow-600 hover:text-yellow-900"
+                                                aria-label="Editar pedido"><i class="fas fa-edit"></i></a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6"
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum
+                                            pedido encontrado</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-4 border-t border-gray-200">
+                            <a href="#" class="text-primary-start hover:text-blue-700 font-medium" data-section="vendas"
+                                onclick="showSection('vendas')">Ver todos os pedidos</a>
+                        </div>
+                    </div>
+
+                    <!-- Recent Products -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Produtos Recentes</h3>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Produto</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Categoria</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Preço</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Estoque</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for product in recent_products|dictsort:"id" %}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10">
+                                                    {% if product.image %}
+                                                    <img class="h-10 w-10 rounded" src="{{ product.image.url }}"
+                                                        alt="{{ product.name }}">
+                                                    {% else %}
+                                                    <img class="h-10 w-10 rounded" src="https://via.placeholder.com/40"
+                                                        alt="{{ product.name }}">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">{{ product.name }}
+                                                    </div>
+                                                    <div class="text-sm text-gray-500">SKU: {{ product.sku }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
+                                            product.category }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{
+                                            product.price|floatformat:2 }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.stock
+                                            }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if product.status == 'Disponível' or product.status == 'Ativo' %}bg-green-100 text-green-800
+                                                {% elif product.status == 'Últimas unidades' %}bg-yellow-100 text-yellow-800
+                                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                                {{ product.status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <a href="{% url 'product_detail' product.id %}"
+                                                class="text-blue-600 hover:text-blue-900 mr-3"
+                                                aria-label="Ver produto"><i class="fas fa-eye"></i></a>
+                                            <a href="{% url 'product_edit' product.id %}"
+                                                class="text-yellow-600 hover:text-yellow-900 mr-3"
+                                                aria-label="Editar produto"><i class="fas fa-edit"></i></a>
+                                            <form action="{% url 'product_delete' product.id %}" method="post"
+                                                class="inline"
+                                                onsubmit="return confirm('Tem certeza que deseja excluir este produto?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-600 hover:text-red-900"
+                                                    aria-label="Excluir produto"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6"
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum
+                                            produto encontrado</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-4 border-t border-gray-200">
+                            <a href="#" class="text-primary-start hover:text-blue-700 font-medium"
+                                data-section="produtos" onclick="showSection('produtos')">Ver todos os produtos</a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Produtos Section -->
+                <section id="produtos-section" class="section-content hidden">
+                    <div class="mb-6 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Produtos</h2>
+                            <p class="text-gray-600">Gerencie seus produtos</p>
+                        </div>
+                        <button
+                            class="btn-add-product bg-gradient-to-r from-primary-start to-primary-end text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            onclick="toggleAddProductForm()">
+                            <i class="fas fa-plus mr-2"></i> Adicionar Produto
+                        </button>
+                    </div>
+
+                    <!-- Add Product Form -->
+                    <div id="add-product-form" class="bg-white rounded-lg shadow p-6 mb-6 hidden">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Adicionar Novo Produto</h3>
+
+                        <form id="product-form" action="/api/produtos/" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="product-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome
+                                        do Produto</label>
+                                    <input type="text" id="product-nome" name="nome" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="product-sku"
+                                        class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                                    <input type="text" id="product-sku" name="sku" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="product-preco"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Preço</label>
+                                    <input type="number" id="product-preco" name="preco" required min="0" step="0.01"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="product-estoque"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Estoque</label>
+                                    <input type="number" id="product-estoque" name="estoque" required min="0"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="product-categoria"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                                    <select id="product-categoria" name="categoria" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Selecione uma categoria</option>
+                                        <option value="Lavagem">Lavagem</option>
+                                        <option value="Polimento">Polimento</option>
+                                        <option value="Proteção">Proteção</option>
+                                        <option value="Acessórios">Acessórios</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="product-status"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <select id="product-status" name="status" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="Ativo">Ativo</option>
+                                        <option value="Inativo">Inativo</option>
+                                        <option value="Últimas unidades">Últimas unidades</option>
+                                    </select>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="product-descricao"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                    <textarea id="product-descricao" name="descricao" rows="3"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="product-imagem"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Imagem do Produto</label>
+                                    <input type="file" id="product-imagem" name="imagem" accept="image/*"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+
+                            <div class="mt-6 flex justify-end space-x-3">
+                                <button type="button"
+                                    class="btn-cancel-product bg-gray-200 text-gray-800 py-2 px-4 rounded-md font-medium hover:bg-gray-300 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                    onclick="toggleAddProductForm()">Cancelar</button>
+                                <button type="submit"
+                                    class="bg-gradient-to-r from-primary-start to-primary-end text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Salvar
+                                    Produto</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Products Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-800">Lista de Produtos</h3>
+                            <form action="{% url 'index' %}" method="get" class="relative">
+                                <input type="text" name="search" placeholder="Buscar produtos..."
+                                    value="{{ request.GET.search }}"
+                                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Buscar produtos">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </form>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Produto</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Categoria</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Preço</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Estoque</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for product in products|dictsort:"id" %}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10">
+                                                    {% if product.image %}
+                                                    <img class="h-10 w-10 rounded" src="{{ product.image.url }}"
+                                                        alt="{{ product.name }}">
+                                                    {% else %}
+                                                    <img class="h-10 w-10 rounded" src="https://via.placeholder.com/40"
+                                                        alt="{{ product.name }}">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">{{ product.name }}
+                                                    </div>
+                                                    <div class="text-sm text-gray-500">SKU: {{ product.sku }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
+                                            product.category }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{
+                                            product.price|floatformat:2 }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.stock
+                                            }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if product.status == 'Ativo' %}bg-green-100 text-green-800
+                                                {% elif product.status == 'Últimas unidades' %}bg-yellow-100 text-yellow-800
+                                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                                {{ product.status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <a href="{% url 'product_detail' product.id %}"
+                                                class="text-blue-600 hover:text-blue-900 mr-3"
+                                                aria-label="Ver produto"><i class="fas fa-eye"></i></a>
+                                            <a href="{% url 'product_edit' product.id %}"
+                                                class="text-yellow-600 hover:text-yellow-900 mr-3"
+                                                aria-label="Editar produto"><i class="fas fa-edit"></i></a>
+                                            <form action="{% url 'product_delete' product.id %}" method="post"
+                                                class="inline"
+                                                onsubmit="return confirm('Tem certeza que deseja excluir este produto?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-600 hover:text-red-900"
+                                                    aria-label="Excluir produto"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6"
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum
+                                            produto encontrado</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                            <div class="text-sm text-gray-500">
+                                Mostrando <span class="font-medium">{{ products.start_index }}</span> a <span
+                                    class="font-medium">{{ products.end_index }}</span> de <span class="font-medium">{{
+                                    products.paginator.count }}</span> resultados
+                            </div>
+                            <div class="flex space-x-2">
+                                {% if products.has_previous %}
+                                <a href="{% url 'index' %}?page={{ products.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                    aria-label="Página anterior">Anterior</a>
+                                {% else %}
+                                <button
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed"
+                                    disabled aria-label="Página anterior">Anterior</button>
+                                {% endif %}
+                                {% for num in products.paginator.page_range %}
+                                <a href="{% url 'index' %}?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium {% if products.number == num %}text-white bg-blue-600 hover:bg-blue-700{% else %}text-gray-700 bg-white hover:bg-gray-50{% endif %}"
+                                    aria-label="Página {{ num }}">{{ num }}</a>
+                                {% endfor %}
+                                {% if products.has_next %}
+                                <a href="{% url 'index' %}?page={{ products.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                    aria-label="Próxima página">Próximo</a>
+                                {% else %}
+                                <button
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed"
+                                    disabled aria-label="Próxima página">Próximo</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Vendas Section -->
+                <section id="vendas-section" class="section-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Vendas</h2>
+                        <p class="text-gray-600">Gerencie suas vendas e pedidos</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Total de Vendas</p>
+                                    <h3 class="text-2xl font-bold text-gray-800">R$ {{
+                                        sales_stats.total_sales|floatformat:2 }}</h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-blue-100 text-primary-start">
+                                    <i class="fas fa-shopping-cart text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{
+                                sales_stats.sales_growth }}% desde o último mês</p>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Pedidos Hoje</p>
+                                    <h3 class="text-2xl font-bold text-gray-800">{{ sales_stats.orders_today }}</h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                    <i class="fas fa-calendar-day text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{
+                                sales_stats.orders_today_change }} desde ontem</p>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Pedidos Pendentes</p>
+                                    <h3 class="text-2xl font-bold text-gray-800">{{ sales_stats.pending_orders }}</h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-yellow-100 text-accent">
+                                    <i class="fas fa-clock text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-red-500"><i class="fas fa-arrow-down mr-1"></i> {{
+                                sales_stats.pending_orders_change }} desde ontem</p>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Ticket Médio</p>
+                                    <h3 class="text-2xl font-bold text-gray-800">R$ {{
+                                        sales_stats.average_ticket|floatformat:2 }}</h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                    <i class="fas fa-receipt text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-green-500"><i class="fas fa-arrow-up mr-1"></i> {{
+                                sales_stats.average_ticket_growth }}% desde o último mês</p>
+                        </div>
+                    </div>
+
+                    <!-- Orders Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-800">Todos os Pedidos</h3>
+                            <div class="flex space-x-3">
+                                <form action="{% url 'index' %}" method="get" class="flex items-center">
+                                    <select name="status" aria-label="Filtrar por status"
+                                        class="appearance-none pl-3 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2">
+                                        <option value="">Filtrar por status</option>
+                                        <option value="Todos" {% if status == "Todos" %}selected{% endif %}>Todos</option>
+                                        <option value="Pendente" {% if status == "Pendente" %}selected{% endif %}>Pendente
+                                        </option>
+                                        <option value="Processando" {% if status == "Processando" %}selected{% endif %}>
+                                            Processando</option>
+                                        <option value="Enviado" {% if status == "Enviado" %}selected{% endif %}>Enviado
+                                        </option>
+                                        <option value="Entregue" {% if status == "Entregue" %}selected{% endif %}>Entregue
+                                        </option>
+                                        <option value="Cancelado" {% if status == "Cancelado" %}selected{% endif %}>
+                                            Cancelado</option>
+                                    </select>
+                                    <button type="submit"
+                                        class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">Filtrar</button>
+                                </form>
+                                <div class="relative">
+                                    <form action="{% url 'index' %}" method="get">
+                                        <input type="text" name="search" placeholder="Buscar pedidos..."
+                                            value="{{ request.GET.search }}"
+                                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            aria-label="Buscar pedidos">
+                                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Pedido</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Cliente</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Data</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Valor</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
+                                            order.order_number }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
+                                            order.customer_name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
+                                            order.order_date|date:"d/m/Y" }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{
+                                            order.order_value|floatformat:2 }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if order.status == 'Entregue' %}bg-green-100 text-green-800
+                                                {% elif order.status == 'Processando' %}bg-yellow-100 text-yellow-800
+                                                {% elif order.status == 'Enviado' %}bg-blue-100 text-blue-800
+                                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {{ order.status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <a href="{% url 'order_detail' order.id %}"
+                                                class="text-blue-600 hover:text-blue-900 mr-3"
+                                                aria-label="Ver pedido"><i class="fas fa-eye"></i></a>
+                                            <a href="{% url 'order_edit' order.id %}"
+                                                class="text-yellow-600 hover:text-yellow-900"
+                                                aria-label="Editar pedido"><i class="fas fa-edit"></i></a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6"
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum
+                                            pedido encontrado</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                            <div class="text-sm text-gray-500">
+                                Mostrando <span class="font-medium">{{ orders.start_index }}</span> a <span
+                                    class="font-medium">{{ orders.end_index }}</span> de <span class="font-medium">{{
+                                    orders.paginator.count }}</span> resultados
+                            </div>
+                            <div class="flex space-x-2">
+                                {% if orders.has_previous %}
+                                <a href="{% url 'index' %}?page={{ orders.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                    aria-label="Página anterior">Anterior</a>
+                                {% else %}
+                                <button
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed"
+                                    disabled aria-label="Página anterior">Anterior</button>
+                                {% endif %}
+                                {% for num in orders.paginator.page_range %}
+                                <a href="{% url 'index' %}?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium {% if orders.number == num %}text-white bg-blue-600 hover:bg-blue-700{% else %}text-gray-700 bg-white hover:bg-gray-50{% endif %}"
+                                    aria-label="Página {{ num }}">{{ num }}</a>
+                                {% endfor %}
+                                {% if orders.has_next %}
+                                <a href="{% url 'index' %}?page={{ orders.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                    aria-label="Próxima página">Próximo</a>
+                                {% else %}
+                                <button
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed"
+                                    disabled aria-label="Próxima página">Próximo</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Usuários Section -->
+                <section id="usuarios-section" class="section-content hidden">
+                    <div class="mb-6 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Usuários</h2>
+                            <p class="text-gray-600">Gerencie os usuários do sistema</p>
+                        </div>
+                        <button
+                            class="btn-add-user bg-gradient-to-r from-primary-start to-primary-end text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            onclick="toggleAddUserForm()">
+                            <i class="fas fa-plus mr-2"></i> Adicionar Usuário
+                        </button>
+                    </div>
+
+                    <!-- Add User Form -->
+                    <div id="add-user-form" class="bg-white rounded-lg shadow p-6 mb-6 hidden">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Adicionar Novo Usuário</h3>
+                        <form action="{% url 'index' %}" method="post" onsubmit="handleUserSubmit(event)">
+                            {% csrf_token %}
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="user-name" class="block text-sm font-medium text-gray-700 mb-1">Nome
+                                        Completo</label>
+                                    <input type="text" id="user-name" name="name" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="user-email"
+                                        class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                                    <input type="email" id="user-email" name="email" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="user-password"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                                    <input type="password" id="user-password" name="password" required minlength="8"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="user-role" class="block text-sm font-medium text-gray-700 mb-1">Tipo de
+                                        Usuário</label>
+                                    <select id="user-role" name="role" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Selecione um tipo</option>
+                                        {% for role in user_roles %}
+                                        <option value="{{ role }}">{{ role }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="user-status"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <select id="user-status" name="status" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="Ativo">Ativo</option>
+                                        <option value="Inativo">Inativo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex justify-end space-x-3">
+                                <button type="button"
+                                    class="btn-cancel-user bg-gray-200 text-gray-800 py-2 px-4 rounded-md font-medium hover:bg-gray-300 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                    onclick="toggleAddUserForm()">Cancelar</button>
+                                <button type="submit"
+                                    class="bg-gradient-to-r from-primary-start to-primary-end text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Salvar
+                                    Usuário</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-800">Lista de Usuários</h3>
+                            <form action="{% url 'index' %}" method="get" class="relative">
+                                <input type="text" name="search" placeholder="Buscar usuários..."
+                                    value="{{ request.GET.search }}"
+                                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Buscar usuários">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </form>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Usuário</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            E-mail</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Tipo</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for user in users %}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
+                                            user.username }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
+                                            user.get_user_type_display|default:'Administrador' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span
+                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if user.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                                {{ user.is_active|yesno:"Ativo,Inativo" }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <a href="{% url 'user_detail' user.id %}"
+                                                class="text-blue-600 hover:text-blue-900 mr-3"
+                                                aria-label="Ver usuário"><i class="fas fa-eye"></i></a>
+                                            <a href="{% url 'user_edit' user.id %}"
+                                                class="text-yellow-600 hover:text-yellow-900 mr-3"
+                                                aria-label="Editar usuário"><i class="fas fa-edit"></i></a>
+                                            <form action="{% url 'user_delete' user.id %}" method="post" class="inline"
+                                                onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-600 hover:text-red-900"
+                                                    aria-label="Excluir usuário"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5"
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum
+                                            usuário encontrado</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                            <div class="text-sm text-gray-500">
+                                Mostrando <span class="font-medium">{{ users.start_index }}</span> a <span
+                                    class="font-medium">{{ users.end_index }}</span> de <span class="font-medium">{{
+                                    users.paginator.count }}</span> resultados
+                            </div>
+                            <div class="flex space-x-2">
+                                {% if users.has_previous %}
+                                <a href="{% url 'index' %}?page={{ users.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                    aria-label="Página anterior">Anterior</a>
+                                {% else %}
+                                <button
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed"
+                                    disabled aria-label="Página anterior">Anterior</button>
+                                {% endif %}
+                                {% for num in users.paginator.page_range %}
+                                <a href="{% url 'index' %}?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium {% if users.number == num %}text-white bg-blue-600 hover:bg-blue-700{% else %}text-gray-700 bg-white hover:bg-gray-50{% endif %}"
+                                    aria-label="Página {{ num }}">{{ num }}</a>
+                                {% endfor %}
+                                {% if users.has_next %}
+                                <a href="{% url 'index' %}?page={{ users.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                    aria-label="Próxima página">Próximo</a>
+                                {% else %}
+                                <button
+                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-white cursor-not-allowed"
+                                    disabled aria-label="Próxima página">Próximo</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Configurações Section -->
+                <section id="configuracoes-section" class="section-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Configurações</h2>
+                        <p class="text-gray-600">Gerencie as configurações do sistema</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Configurações Gerais</h3>
+                        <form action="{% url 'index' %}" method="post">
+                            {% csrf_token %}
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="site-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do
+                                        Site</label>
+                                    <input type="text" id="site-name" name="site_name"
+                                        value="{{ settings.site_name|default:'Especialista.Carros' }}"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="site-email" class="block text-sm font-medium text-gray-700 mb-1">E-mail
+                                        de Contato</label>
+                                    <input type="email" id="site-email" name="site_email"
+                                        value="{{ settings.site_email|default:'contato@especialista.carros' }}"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="site-whatsapp"
+                                        class="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+                                    <input type="tel" id="site-whatsapp" name="site_whatsapp"
+                                        value="{{ settings.site_whatsapp|default:'+5511995366395' }}"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="site-language"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Idioma</label>
+                                    <select id="site-language" name="site_language"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="pt-BR" {% if site_language == "pt-BR" %}selected{% endif %}>
+                                            Português (Brasil)</option>
+                                        <option value="en" {% if site_language == "en" %}selected{% endif %}>English
+                                        </option>
+                                        <option value="es" {% if site_language == "es" %}selected{% endif %}>Español
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex justify-end space-x-3">
+                                <button type="button"
+                                    class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md font-medium hover:bg-gray-300 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Cancelar</button>
+                                <button type="submit"
+                                    class="bg-gradient-to-r from-primary-start to-primary-end text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Salvar
+                                    Configurações</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="admin-scripts.js"></script>
+    <script src="js/products.js"></script>
+</body>
+
+</html>
