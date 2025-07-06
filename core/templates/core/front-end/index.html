@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -40,7 +41,7 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center">
-                    <span class="text-xl font-bold text-primary-start">O Especialista.Carros</span>
+                    <a href="{% url 'index' %}" class="text-xl font-bold text-primary-start">O Especialista.Carros</a>
                 </div>
 
                 <!-- Desktop Menu -->
@@ -55,10 +56,10 @@
 
                 <!-- Login/Cart -->
                 <div class="hidden md:flex items-center space-x-4">
-                    <a href="login.html" class="text-gray-700 hover:text-primary-end">
+                    <a href="{% url 'api-login' %}" class="text-gray-700 hover:text-primary-end">
                         <i class="fas fa-user"></i>
                     </a>
-                    <a href="carrinho.html" class="text-gray-700 hover:text-primary-end relative">
+                    <a href="{% url 'carrinho' %}" class="text-gray-700 hover:text-primary-end relative">
                         <i class="fas fa-shopping-cart"></i>
                         <span
                             class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
@@ -92,9 +93,9 @@
                 <a href="#contact"
                     class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Contato</a>
                 <div class="pt-4 border-t border-gray-200">
-                    <a href="login.html"
+                    <a href="{% url 'api-login' %}"
                         class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Login</a>
-                    <a href="carrinho.html"
+                    <a href="{% url 'carrinho' %}"
                         class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Carrinho</a>
                 </div>
             </div>
@@ -119,7 +120,7 @@
                     </div>
                 </div>
                 <div class="md:w-1/2">
-                    <img src="imgs/carro polido.avif" alt="Carro polido" class="rounded-lg shadow-xl hover-scale">
+                    <img src="{% static 'core/front-end/imgs/carro polido.avif' %}" alt="Carro polido" class="rounded-lg shadow-xl hover-scale">
                 </div>
             </div>
         </div>
@@ -160,7 +161,7 @@
             </div>
 
             <div class="text-center mt-12">
-                <a href="#"
+                <a href="{% url 'index' %}#products"
                     class="inline-block bg-primary-end text-white px-8 py-3 rounded-lg font-medium hover:bg-primary-start transition duration-300">
                     Ver Todos os Produtos
                 </a>
@@ -458,7 +459,6 @@
 
             </div>
         </div>
-        </div>
     </section>
 
     <!-- Blog Section -->
@@ -488,7 +488,7 @@
                             a pintura</h3>
                         <p class="text-gray-600 mb-4">Aprenda técnicas profissionais para lavar seu veículo em casa,
                             evitando riscos e mantendo o brilho da pintura por mais tempo.</p>
-                        <a href="#"
+                        <a href="{% url 'index' %}#blog"
                             class="text-primary-end font-medium hover:text-primary-start transition duration-300 inline-flex items-center">
                             Ler mais
                             <i class="fas fa-arrow-right ml-2"></i>
@@ -513,7 +513,7 @@
                             passo</h3>
                         <p class="text-gray-600 mb-4">Descubra como remover riscos leves e recuperar o brilho da pintura
                             do seu carro com técnicas acessíveis para fazer em casa.</p>
-                        <a href="#"
+                        <a href="{% url 'index' %}#blog"
                             class="text-primary-end font-medium hover:text-primary-start transition duration-300 inline-flex items-center">
                             Ler mais
                             <i class="fas fa-arrow-right ml-2"></i>
@@ -539,7 +539,7 @@
                             como fazer</h3>
                         <p class="text-gray-600 mb-4">Aprenda a importância de manter o interior do seu carro limpo e
                             livre de bactérias, e como realizar uma higienização eficaz.</p>
-                        <a href="#"
+                        <a href="{% url 'index' %}#blog"
                             class="text-primary-end font-medium hover:text-primary-start transition duration-300 inline-flex items-center">
                             Ler mais
                             <i class="fas fa-arrow-right ml-2"></i>
@@ -549,7 +549,7 @@
             </div>
 
             <div class="text-center mt-12">
-                <a href="#"
+                <a href="{% url 'index' %}#blog"
                     class="inline-block bg-primary-end text-white px-8 py-3 rounded-lg font-medium hover:bg-primary-start transition duration-300">
                     Ver Mais Artigos
                 </a>
@@ -567,7 +567,8 @@
 
             <div class="lg:flex">
                 <div class="lg:w-1/2 mb-10 lg:mb-0 lg:pr-12">
-                    <form class="space-y-6">
+                    <form action="{% url 'contato-envio' %}" method="post" class="space-y-6">
+                        {% csrf_token %}
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700">Nome</label>
                             <input type="text" id="name" name="name"
@@ -690,8 +691,6 @@
         </div>
     </section>
 
-
-
     <!-- Footer -->
     <footer class="bg-gray-900 text-white pt-12 pb-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -705,15 +704,15 @@
                 <div>
                     <h4 class="text-lg font-bold mb-4">Links Rápidos</h4>
                     <ul class="space-y-2">
-                        <li><a href="#home" class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
-                        <li><a href="#products"
+                        <li><a href="{% url 'index' %}" class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
+                        <li><a href="{% url 'index' %}#products"
                                 class="text-gray-400 hover:text-white transition duration-300">Produtos</a></li>
-                        <li><a href="#services"
+                        <li><a href="{% url 'index' %}#services"
                                 class="text-gray-400 hover:text-white transition duration-300">Serviços</a></li>
-                        <li><a href="#about" class="text-gray-400 hover:text-white transition duration-300">Sobre
+                        <li><a href="{% url 'index' %}#about" class="text-gray-400 hover:text-white transition duration-300">Sobre
                                 Nós</a></li>
-                        <li><a href="#blog" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
-                        <li><a href="#contact"
+                        <li><a href="{% url 'index' %}#blog" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
+                        <li><a href="{% url 'index' %}#contact"
                                 class="text-gray-400 hover:text-white transition duration-300">Contato</a></li>
                     </ul>
                 </div>
@@ -721,22 +720,20 @@
                 <div>
                     <h4 class="text-lg font-bold mb-4">Serviços</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Lavagem
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Lavagem
                                 Técnica</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Polimento e
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Polimento e
                                 Vitrificação</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Higienização
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Higienização
                                 Interna</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Proteção
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Proteção
                                 Cerâmica</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Funilaria e
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Funilaria e
                                 Pintura</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Detalhamento
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Detalhamento
                                 Completo</a></li>
                     </ul>
                 </div>
-
-                {% load static %}
 
                 <div>
                     <h4 class="text-lg font-bold mb-4">Formas de Pagamento</h4>
@@ -775,7 +772,6 @@
                     Privacidade</a>
                 <a href="#" class="text-gray-400 hover:text-white transition duration-300 text-sm">FAQ</a>
             </div>
-        </div>
         </div>
     </footer>
 

@@ -498,7 +498,7 @@
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                             <h3 class="text-lg font-semibold text-gray-800">Lista de Produtos</h3>
-                            <form action="{% url 'index' %}" method="get" class="relative">
+                            <form action="{% url 'admin_index' %}" method="get" class="relative">
                                 <input type="text" name="search" placeholder="Buscar produtos..."
                                     value="{{ request.GET.search }}"
                                     class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -599,7 +599,7 @@
                             </div>
                             <div class="flex space-x-2">
                                 {% if products.has_previous %}
-                                <a href="{% url 'index' %}?page={{ products.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                <a href="{% url 'admin_index' %}?page={{ products.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                                     class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                                     aria-label="Página anterior">Anterior</a>
                                 {% else %}
@@ -608,12 +608,12 @@
                                     disabled aria-label="Página anterior">Anterior</button>
                                 {% endif %}
                                 {% for num in products.paginator.page_range %}
-                                <a href="{% url 'index' %}?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                <a href="{% url 'admin_index' %}?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                                     class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium {% if products.number == num %}text-white bg-blue-600 hover:bg-blue-700{% else %}text-gray-700 bg-white hover:bg-gray-50{% endif %}"
                                     aria-label="Página {{ num }}">{{ num }}</a>
                                 {% endfor %}
                                 {% if products.has_next %}
-                                <a href="{% url 'index' %}?page={{ products.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                <a href="{% url 'admin_index' %}?page={{ products.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                                     class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                                     aria-label="Próxima página">Próximo</a>
                                 {% else %}
@@ -699,7 +699,7 @@
                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                             <h3 class="text-lg font-semibold text-gray-800">Todos os Pedidos</h3>
                             <div class="flex space-x-3">
-                                <form action="{% url 'index' %}" method="get" class="flex items-center">
+                                <form action="{% url 'admin_index' %}" method="get" class="flex items-center">
                                     <select name="status" aria-label="Filtrar por status"
                                         class="appearance-none pl-3 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2">
                                         <option value="">Filtrar por status</option>
@@ -719,7 +719,7 @@
                                         class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">Filtrar</button>
                                 </form>
                                 <div class="relative">
-                                    <form action="{% url 'index' %}" method="get">
+                                    <form action="{% url 'admin_index' %}" method="get">
                                         <input type="text" name="search" placeholder="Buscar pedidos..."
                                             value="{{ request.GET.search }}"
                                             class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -800,7 +800,7 @@
                             </div>
                             <div class="flex space-x-2">
                                 {% if orders.has_previous %}
-                                <a href="{% url 'index' %}?page={{ orders.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                <a href="{% url 'admin_index' %}?page={{ orders.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                                     class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                                     aria-label="Página anterior">Anterior</a>
                                 {% else %}
@@ -809,12 +809,12 @@
                                     disabled aria-label="Página anterior">Anterior</button>
                                 {% endif %}
                                 {% for num in orders.paginator.page_range %}
-                                <a href="{% url 'index' %}?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                <a href="{% url 'admin_index' %}?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                                     class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium {% if orders.number == num %}text-white bg-blue-600 hover:bg-blue-700{% else %}text-gray-700 bg-white hover:bg-gray-50{% endif %}"
                                     aria-label="Página {{ num }}">{{ num }}</a>
                                 {% endfor %}
                                 {% if orders.has_next %}
-                                <a href="{% url 'index' %}?page={{ orders.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                <a href="{% url 'admin_index' %}?page={{ orders.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                                     class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                                     aria-label="Próxima página">Próximo</a>
                                 {% else %}
@@ -844,7 +844,7 @@
                     <!-- Add User Form -->
                     <div id="add-user-form" class="bg-white rounded-lg shadow p-6 mb-6 hidden">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Adicionar Novo Usuário</h3>
-                        <form action="{% url 'index' %}" method="post" onsubmit="handleUserSubmit(event)">
+                        <form action="{% url 'admin_index' %}" method="post" onsubmit="handleUserSubmit(event)">
                             {% csrf_token %}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -901,7 +901,7 @@
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                             <h3 class="text-lg font-semibold text-gray-800">Lista de Usuários</h3>
-                            <form action="{% url 'index' %}" method="get" class="relative">
+                            <form action="{% url 'admin_index' %}" method="get" class="relative">
                                 <input type="text" name="search" placeholder="Buscar usuários..."
                                     value="{{ request.GET.search }}"
                                     class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -979,7 +979,7 @@
                             </div>
                             <div class="flex space-x-2">
                                 {% if users.has_previous %}
-                                <a href="{% url 'index' %}?page={{ users.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                <a href="{% url 'admin_index' %}?page={{ users.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                                     class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                                     aria-label="Página anterior">Anterior</a>
                                 {% else %}
@@ -988,12 +988,12 @@
                                     disabled aria-label="Página anterior">Anterior</button>
                                 {% endif %}
                                 {% for num in users.paginator.page_range %}
-                                <a href="{% url 'index' %}?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                <a href="{% url 'admin_index' %}?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                                     class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium {% if users.number == num %}text-white bg-blue-600 hover:bg-blue-700{% else %}text-gray-700 bg-white hover:bg-gray-50{% endif %}"
                                     aria-label="Página {{ num }}">{{ num }}</a>
                                 {% endfor %}
                                 {% if users.has_next %}
-                                <a href="{% url 'index' %}?page={{ users.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                <a href="{% url 'admin_index' %}?page={{ users.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                                     class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                                     aria-label="Próxima página">Próximo</a>
                                 {% else %}
@@ -1014,7 +1014,7 @@
                     </div>
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Configurações Gerais</h3>
-                        <form action="{% url 'index' %}" method="post">
+                        <form action="{% url 'admin_index' %}" method="post">
                             {% csrf_token %}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>

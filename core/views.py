@@ -9,7 +9,7 @@ from .models import User,Produto
 from rest_framework import viewsets #alteração recente para corrigir o erro de migrations da model produtos
 from django.shortcuts import render,redirect
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
-
+from django.views.decorators.http import require_http_methods
 
 def home(request):
     return HttpResponse("Bem-vindo ao especialista de carros!")
@@ -72,8 +72,8 @@ class ProdutoViewSet(viewsets.ModelViewSet):
     parser_classes = [FormParser, MultiPartParser, JSONParser]
 
 def produtos_listagem(request):
-    produtos = Produto.objects.all()
-    return render(request, 'index.html', {'produtos': produtos})
+   produtos = Produto.objects.all()
+   return render(request, 'core/front-end/index.html', {'produtos': produtos})
 
 def admin_index(request):
     site_language = request.GET.get('site_language', 'pt-BR')
@@ -92,3 +92,25 @@ def admin_index(request):
 def logout_view(request):
     logout(request)
     return redirect('admin_index')  # Ou redirecione pra qualquer outra página sua
+
+def carrinho(request):
+    # lógica do carrinho
+    return render(request, 'core/front-end/carrinho.html')
+
+@require_http_methods(["POST"])
+def contato_envio(request):
+    # Pega os dados do formulário
+    nome = request.POST.get('name')
+    email = request.POST.get('email')
+    telefone = request.POST.get('phone')
+    assunto = request.POST.get('subject')
+    mensagem = request.POST.get('message')
+
+    # Aqui você pode salvar no banco, enviar email, ou só logar
+    print(f'Contato: {nome}, {email}, {telefone}, {assunto}, {mensagem}')
+
+    # Depois redireciona para a página onde o form está, ou uma página de sucesso
+    return redirect('index')  # Ou qualquer outra página que quiser
+
+def login_page(request):
+    return render(request, 'core/front-end/login.html')
