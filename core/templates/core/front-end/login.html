@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +28,7 @@
         }
     </script>
 </head>
+
 <body class="font-sans bg-gray-50">
     <!-- WhatsApp Float Button -->
     <a href="https://wa.me/5511995366395" class="whatsapp-float" target="_blank">
@@ -41,17 +43,23 @@
                 <div class="flex-shrink-0 flex items-center">
                     <a href="{% url 'index' %}" class="text-xl font-bold text-blue-900">O Especialista.Carros</a>
                 </div>
-                
+
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex space-x-8">
-                    <a href="{% url 'index' %}#home" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Home</a>
-                    <a href="{% url 'index' %}#products" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Produtos</a>
-                    <a href="{% url 'index' %}#services" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Serviços</a>
-                    <a href="{% url 'index' %}#about" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Sobre Nós</a>
-                    <a href="{% url 'index' %}#blog" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Blog</a>
-                    <a href="{% url 'index' %}#contact" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Contato</a>
+                    <a href="{% url 'index' %}#home"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Home</a>
+                    <a href="{% url 'index' %}#products"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Produtos</a>
+                    <a href="{% url 'index' %}#services"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Serviços</a>
+                    <a href="{% url 'index' %}#about"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Sobre Nós</a>
+                    <a href="{% url 'index' %}#blog"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Blog</a>
+                    <a href="{% url 'index' %}#contact"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Contato</a>
                 </div>
-                
+
                 <!-- Login/Cart -->
                 <div class="hidden md:flex items-center space-x-4">
                     <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-500">
@@ -59,31 +67,42 @@
                     </a>
                     <a href="{% url 'carrinho' %}" class="text-gray-700 hover:text-blue-500 relative">
                         <i class="fas fa-shopping-cart"></i>
-                        <span class="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                        <span
+                            class="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
                     </a>
                 </div>
-                
+
                 <!-- Mobile menu button -->
                 <div class="md:hidden flex items-center">
-                    <button class="mobile-menu-button p-2 rounded-md text-gray-700 hover:text-blue-500 hover:bg-gray-100 focus:outline-none">
+                    <button
+                        class="mobile-menu-button p-2 rounded-md text-gray-700 hover:text-blue-500 hover:bg-gray-100 focus:outline-none">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
             </div>
         </div>
-        
+
         <!-- Mobile Menu -->
         <div class="mobile-menu hidden md:hidden bg-white shadow-lg">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="{% url 'index' %}#home" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Home</a>
-                <a href="{% url 'index' %}#products" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Produtos</a>
-                <a href="{% url 'index' %}#services" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Serviços</a>
-                <a href="{% url 'index' %}#about" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Sobre Nós</a>
-                <a href="{% url 'index' %}#blog" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Blog</a>
-                <a href="{% url 'index' %}#contact" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Contato</a>
+                <a href="{% url 'index' %}#home"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Home</a>
+                <a href="{% url 'index' %}#products"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Produtos</a>
+                <a href="{% url 'index' %}#services"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Serviços</a>
+                <a href="{% url 'index' %}#about"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Sobre
+                    Nós</a>
+                <a href="{% url 'index' %}#blog"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Blog</a>
+                <a href="{% url 'index' %}#contact"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Contato</a>
                 <div class="pt-4 border-t border-gray-200">
-                    <a href="{% url 'login' %}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Login</a>
-                    <a href="{% url 'carrinho' %}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Carrinho</a>
+                    <a href="{% url 'login' %}"
+                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Login</a>
+                    <a href="{% url 'carrinho' %}"
+                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Carrinho</a>
                 </div>
             </div>
         </div>
@@ -98,7 +117,7 @@
                         <h1 class="text-2xl font-bold">Bem-vindo de volta!</h1>
                         <p class="mt-2 opacity-90">Faça login para acessar sua conta</p>
                     </div>
-                    
+
                     <div class="p-8">
                         <!-- Social Login Buttons -->
                         <div class="grid grid-cols-2 gap-4">
@@ -109,53 +128,58 @@
                                 <i class="fab fa-google mr-2"></i> Google
                             </a>
                         </div>
-                        
+
                         <!-- Divider -->
                         <div class="divider">
                             <span>ou</span>
                         </div>
-                        
+
                         <!-- Login Form -->
-                        <form action="{% url 'login' %}" method="post" class="login-form">
-                            {% csrf_token %}
+                        <form method="post" class="login-form">
                             <!-- Email Input -->
                             <div class="input-group">
                                 <span class="input-icon">
                                     <i class="fas fa-envelope"></i>
                                 </span>
-                                <input type="email" id="email" name="email" class="input-field" placeholder="Seu e-mail" required>
+                                <input type="email" id="email" name="email" class="input-field" placeholder="Seu e-mail"
+                                    required>
                             </div>
-                            
+
                             <!-- Password Input -->
                             <div class="input-group">
                                 <span class="input-icon">
                                     <i class="fas fa-lock"></i>
                                 </span>
-                                <input type="password" id="senha" name="password" class="input-field" placeholder="Sua senha" required>
+                                <input type="password" id="senha" name="password" class="input-field"
+                                    placeholder="Sua senha" required>
                             </div>
-                            
+
                             <!-- Remember Me & Forgot Password -->
                             <div class="remember-forgot">
                                 <label class="remember-me">
-                                    <input type="checkbox" name="remember" class="rounded text-blue-600 focus:ring-blue-500">
+                                    <input type="checkbox" name="remember"
+                                        class="rounded text-blue-600 focus:ring-blue-500">
                                     <span class="text-gray-600">Lembrar-me</span>
                                 </label>
                                 <a href="{% url 'esqueceusenha' %}" class="forgot-password">Esqueceu a senha?</a>
                             </div>
-                            
+
                             <!-- Submit Button -->
-                            <button type="submit" class="w-full gradient-bg text-white py-3 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <button type="submit"
+                                class="w-full gradient-bg text-white py-3 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 Entrar
                             </button>
-                            
+
                             <!-- Register Link -->
                             <div class="mt-6 text-center">
                                 <p class="text-gray-600">
-                                    Não tem uma conta? 
-                                    <a href="{% url 'criarconta' %}" class="text-blue-600 font-medium hover:text-blue-700">Cadastre-se</a>
+                                    Não tem uma conta?
+                                    <a href="{% url 'criarconta' %}"
+                                        class="text-blue-600 font-medium hover:text-blue-700">Cadastre-se</a>
                                 </p>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>
@@ -168,33 +192,51 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
                     <h4 class="text-lg font-bold mb-4">O Especialista.Carros</h4>
-                    <p class="text-gray-400">Especialistas em estética automotiva, ofere macos e serviços premium para deixar seu veículo com aparência de novo.</p>
+                    <p class="text-gray-400">Especialistas em estética automotiva, ofere macos e serviços premium para
+                        deixar seu veículo com aparência de novo.</p>
                 </div>
-                
+
                 <div>
                     <h4 class="text-lg font-bold mb-4">Links Rápidos</h4>
                     <ul class="space-y-2">
-                        <li><a href="{% url 'index' %}#home" class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
-                        <li><a href="{% url 'index' %}#products" class="text-gray-400 hover:text-white transition duration-300">Produtos</a></li>
-                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Serviços</a></li>
-                        <li><a href="{% url 'index' %}#about" class="text-gray-400 hover:text-white transition duration-300">Sobre Nós</a></li>
-                        <li><a href="{% url 'index' %}#blog" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
-                        <li><a href="{% url 'index' %}#contact" class="text-gray-400 hover:text-white transition duration-300">Contato</a></li>
+                        <li><a href="{% url 'index' %}#home"
+                                class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
+                        <li><a href="{% url 'index' %}#products"
+                                class="text-gray-400 hover:text-white transition duration-300">Produtos</a></li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Serviços</a></li>
+                        <li><a href="{% url 'index' %}#about"
+                                class="text-gray-400 hover:text-white transition duration-300">Sobre Nós</a></li>
+                        <li><a href="{% url 'index' %}#blog"
+                                class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
+                        <li><a href="{% url 'index' %}#contact"
+                                class="text-gray-400 hover:text-white transition duration-300">Contato</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <h4 class="text-lg font-bold mb-4">Serviços</h4>
                     <ul class="space-y-2">
-                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Lavagem Técnica</a></li>
-                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Polimento e Vitrificação</a></li>
-                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Higienização Interna</a></li>
-                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Proteção Cerâmica</a></li>
-                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Funilaria e Pintura</a></li>
-                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Detalhamento Completo</a></li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Lavagem Técnica</a></li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Polimento e
+                                Vitrificação</a></li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Higienização Interna</a>
+                        </li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Proteção Cerâmica</a>
+                        </li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Funilaria e Pintura</a>
+                        </li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Detalhamento Completo</a>
+                        </li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <h4 class="text-lg font-bold mb-4">Formas de Pagamento</h4>
                     <div class="grid grid-cols-3 gap-2">
@@ -208,7 +250,8 @@
                             <img src="{% static 'core/front-end/imgs/elo.png' %}" alt="Elo" class="h-8">
                         </div>
                         <div class="bg-white p-2 rounded flex items-center justify-center">
-                            <img src="{% static 'core/front-end/imgs/American Express.jfif' %}" alt="American Express" class="h-8">
+                            <img src="{% static 'core/front-end/imgs/American Express.jfif' %}" alt="American Express"
+                                class="h-8">
                         </div>
                         <div class="bg-white p-2 rounded flex items-center justify-center">
                             <img src="{% static 'core/front-end/imgs/Hipercard.png' %}" alt="Hipercard" class="h-8">
@@ -219,12 +262,15 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-400 text-sm mb-4 md:mb-0">© 2023 O Especialista.Carros. Todos os direitos reservados.</p>
+                <p class="text-gray-400 text-sm mb-4 md:mb-0">© 2023 O Especialista.Carros. Todos os direitos
+                    reservados.</p>
                 <div class="flex space-x-6">
-                    <a href="#" class="text-gray-400 hover:text-white transition duration-300 text-sm">Termos de Serviço</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition duration-300 text-sm">Política de Privacidade</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300 text-sm">Termos de
+                        Serviço</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300 text-sm">Política de
+                        Privacidade</a>
                     <a href="#" class="text-gray-400 hover:text-white transition duration-300 text-sm">FAQ</a>
                 </div>
             </div>
@@ -234,4 +280,5 @@
     <script src="{% static 'core/front-end/js/scripts.js' %}"></script>
     <script src="{% static 'core/front-end/js/login.js' %}"></script>
 </body>
+
 </html>
