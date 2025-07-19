@@ -116,7 +116,7 @@ def login_page(request):
     return render(request, 'core/front-end/login.html')
 
 def esqueceu_senha_page(request):
-    return render(request, 'core/front-end/esqueceu_senha.html')
+    return render(request, 'core/front-end/esqueceusenha.html')
 
 def criar_conta_page(request):
     return render(request, 'core/front-end/criarconta.html')

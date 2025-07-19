@@ -1,11 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('registerForm');
-    
+
+    // Função para pegar o cookie pelo nome (útil para pegar csrftoken)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for(let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
     if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
-            
-            // Coleta dos dados com validação
+
             const formData = {
                 fullName: document.getElementById('fullName').value.trim(),
                 email: document.getElementById('email').value.trim(),
@@ -14,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 password2: document.getElementById('password2').value
             };
 
-            // Validações frontend
             if (!formData.fullName) {
                 alert('Por favor, informe seu nome completo');
                 return;
@@ -35,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Dividir nome completo
             const nameParts = formData.fullName.split(' ');
             const payload = {
                 email: formData.email,
@@ -51,18 +66,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken // << Aqui envia o token CSRF
                     },
                     body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     alert('Cadastro realizado com sucesso!');
                     window.location.href = 'login.html';
                 } else {
-                    // Tratamento de erros do backend
                     if (data.details) {
                         const errorMessages = Object.entries(data.details)
                             .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(' ') : errors}`)
@@ -78,12 +93,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
-console.log('Register form initialized');
-console.log('Form element:', document.getElementById('registerForm'));
-console.log('Input elements:', {
-    fullName: document.getElementById('fullName'),
-    email: document.getElementById('email'),
-    password: document.getElementById('password'),
-    password2: document.getElementById('password2')
 });
