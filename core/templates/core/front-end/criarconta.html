@@ -116,7 +116,7 @@
                         </div>
 
                         <!-- Register Form -->
-                        <form id="registerForm" class="register-form" action="#" method="POST" novalidate>
+                        <form id="registerForm" class="register-form" action="#" method="POST" novalidate data-login-url="{% url 'login' %}">
                             {% csrf_token %}
                             <!-- Name Input -->
                             <div class="input-group mb-4 relative">

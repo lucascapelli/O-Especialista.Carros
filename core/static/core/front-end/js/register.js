@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch('http://localhost:8000/api/register/', {
+                const response = await fetch('/api/register/', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -76,8 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     alert('Cadastro realizado com sucesso!');
-                    window.location.href = 'login.html';
-                } else {
+                    window.location.href = document.getElementById('registerForm').getAttribute
+                } 
+                
+                else {
                     if (data.details) {
                         const errorMessages = Object.entries(data.details)
                             .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(' ') : errors}`)

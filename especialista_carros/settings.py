@@ -156,10 +156,18 @@ AUTHENTICATION_BACKENDS = [
 SESSION_COOKIE_AGE = 1209600  # 2 semanas em segundos
 
 # Configurações de CORS (desenvolvimento)
-CORS_ALLOW_ALL_ORIGINS = False  # melhor definir origens específicas em dev
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5500",
     "http://localhost:5500",
+    "http://127.0.0.1:8000",    
+    "http://localhost:8000",    
+]
+
+CSRF_TRUSTED_ORIGINS = [  
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:5500", 
+    "http://127.0.0.1:5500",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
