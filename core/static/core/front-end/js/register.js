@@ -1,14 +1,19 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('registerForm');
+console.log('🚀 register.js INICIADO - arquivo carregado');
+console.log('📋 Verificando DOM...');
 
-    // Função para pegar o cookie pelo nome (útil para pegar csrftoken)
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ DOM totalmente carregado');    const form = document.getElementById('registerForm');
+    if (!form) return;
+
+    const loginUrl = form.dataset.loginUrl; // Pega do atributo data-login-url
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
-            for(let i = 0; i < cookies.length; i++) {
+            for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                if (cookie.startsWith(name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
                 }
@@ -16,83 +21,79 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return cookieValue;
     }
-
     const csrftoken = getCookie('csrftoken');
 
-    if (form) {
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
 
-            const formData = {
-                fullName: document.getElementById('fullName').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                password: document.getElementById('password').value,
-                password2: document.getElementById('password2').value
-            };
+        const formData = {
+            fullName: document.getElementById('fullName').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            password: document.getElementById('password').value,
+            password2: document.getElementById('password2').value
+        };
 
-            if (!formData.fullName) {
-                alert('Por favor, informe seu nome completo');
-                return;
-            }
+        // Validações básicas
+        if (!formData.fullName) return alert('Informe seu nome completo');
+        if (!/^\S+@\S+\.\S+$/.test(formData.email)) return alert('E-mail inválido');
+        if (formData.password.length < 8) return alert('Senha deve ter pelo menos 8 caracteres');
+        if (formData.password !== formData.password2) return alert('As senhas não coincidem');
 
-            if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-                alert('Por favor, insira um e-mail válido');
-                return;
-            }
+        const nameParts = formData.fullName.split(' ');
+        const payload = {
+            email: formData.email,
+            first_name: nameParts[0] || '',
+            last_name: nameParts.slice(1).join(' ') || '',
+            password: formData.password,
+            password2: formData.password2,
+            phone: formData.phone || null
+        };
 
-            if (formData.password.length < 8) {
-                alert('A senha deve ter pelo menos 8 caracteres');
-                return;
-            }
+        try {
+            console.log('Enviando requisição para /api/register/ com payload:', payload);
+            const response = await fetch('/api/register/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify(payload)
+            });
 
-            if (formData.password !== formData.password2) {
-                alert('As senhas não coincidem');
-                return;
-            }
+            console.log('Resposta recebida:', response);
+            const data = await response.json();
+            console.log('Dados da resposta:', data);
 
-            const nameParts = formData.fullName.split(' ');
-            const payload = {
-                email: formData.email,
-                first_name: nameParts[0] || '',
-                last_name: nameParts.slice(1).join(' ') || '',
-                password: formData.password,
-                password2: formData.password2,
-                phone: formData.phone || null
-            };
+            if (response.ok) {
+                console.log('=== DEBUG DETALHADO ===');
+                console.log('Resposta completa:', data);
+                console.log('data.redirect_to:', data.redirect_to);
+                console.log('loginUrl:', loginUrl);
+                console.log('Tipo data.redirect_to:', typeof data.redirect_to);
+                console.log('Tipo loginUrl:', typeof loginUrl);
 
-            try {
-                const response = await fetch('/api/register/', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': csrftoken // << Aqui envia o token CSRF
-                    },
-                    body: JSON.stringify(payload)
-                });
+                // Mostra o que seria redirecionado
+                const redirectTarget = data.redirect_to || loginUrl;
+                console.log('Iria redirecionar para:', redirectTarget);
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert('Cadastro realizado com sucesso!');
-                    window.location.href = document.getElementById('registerForm').getAttribute
-                } 
-                
-                else {
-                    if (data.details) {
-                        const errorMessages = Object.entries(data.details)
-                            .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(' ') : errors}`)
-                            .join('\n');
-                        alert(`Erros no formulário:\n${errorMessages}`);
-                    } else {
-                        alert(data.error || 'Erro ao processar cadastro');
-                    }
+                // PARA TESTE: Force redirecionamento correto
+                console.log('Forçando redirecionamento para /login/');
+                window.location.href = '/login/';
+            } else {
+                if (data.details) {
+                    const errorMessages = Object.entries(data.details)
+                        .map(([field, errors]) => `${field}: ${errors}`)
+                        .join('\n');
+                    alert(`Erros no formulário:\n${errorMessages}`);
+                } else {
+                    alert(data.error || 'Erro ao processar cadastro');
                 }
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro de conexão com o servidor. Tente novamente.');
             }
-        });
-    }
+        } catch (err) {
+            console.error('Erro na requisição:', err);
+            alert('Erro de conexão com o servidor.');
+        }
+    });
 });

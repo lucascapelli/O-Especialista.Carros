@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth import authenticate,logout
+from django.contrib.auth import authenticate,logout,login
 from .serializers import UserSerializer, RegisterSerializer,ProdutoSerializer
 from rest_framework.permissions import AllowAny
 from .models import User,Produto
@@ -10,6 +10,7 @@ from rest_framework import viewsets #alteração recente para corrigir o erro de
 from django.shortcuts import render,redirect
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from django.views.decorators.http import require_http_methods
+from django.urls import reverse
 
 def home(request):
     return HttpResponse("Bem-vindo ao especialista de carros!")
@@ -31,11 +32,13 @@ class LoginView(APIView):
 
         user = authenticate(request, email=email, password=password)
         if user is not None:
+            login(request, user)
             serializer = UserSerializer(user)
             return Response(
                 {
                     'message': 'Login realizado com sucesso',
-                    'user': serializer.data
+                    'user': serializer.data,
+                    'redirect_to': '/' 
                 },
                 status=status.HTTP_200_OK
             )
@@ -53,18 +56,18 @@ class RegisterView(APIView):
             user = serializer.save()
             return Response({
                 "message": "Usuário criado com sucesso",
-                "user": UserSerializer(user).data
+                "redirect_to": "/login/"  # Caminho fixo
             }, status=status.HTTP_201_CREATED)
         
         # Formata erros de validação
-        errors = {}
-        for field, error_list in serializer.errors.items():
-            errors[field] = ' '.join([str(e) for e in error_list])
-            
+        errors = {field: ' '.join([str(e) for e in error_list]) 
+          for field, error_list in serializer.errors.items()}
+        
         return Response({
             "error": "Dados inválidos",
             "details": errors
         }, status=status.HTTP_400_BAD_REQUEST)
+    
     
 class ProdutoViewSet(viewsets.ModelViewSet):
     queryset = Produto.objects.all()

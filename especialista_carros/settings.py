@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # Django REST Framework
     'rest_framework',
     'corsheaders',
+    'django_extensions'
 ]
 
 MIDDLEWARE = [

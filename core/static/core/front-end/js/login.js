@@ -15,15 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const response = await fetch('http://localhost:8000/api/login/', {
+        // ✅ CORRETO: Use URL relativa do Django
+        const response = await fetch('/api/login/', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'  // Para ajudar com CORS
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCSRFToken()  // ✅ Adicione CSRF token
           },
           body: JSON.stringify({ 
             email: email,
-            senha: senha  // Mantendo o nome do campo que seu backend espera
+            senha: senha
           })
         });
 
@@ -36,8 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
           // Armazena os dados do usuário
           localStorage.setItem('user', JSON.stringify(data.user));
           
-          // Redireciona
-          window.location.href = 'index.html';
+          // ✅ CORRETO: Redireciona para a URL nomeada do Django
+          window.location.href = data.redirect_to || '/';  // Ou use a URL do name='index'
         } else {
           // Trata erros do backend
           alert(data.error || 'Credenciais inválidas');
@@ -47,5 +49,21 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Erro ao conectar com o servidor');
       }
     });
+  }
+
+  // ✅ Função para pegar o CSRF token (adicione esta função)
+  function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken' + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
   }
 });
