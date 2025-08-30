@@ -1,16 +1,20 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.contrib.auth import authenticate, logout, login
+from django.views.decorators.http import require_http_methods
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth import authenticate,logout,login
-from .serializers import UserSerializer, RegisterSerializer,ProdutoSerializer
+from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny
-from .models import User,Produto
-from rest_framework import viewsets #alteração recente para corrigir o erro de migrations da model produtos
-from django.shortcuts import render,redirect
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
-from django.views.decorators.http import require_http_methods
-from django.urls import reverse
+
+from .serializers import UserSerializer, RegisterSerializer, ProdutoSerializer
+from .models import User, Produto, Carrinho, ItemCarrinho
+
+import uuid
+
 
 def home(request):
     return HttpResponse("Bem-vindo ao especialista de carros!")
@@ -96,9 +100,77 @@ def logout_view(request):
     logout(request)
     return redirect('admin_index')  # Ou redirecione pra qualquer outra página sua
 
+def get_or_create_carrinho(request):
+    """Obtém ou cria carrinho para usuário logado ou sessão"""
+    if request.user.is_authenticated:
+        carrinho, created = Carrinho.objects.get_or_create(usuario=request.user)
+    else:
+        # Para usuários não logados, usa sessão
+        session_key = request.session.get('carrinho_sessao')
+        if not session_key:
+            session_key = str(uuid.uuid4())
+            request.session['carrinho_sessao'] = session_key
+        
+        carrinho, created = Carrinho.objects.get_or_create(
+            sessao=session_key, 
+            usuario=None
+        )
+    
+    return carrinho
+
+
 def carrinho(request):
-    # lógica do carrinho
-    return render(request, 'core/front-end/carrinho.html')
+    carrinho_obj = get_or_create_carrinho(request)
+    return render(request, 'core/front-end/carrinho.html', {'carrinho': carrinho_obj})
+
+
+@require_http_methods(["POST"])
+def adicionar_carrinho(request, produto_id):
+    produto = get_object_or_404(Produto, id=produto_id)
+    carrinho_obj = get_or_create_carrinho(request)
+    
+    # Verifica se o item já existe
+    item, created = ItemCarrinho.objects.get_or_create(
+        carrinho=carrinho_obj,
+        produto=produto,
+        defaults={'preco_unitario': produto.preco}
+    )
+    
+    if not created:
+        item.quantidade += 1
+        item.save()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'total_itens': carrinho_obj.total_itens,
+            'message': 'Produto adicionado ao carrinho!'
+        })
+    
+    return redirect('carrinho')
+
+
+@require_http_methods(["POST"])
+def remover_carrinho(request, item_id):
+    item = get_object_or_404(ItemCarrinho, id=item_id)
+    
+    # Verifica se o item pertence ao carrinho do usuário/sessão
+    carrinho_obj = get_or_create_carrinho(request)
+    if item.carrinho != carrinho_obj:
+        return JsonResponse({'success': False, 'error': 'Item não encontrado'})
+    
+    item.delete()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'total_itens': carrinho_obj.total_itens,
+            'message': 'Produto removido do carrinho!'
+        })
+    
+    return redirect('carrinho')
+
+
 
 @require_http_methods(["POST"])
 def contato_envio(request):

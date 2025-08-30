@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,7 +7,7 @@
     <title>Carrinho de Compras | O Especialista.Carros</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="{% static 'core/front-end/css/styles.css' %}">
 </head>
 <body class="font-sans bg-gray-50">
     <!-- WhatsApp Float Button -->
@@ -20,25 +21,25 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="index.html" class="text-xl font-bold text-blue-900">O Especialista.Carros</a>
+                    <a href="{% url 'index' %}" class="text-xl font-bold text-blue-900">O Especialista.Carros</a>
                 </div>
                 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex space-x-8">
-                    <a href="index.html#home" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Home</a>
-                    <a href="index.html#products" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Produtos</a>
-                    <a href="index.html#services" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Serviços</a>
-                    <a href="index.html#about" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Sobre Nós</a>
-                    <a href="index.html#blog" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Blog</a>
-                    <a href="index.html#contact" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Contato</a>
+                    <a href="{% url 'index' %}#home" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Home</a>
+                    <a href="{% url 'index' %}#products" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Produtos</a>
+                    <a href="{% url 'index' %}#services" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Serviços</a>
+                    <a href="{% url 'index' %}#about" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Sobre Nós</a>
+                    <a href="{% url 'index' %}#blog" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Blog</a>
+                    <a href="{% url 'index' %}#contact" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Contato</a>
                 </div>
                 
                 <!-- Login/Cart -->
                 <div class="hidden md:flex items-center space-x-4">
-                    <a href="login.html" class="text-gray-700 hover:text-blue-500">
+                    <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-500">
                         <i class="fas fa-user"></i>
                     </a>
-                    <a href="carrinho.html" class="text-gray-700 hover:text-blue-500 relative">
+                    <a href="{% url 'carrinho' %}" class="text-gray-700 hover:text-blue-500 relative">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
                     </a>
@@ -56,15 +57,15 @@
         <!-- Mobile Menu -->
         <div class="mobile-menu hidden md:hidden bg-white shadow-lg">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="index.html#home" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Home</a>
-                <a href="index.html#products" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Produtos</a>
-                <a href="index.html#services" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Serviços</a>
-                <a href="index.html#about" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Sobre Nós</a>
-                <a href="index.html#blog" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Blog</a>
-                <a href="index.html#contact" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Contato</a>
+                <a href="{% url 'index' %}#home" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Home</a>
+                <a href="{% url 'index' %}#products" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Produtos</a>
+                <a href="{% url 'index' %}#services" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Serviços</a>
+                <a href="{% url 'index' %}#about" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Sobre Nós</a>
+                <a href="{% url 'index' %}#blog" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Blog</a>
+                <a href="{% url 'index' %}#contact" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Contato</a>
                 <div class="pt-4 border-t border-gray-200">
-                    <a href="login.html" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Login</a>
-                    <a href="carrinho.html" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Carrinho</a>
+                    <a href="{% url 'login' %}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Login</a>
+                    <a href="{% url 'carrinho' %}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Carrinho</a>
                 </div>
             </div>
         </div>
@@ -213,7 +214,7 @@
                         
                         <!-- Continue Shopping Button -->
                         <div class="mt-6">
-                            <a href="index.html#products" class="flex items-center text-blue-600 hover:text-blue-800">
+                            <a href="{% url 'index' %}#products" class="flex items-center text-blue-600 hover:text-blue-800">
                                 <i class="fas fa-arrow-left mr-2"></i>
                                 Continuar comprando
                             </a>
@@ -267,11 +268,11 @@
                         <div class="mt-6">
                             <p class="text-sm text-gray-500 mb-2">Métodos de pagamento aceitos:</p>
                             <div class="flex space-x-2">
-                                <img src="https://cdn-icons-png.flaticon.com/512/196/196578.png" alt="Visa" class="h-8">
-                                <img src="https://cdn-icons-png.flaticon.com/512/196/196561.png" alt="Mastercard" class="h-8">
-                                <img src="https://cdn-icons-png.flaticon.com/512/196/196566.png" alt="Elo" class="h-8">
-                                <img src="https://cdn-icons-png.flaticon.com/512/196/196565.png" alt="American Express" class="h-8">
-                                <img src="https://cdn-icons-png.flaticon.com/512/196/196563.png" alt="Pix" class="h-8">
+                                <img src="{% static 'core/front-end/imgs/visa.png' %}" alt="Visa" class="h-8">
+                                <img src="{% static 'core/front-end/imgs/mastercard.png' %}" alt="Mastercard" class="h-8">
+                                <img src="{% static 'core/front-end/imgs/elo.png' %}" alt="Elo" class="h-8">
+                                <img src="{% static 'core/front-end/imgs/American Express.jfif' %}" alt="American Express" class="h-8">
+                                <img src="{% static 'core/front-end/imgs/pix.png' %}" alt="Pix" class="h-8">
                             </div>
                         </div>
                     </div>
@@ -289,7 +290,7 @@
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Seu carrinho está vazio</h2>
                 <p class="text-gray-600 mb-6">Parece que você ainda não adicionou nenhum item ao seu carrinho.</p>
-                <a href="index.html#products" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                <a href="{% url 'index' %}#products" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                     <i class="fas fa-store mr-2"></i>
                     Ver produtos
                 </a>
@@ -309,24 +310,24 @@
                 <div>
                     <h4 class="text-lg font-bold mb-4">Links Rápidos</h4>
                     <ul class="space-y-2">
-                        <li><a href="index.html#home" class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
-                        <li><a href="index.html#products" class="text-gray-400 hover:text-white transition duration-300">Produtos</a></li>
-                        <li><a href="index.html#services" class="text-gray-400 hover:text-white transition duration-300">Serviços</a></li>
-                        <li><a href="index.html#about" class="text-gray-400 hover:text-white transition duration-300">Sobre Nós</a></li>
-                        <li><a href="index.html#blog" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
-                        <li><a href="index.html#contact" class="text-gray-400 hover:text-white transition duration-300">Contato</a></li>
+                        <li><a href="{% url 'index' %}#home" class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
+                        <li><a href="{% url 'index' %}#products" class="text-gray-400 hover:text-white transition duration-300">Produtos</a></li>
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Serviços</a></li>
+                        <li><a href="{% url 'index' %}#about" class="text-gray-400 hover:text-white transition duration-300">Sobre Nós</a></li>
+                        <li><a href="{% url 'index' %}#blog" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
+                        <li><a href="{% url 'index' %}#contact" class="text-gray-400 hover:text-white transition duration-300">Contato</a></li>
                     </ul>
                 </div>
                 
                 <div>
                     <h4 class="text-lg font-bold mb-4">Serviços</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Lavagem Técnica</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Polimento e Vitrificação</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Higienização Interna</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Proteção Cerâmica</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Funilaria e Pintura</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Detalhamento Completo</a></li>
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Lavagem Técnica</a></li>
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Polimento e Vitrificação</a></li>
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Higienização Interna</a></li>
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Proteção Cerâmica</a></li>
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Funilaria e Pintura</a></li>
+                        <li><a href="{% url 'index' %}#services" class="text-gray-400 hover:text-white transition duration-300">Detalhamento Completo</a></li>
                     </ul>
                 </div>
                 
@@ -334,22 +335,22 @@
                     <h4 class="text-lg font-bold mb-4">Formas de Pagamento</h4>
                     <div class="grid grid-cols-3 gap-2">
                         <div class="bg-white p-2 rounded flex items-center justify-center">
-                            <img src="https://cdn-icons-png.flaticon.com/512/196/196578.png" alt="Visa" class="h-8">
+                            <img src="{% static 'core/front-end/imgs/visa.png' %}" alt="Visa" class="h-8">
                         </div>
                         <div class="bg-white p-2 rounded flex items-center justify-center">
-                            <img src="https://cdn-icons-png.flaticon.com/512/196/196561.png" alt="Mastercard" class="h-8">
+                            <img src="{% static 'core/front-end/imgs/mastercard.png' %}" alt="Mastercard" class="h-8">
                         </div>
                         <div class="bg-white p-2 rounded flex items-center justify-center">
-                            <img src="https://cdn-icons-png.flaticon.com/512/196/196566.png" alt="Elo" class="h-8">
+                            <img src="{% static 'core/front-end/imgs/elo.png' %}" alt="Elo" class="h-8">
                         </div>
                         <div class="bg-white p-2 rounded flex items-center justify-center">
-                            <img src="https://cdn-icons-png.flaticon.com/512/196/196565.png" alt="American Express" class="h-8">
+                            <img src="{% static 'core/front-end/imgs/American Express.jfif' %}" alt="American Express" class="h-8">
                         </div>
                         <div class="bg-white p-2 rounded flex items-center justify-center">
-                            <img src="https://cdn-icons-png.flaticon.com/512/196/196563.png" alt="Hipercard" class="h-8">
+                            <img src="{% static 'core/front-end/imgs/Hipercard.png' %}" alt="Hipercard" class="h-8">
                         </div>
                         <div class="bg-white p-2 rounded flex items-center justify-center">
-                            <img src="https://cdn-icons-png.flaticon.com/512/196/196568.png" alt="Pix" class="h-8">
+                            <img src="{% static 'core/front-end/imgs/pix.png' %}" alt="Pix" class="h-8">
                         </div>
                     </div>
                 </div>
@@ -366,6 +367,6 @@
         </div>
     </footer>
     
-    <script src="scripts.js"></script>
+    <script src="{% static 'core/front-end/scripts.js' %}"></script>
 </body>
 </html>
