@@ -170,6 +170,16 @@ def remover_carrinho(request, item_id):
     
     return redirect('carrinho')
 
+def carrinho_json(request):
+    carrinho_obj = get_or_create_carrinho(request)
+    frete = 0  # fixo por enquanto
+
+    return JsonResponse({
+        'subtotal': float(carrinho_obj.total_preco),
+        'frete': frete,
+        'total': float(carrinho_obj.total_preco) + frete,
+        'total_itens': carrinho_obj.total_itens
+    })
 
 
 @require_http_methods(["POST"])
