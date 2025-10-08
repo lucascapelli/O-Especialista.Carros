@@ -273,10 +273,10 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <a href="{% url 'order_detail' order.id %}"
+                                              {# <a href="{% url 'order_detail' order.id %}" #}
                                                 class="text-blue-600 hover:text-blue-900 mr-3"
                                                 aria-label="Ver pedido"><i class="fas fa-eye"></i></a>
-                                            <a href="{% url 'order_edit' order.id %}"
+                                              {# <a href="{% url 'order_edit' order.id %}" #}
                                                 class="text-yellow-600 hover:text-yellow-900"
                                                 aria-label="Editar pedido"><i class="fas fa-edit"></i></a>
                                         </td>
@@ -774,10 +774,10 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <a href="{% url 'order_detail' order.id %}"
+                                            {# <a href="{% url '' order.id %}" #}
                                                 class="text-blue-600 hover:text-blue-900 mr-3"
                                                 aria-label="Ver pedido"><i class="fas fa-eye"></i></a>
-                                            <a href="{% url 'order_edit' order.id %}"
+                                            {# <a href="{% url 'order_edit' order.id %}" #}
                                                 class="text-yellow-600 hover:text-yellow-900"
                                                 aria-label="Editar pedido"><i class="fas fa-edit"></i></a>
                                         </td>
@@ -947,13 +947,13 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <a href="{% url 'user_detail' user.id %}"
+                                            {# <a href="{% url 'user_detail' user.id %}" #}
                                                 class="text-blue-600 hover:text-blue-900 mr-3"
                                                 aria-label="Ver usuário"><i class="fas fa-eye"></i></a>
-                                            <a href="{% url 'user_edit' user.id %}"
+                                            {#  <a href="{% url 'user_edit' user.id %}" #}
                                                 class="text-yellow-600 hover:text-yellow-900 mr-3"
                                                 aria-label="Editar usuário"><i class="fas fa-edit"></i></a>
-                                            <form action="{% url 'user_delete' user.id %}" method="post" class="inline"
+                                           {# <form action="{% url 'user_delete' user.id %}" method="post" class="inline" #}
                                                 onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
                                                 {% csrf_token %}
                                                 <button type="submit" class="text-red-600 hover:text-red-900"

@@ -1,0 +1,93 @@
+{# =============================================================== #}
+{# 🔽 NOVO BLOCO HTML COMPLETO INSERIDO - PAINEL ADMINISTRATIVO   #}
+{# =============================================================== #}
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Painel Administrativo - O Especialista.Carros</title>
+    
+    <!-- Fontes e Tailwind -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Ícones e CSS custom -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'core/admin-front-end/css/admin-styles.css' %}">
+</head>
+
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-header">
+            <div class="flex items-center justify-center space-x-2 mb-2">
+                <i class="fas fa-car text-accent text-2xl"></i>
+                <span class="logo-text text-xl">Especialista.Carros</span>
+            </div>
+            <h1 class="text-xl font-semibold">Painel Administrativo</h1>
+        </div>
+
+        <div class="login-form">
+            <!-- Mensagens de erro -->
+            {% if messages %}
+                {% for message in messages %}
+                <div id="error-message" class="error-message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span id="error-text">{{ message }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div id="error-message" class="error-message hidden">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span id="error-text">Usuário ou senha incorretos</span>
+                </div>
+            {% endif %}
+
+            <form id="login-form" method="post" action="{% url 'admin_login' %}">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Usuário</label>
+                    <input type="text" id="username" name="username" class="form-input" placeholder="Digite seu usuário" required autofocus value="{{ request.POST.username }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Senha</label>
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" class="form-input pr-10" placeholder="Digite sua senha" required>
+                        <span class="password-toggle" id="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember-me" name="remember_me" class="h-4 w-4 text-primary-start focus:ring-primary-start border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">Lembrar-me</label>
+                    </div>
+                    
+                    <a href="#" class="text-sm text-primary-start hover:text-primary-end">Esqueceu a senha?</a>
+                </div>
+                
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Entrar
+                </button>
+            </form>
+        </div>
+        
+        <div class="login-footer">
+            <p>&copy; 2023 Especialista.Carros. Todos os direitos reservados.</p>
+        </div>
+    </div>
+
+    <!-- Scripts globais -->
+    <script src="{% static 'core/admin-front-end/js/admin-scripts.js' %}"></script>
+
+    <!-- Script específico da página de login -->
+    <script src="{% static 'core/admin-front-end/js/admin-login.js' %}"></script>
+</body>
+
+</html>

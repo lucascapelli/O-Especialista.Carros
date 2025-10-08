@@ -16,14 +16,28 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include  
+from django.shortcuts import redirect
 from core.views import admin_index
 
+def root_redirect(request):
+    """Redirecionamento condicional da raiz"""
+    if request.user.is_authenticated and hasattr(request.user, 'is_admin') and request.user.is_admin:
+        return redirect('admin_index')
+    else:
+        return redirect('index')  # Redireciona para a página inicial pública
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('core.urls')),  # Tudo que for API ou Front fica aqui
-    path('admin-front-end/', admin_index, name='admin_index'),                                                        
+    # Redirecionamento da raiz
+    path('', root_redirect),
+    
+    # Admin Django padrão (nova rota para evitar conflito)
+    path('admin-django/', admin.site.urls),
+    
+    # URLs do app core (inclui todas as outras URLs)
+    path('', include('core.urls')),
 ]
 
+# Configurações de arquivos estáticos e media
 from django.conf import settings
 from django.conf.urls.static import static
 

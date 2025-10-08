@@ -1,15 +1,184 @@
-.sidebar {
-    transition: width 0.3s ease, left 0.3s ease;
+:root {
+    --primary-start: #1e40af;
+    --primary-end: #1e3a8a;
+    --accent: #f59e0b;
 }
 
+/* ===== ESTILOS PARA PÁGINA DE LOGIN ===== */
+.login-body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 1rem;
+}
+
+.login-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-header {
+    background: linear-gradient(to right, var(--primary-start), var(--primary-end));
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.logo-text {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.login-form {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-start);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.btn-login {
+    width: 100%;
+    background: linear-gradient(to right, var(--primary-start), var(--primary-end));
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-login:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+}
+
+.login-footer {
+    text-align: center;
+    padding: 1rem 2rem 2rem;
+    border-top: 1px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+/* ===== MENSAGENS SIMPLES ===== */
+.error-message {
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.success-message {
+    background-color: #d1fae5;
+    border: 1px solid #6ee7b7;
+    color: #065f46;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.warning-message {
+    background-color: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #92400e;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.info-message {
+    background-color: #dbeafe;
+    border: 1px solid #93c5fd;
+    color: #1e3a8a;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.password-container {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6b7280;
+}
+
+/* ===== ESTILOS PARA PAINEL ADMINISTRATIVO ===== */
+.admin-body {
+    background-color: #f9fafb;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar {
+    background: linear-gradient(to bottom, var(--primary-start), var(--primary-end));
+    color: white;
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    transition: transform 0.3s ease, width 0.3s ease, left 0.3s ease;
+}
+
+.content-area {
+    margin-left: 250px;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+/* ===== SIDEBAR COLLAPSED ===== */
 .sidebar.collapsed {
     width: 80px;
 }
 
-.sidebar.collapsed .sidebar-text {
-    display: none;
-}
-
+.sidebar.collapsed .sidebar-text,
 .sidebar.collapsed .logo-text {
     display: none;
 }
@@ -18,15 +187,12 @@
     transform: rotate(180deg);
 }
 
-.content-area {
-    transition: margin-left 0.3s ease, width 0.3s ease;
-}
-
 .content-area.expanded {
     margin-left: 80px;
     width: calc(100% - 80px);
 }
 
+/* ===== NAVEGAÇÃO ===== */
 .nav-link.active {
     background-color: rgba(255, 255, 255, 0.1);
     border-left: 4px solid #fbbf24;
@@ -36,6 +202,7 @@
     overflow-x: auto;
 }
 
+/* ===== BACKDROP MOBILE ===== */
 .backdrop {
     display: none;
     position: fixed;
@@ -51,23 +218,36 @@
     display: block;
 }
 
+/* ===== RESPONSIVIDADE ===== */
 @media (max-width: 768px) {
     .sidebar {
+        transform: translateX(-100%);
         position: fixed;
         z-index: 1000;
         left: -250px;
     }
-
+    
+    .sidebar.mobile-open,
     .sidebar.open {
+        transform: translateX(0);
         left: 0;
     }
-
+    
     .content-area {
         margin-left: 0;
         width: 100%;
+    }
+    
+    .content-area.sidebar-open {
+        margin-left: 250px;
     }
 
     .mobile-menu-btn {
         display: block;
     }
+}
+
+/* Estilos gerais para o painel administrativo */
+body {
+    font-family: 'Inter', sans-serif;
 }
