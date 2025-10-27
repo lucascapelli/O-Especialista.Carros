@@ -8,6 +8,8 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
+from django.db import models
+from django.core.paginator import Paginator
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -185,7 +187,7 @@ def admin_index(request):
     """Área administrativa - verifica se usuário é admin"""
     if not request.user.is_authenticated or not request.user.is_admin:
         logger.warning(f"Acesso negado à admin_index - Usuário: {request.user if request.user.is_authenticated else 'Anônimo'}")
-        return redirect('login_page')  # Redireciona para login se não for admin
+        return redirect('login_page')
     
     site_language = request.GET.get('site_language', 'pt-BR')
     allowed_status = ['Todos', 'Pendente', 'Processando', 'Enviado', 'Entregue', 'Cancelado']
@@ -193,18 +195,37 @@ def admin_index(request):
     
     if status_filter not in allowed_status:
         status_filter = 'Todos'
+
+    # ---------------------------------------------------------------
+    # 🔽 BLOCO DE CONFIGURAÇÕES E FILTROS
+    # ---------------------------------------------------------------
+    # Paginação para usuários
+    users_list = User.objects.all().order_by('-id')
     
+    # Filtro de busca para usuários
+    search_query = request.GET.get('search', '')
+    if search_query:
+        users_list = users_list.filter(
+            models.Q(first_name__icontains=search_query) |
+            models.Q(last_name__icontains=search_query) |
+            models.Q(email__icontains=search_query)
+        )
+    
+    paginator = Paginator(users_list, 10)
+    page_number = request.GET.get('page', 1)
+    users_page = paginator.get_page(page_number)
+
     context = {
         'status': status_filter,
         'site_language': site_language,
-        'is_admin': True  # Para uso no template
+        'is_admin': True,
+        'current_section': request.GET.get('section', 'dashboard')  # Para controle no template
     }
 
     # ---------------------------------------------------------------
-    # 🔽 NOVO BLOCO INSERIDO (DADOS DE DASHBOARD / MOCKS / CONSULTAS)
+    # 🔽 BLOCO DE DADOS DO DASHBOARD (MOCKS/CONSULTAS)
     # ---------------------------------------------------------------
     if request.user.is_authenticated and request.user.is_admin:
-        # Dados mock para o dashboard (substitua pelos seus dados reais)
         context.update({
             'dashboard_stats': {
                 'total_sales': 15250.00,
@@ -225,19 +246,55 @@ def admin_index(request):
                     'order_value': 250.00,
                     'status': 'Entregue'
                 },
-                # Adicione mais pedidos conforme necessário
             ],
             'recent_products': Produto.objects.all()[:5],
             'products': Produto.objects.all(),
-            'users': User.objects.regular_users(),  # todos os usuários comuns
-            'admins': User.objects.admins(),        # todos os admins, se precisar
-
-            'user_roles': ['Admin', 'Vendedor', 'Cliente']
+            'users': users_page,
+            'user_roles': ['Admin', 'Usuário']
         })
-    # ---------------------------------------------------------------
 
     logger.info(f"Admin acessou painel: {request.user.email}")
     return render(request, 'core/admin-front-end/admin_index.html', context)
+
+
+# ==================== EXCLUSÃO DE USUÁRIOS ====================
+@require_http_methods(["DELETE"])
+@csrf_protect
+def delete_user(request, user_id):
+    """View para excluir usuário via AJAX"""
+    if not request.user.is_authenticated or not request.user.is_admin:
+        return JsonResponse({
+            'success': False, 
+            'error': 'Permissão negada. Apenas administradores podem excluir usuários.'
+        }, status=403)
+    
+    try:
+        user_to_delete = get_object_or_404(User, id=user_id)
+        
+        # Impedir que o usuário exclua a si mesmo
+        if user_to_delete.id == request.user.id:
+            return JsonResponse({
+                'success': False,
+                'error': 'Você não pode excluir sua própria conta.'
+            }, status=400)
+        
+        # Log antes de excluir
+        logger.info(f"Usuário {user_to_delete.email} (ID: {user_id}) excluído por admin: {request.user.email}")
+        
+        # Excluir o usuário
+        user_to_delete.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Usuário excluído com sucesso!'
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao excluir usuário {user_id}: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Erro ao excluir usuário: {str(e)}'
+        }, status=500)
 
 # ==================== ADMIN LOGIN ====================
 @csrf_protect

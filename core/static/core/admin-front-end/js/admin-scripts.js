@@ -34,10 +34,12 @@ function toggleMobileMenu() {
 
 // Show Section
 function showSection(sectionId) {
+    console.clear();
+    console.log("🧭 showSection() chamada para:", sectionId);
+
     const sections = document.querySelectorAll('.section-content');
     const navLinks = document.querySelectorAll('.nav-link');
 
-    // Esconde todas as seções
     sections.forEach(section => {
         section.classList.add('hidden');
         if (section.id === `${sectionId}-section`) {
@@ -45,7 +47,6 @@ function showSection(sectionId) {
         }
     });
 
-    // Atualiza o link ativo
     navLinks.forEach(link => {
         link.classList.remove('active');
         if (link.dataset.section === sectionId) {
@@ -53,7 +54,7 @@ function showSection(sectionId) {
         }
     });
 
-    // Fecha o menu mobile
+    // Fecha o menu mobile (caso esteja aberto)
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('backdrop');
     if (sidebar.classList.contains('open')) {
@@ -61,23 +62,22 @@ function showSection(sectionId) {
         backdrop.classList.remove('open');
     }
 
-    // 🚀 Se o usuário abriu a aba "Produtos", força a renderização
-    if (sectionId === 'produtos' && typeof fetchProdutos === 'function') {
-        console.log('Aba "Produtos" aberta — renderizando produtos...');
-        
-        // Aguarda o browser reexibir o conteúdo antes de renderizar
-        setTimeout(() => {
-            try {
-                fetchProdutos('all');
-                fetchProdutos('recent');
-                console.log('Produtos carregados após exibir a aba.');
-            } catch (err) {
-                console.error('Erro ao renderizar produtos:', err);
-            }
-        }, 150); // pequeno atraso garante repaint
-    }
-}
+    // 🚀 Inicializa eventos específicos após renderizar a aba
+    setTimeout(() => {
+        if (sectionId === 'usuarios' && typeof initializeUsersSection === 'function') {
+            console.log('Inicializando scripts da aba de usuários...');
+            initializeUsersSection();
+        }
 
+        if (sectionId === 'produtos' && typeof fetchProdutos === 'function') {
+            console.log('Renderizando produtos...');
+            fetchProdutos('all');
+            fetchProdutos('recent');
+        }
+    }, 150);
+
+    console.log("✅ showSection() terminou de rodar");
+}
 
 // Toggle Add Product Form
 function toggleAddProductForm() {

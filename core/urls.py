@@ -2,7 +2,7 @@ from django.urls import path, include
 from .views import (
     produtos_listagem, LoginView, RegisterView, ProdutoViewSet,
     logout_view, carrinho, contato_envio, login_page, esqueceu_senha_page,
-    criar_conta_page, carrinho_json, admin_login, admin_index
+    criar_conta_page, carrinho_json, admin_login, admin_index, delete_user
 )
 from rest_framework.routers import DefaultRouter
 
@@ -19,6 +19,7 @@ urlpatterns = [
     # APIs
     path('api/login/', LoginView.as_view(), name='api-login'),
     path('api/register/', RegisterView.as_view(), name='api-register'),
+    path('admin-panel/delete-user/<int:user_id>/', delete_user, name='delete_user'),
     
     # Admin
     path('admin-login/', admin_login, name='admin_login'),
