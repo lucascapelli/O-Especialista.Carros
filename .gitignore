@@ -1,0 +1,62 @@
+# ================================
+# 🧠 PROJETO DJANGO – O-Especialista.Carros
+# Autor: Lucas
+# Ambiente: Django + MariaDB + venv + VSCode + APIs externas
+# ================================
+
+# === 🧩 DJANGO CORE ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+
+# === 🧰 MIGRATIONS CACHE ===
+**/migrations/__pycache__/
+**/migrations/*.pyc
+# (Mantém apenas os arquivos de migração .py normais)
+
+# === 🔒 VARIÁVEIS DE AMBIENTE ===
+.env
+.env.*
+*.pem
+*.key
+*.crt
+secrets.json
+
+# === 🧾 ARQUIVOS E PASTAS GERADOS ===
+staticfiles/
+media/
+*.bak
+*.swp
+*.swo
+
+# === 📦 PRODUTOS E MÍDIA LOCAL ===
+produtos/
+# (caso queira versionar imagens reais de produtos, remova essa linha)
+
+# === 🧰 AMBIENTE VIRTUAL ===
+venv/
+env/
+.venv/
+ENV/
+.ENV/
+
+# === 💻 VS CODE / IDEs ===
+.vscode/
+.idea/
+*.code-workspace
+
+# === 🧪 TESTES E CACHE ===
+.pytest_cache/
+.mypy_cache/
+__snapshots__/
+.coverage
+coverage.xml
+htmlcov/
+
+
+# === ⚙️ OUTROS ===
+.DS_Store
+Thumbs.db
+estrutura.txt

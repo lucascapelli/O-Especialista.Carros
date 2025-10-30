@@ -187,7 +187,7 @@ def admin_index(request):
     """Área administrativa - verifica se usuário é admin"""
     if not request.user.is_authenticated or not request.user.is_admin:
         logger.warning(f"Acesso negado à admin_index - Usuário: {request.user if request.user.is_authenticated else 'Anônimo'}")
-        return redirect('login_page')
+        return redirect('admin_login')
     
     site_language = request.GET.get('site_language', 'pt-BR')
     allowed_status = ['Todos', 'Pendente', 'Processando', 'Enviado', 'Entregue', 'Cancelado']
@@ -306,7 +306,7 @@ def admin_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        remember_me = request.POST.get('remember_me')
+        remember_me = request.POST.get('remember_me')  # Checkbox no formulário
         
         # Autentica o usuário
         user = authenticate(request, username=username, password=password)
@@ -315,9 +315,9 @@ def admin_login(request):
             if user.is_admin:  # Verifica se é admin
                 auth_login(request, user)
                 
-                # Configura sessão baseada no "Lembrar-me"
+                # 🔒 Sessão expira ao fechar o navegador se "Lembrar-me" não estiver marcado
                 if not remember_me:
-                    request.session.set_expiry(0)  # Sessão de browser
+                    request.session.set_expiry(0)  # Expira ao fechar o navegador
                 else:
                     request.session.set_expiry(1209600)  # 2 semanas
                 
@@ -329,6 +329,7 @@ def admin_login(request):
             messages.error(request, 'Usuário ou senha incorretos.')
     
     return render(request, 'core/admin-front-end/admin-login.html')
+
 # ====================  ====================
 
 
@@ -339,7 +340,7 @@ def logout_view(request):
     
     logout(request)
     if request.path.startswith('/admin-panel/'):
-        return redirect('login_page')  # se veio do admin, volta pro login
+        return redirect('admin_login')  # se veio do admin, volta pro login
     return redirect('index')  # senão, vai pra home
 
 
