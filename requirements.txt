@@ -10,3 +10,4 @@ asgiref==3.10.0
 cffi==2.0.0
 pycparser==2.23
 django-extensions==3.4.0
+requests==2.32.5
