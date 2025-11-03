@@ -63,3 +63,46 @@ async function atualizarCarrinhoResumo() {
     // Atualiza badge no ícone do carrinho
     document.getElementById("cart-count").textContent = data.total_itens;
 }
+
+// ---------------- Finalizar compra ----------------
+document.getElementById("finalizar-compra").addEventListener("click", async () => {
+    try {
+        const response = await fetch("/api/pedido/criar/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken,
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({
+                metodo_pagamento: "pix",
+                endereco_entrega: {
+                    rua: "Rua Teste",
+                    numero: "123",
+                    bairro: "Centro",
+                    cidade: "São Paulo",
+                    estado: "SP",
+                    cep: "01000-000"
+                }
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert("✅ Pedido criado com sucesso!");
+            
+            // Se o AbacatePay retornar um QR Code ou link:
+            if (data.qr_code_url) {
+                window.location.href = data.qr_code_url;
+            } else if (data.codigo_pagamento) {
+                alert("Código do pagamento: " + data.codigo_pagamento);
+            }
+        } else {
+            alert("Erro: " + data.message);
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao finalizar compra.");
+    }
+});

@@ -433,30 +433,56 @@ def carrinho(request):
 
 @require_http_methods(["POST"])
 @csrf_protect
+@require_http_methods(["POST"])
+@csrf_protect
 def adicionar_carrinho(request, produto_id):
     """Adiciona item ao carrinho - acesso público"""
-    produto = get_object_or_404(Produto, id=produto_id)
-    carrinho_obj = get_or_create_carrinho(request)
-    
-    # Verifica se o item já existe
-    item, created = ItemCarrinho.objects.get_or_create(
-        carrinho=carrinho_obj,
-        produto=produto,
-        defaults={'preco_unitario': produto.preco}
-    )
-    
-    if not created:
-        item.quantidade += 1
-        item.save()
-    
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+    try:
+        produto = get_object_or_404(Produto, id=produto_id)
+        
+        # Verificar estoque
+        if produto.estoque <= 0:
+            return JsonResponse({
+                'success': False, 
+                'error': 'Produto fora de estoque'
+            }, status=400)
+        
+        carrinho_obj = get_or_create_carrinho(request)
+        
+        # Verifica se o item já existe
+        item, created = ItemCarrinho.objects.get_or_create(
+            carrinho=carrinho_obj,
+            produto=produto,
+            defaults={'preco_unitario': produto.preco}
+        )
+        
+        if not created:
+            # Verifica se há estoque suficiente
+            if item.quantidade >= produto.estoque:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Estoque insuficiente'
+                }, status=400)
+            item.quantidade += 1
+            item.save()
+        
+        # Recarrega o carrinho para ter dados atualizados
+        carrinho_obj.refresh_from_db()
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'total_itens': carrinho_obj.total_itens,
+                'message': 'Produto adicionado ao carrinho!'
+            })
+        
+        return redirect('carrinho')
+        
+    except Exception as e:
         return JsonResponse({
-            'success': True,
-            'total_itens': carrinho_obj.total_itens,
-            'message': 'Produto adicionado ao carrinho!'
-        })
-    
-    return redirect('carrinho')
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 
 @require_http_methods(["POST"])
@@ -493,6 +519,88 @@ def carrinho_json(request):
         'total': float(carrinho_obj.total_preco) + frete,
         'total_itens': carrinho_obj.total_itens
     })
+
+
+# ==================== PEDIDOS ====================
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def criar_pedido(request):
+    """
+    Cria um pedido a partir do carrinho do usuário autenticado
+    e gera o pagamento via AbacatePay.
+    """
+    logger.info(f"Usuário {request.user.email} solicitou criação de pedido.")
+
+    try:
+        usuario = request.user
+        endereco_entrega = request.data.get('endereco_entrega')
+        metodo_pagamento_tipo = request.data.get('metodo_pagamento', 'pix')
+
+        # 1️⃣ Validação básica
+        if not endereco_entrega:
+            return Response({'error': 'Endereço de entrega é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2️⃣ Obtém carrinho do usuário
+        carrinho = Carrinho.objects.filter(usuario=usuario).first()
+        if not carrinho or not carrinho.itens.exists():
+            return Response({'error': 'Carrinho vazio.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3️⃣ Obtém ou cria o status "Pendente"
+        from core.models.orders import StatusPedido, ItemPedido
+        status_pedido = StatusPedido.objects.first() or StatusPedido.objects.create(nome="Pendente")
+
+        # 4️⃣ Cria o pedido
+        pedido = Pedido.objects.create(
+            usuario=usuario,
+            status=status_pedido,
+            endereco_entrega=endereco_entrega
+        )
+
+        # 5️⃣ Transfere os itens do carrinho para o pedido
+        for item in carrinho.itens.all():
+            ItemPedido.objects.create(
+                pedido=pedido,
+                produto=item.produto,
+                quantidade=item.quantidade,
+                preco_unitario=item.produto.preco
+            )
+
+        pedido.calcular_totais()
+        pedido.save()
+
+        # 6️⃣ Limpa o carrinho
+        carrinho.itens.all().delete()
+
+        # 7️⃣ Gera o pagamento
+        try:
+            metodo_pagamento = MetodoPagamento.objects.get(tipo=metodo_pagamento_tipo)
+            pagamento = gerar_pagamento(pedido, metodo_pagamento)
+        except MetodoPagamento.DoesNotExist:
+            logger.warning("Método de pagamento não configurado. Pulando geração automática.")
+            pagamento = None
+
+        logger.info(f"Pedido #{pedido.id} criado com sucesso para {usuario.email}")
+
+        response_data = {
+            'message': 'Pedido criado com sucesso',
+            'pedido_id': pedido.id,
+            'numero_pedido': pedido.numero_pedido,
+            'total_final': float(pedido.total_final),
+            'status': pedido.status.nome,
+        }
+
+        if pagamento:
+            response_data['pagamento'] = {
+                'codigo_pagamento': pagamento.codigo_pagamento,
+                'status': pagamento.status,
+                'id_transacao': pagamento.id_transacao
+            }
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        logger.error(f"Erro ao criar pedido: {str(e)}", exc_info=True)
+        return Response({'error': f'Erro interno: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ==================== CONTATO E PÁGINAS PÚBLICAS ====================

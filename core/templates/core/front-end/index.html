@@ -148,10 +148,13 @@
                         <p class="text-gray-600 text-sm mb-4">{{ produto.descricao }}</p>
                         <div class="flex items-center justify-between">
                             <span class="text-lg font-bold text-primary-start">R$ {{ produto.preco }}</span>
-                            <button
-                                class="bg-primary-end text-white px-4 py-2 rounded hover:bg-primary-start transition duration-300">
-                                <i class="fas fa-cart-plus mr-2"></i>Comprar
+                            <button 
+                                class="btn-comprar bg-primary-end text-white px-4 py-2 rounded hover:bg-primary-start transition duration-300"
+                                data-produto-id="{{ produto.id }}">
+                            <i class="fas fa-cart-plus mr-2"></i>Comprar
                             </button>
+
+
                         </div>
                     </div>
                 </div>
