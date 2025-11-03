@@ -92,157 +92,163 @@
         </div>
     </nav>
 
-    <!-- Cart Section -->
+    <!-- Cart Section CORRIGIDA -->
     <div class="cart-container py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row gap-8">
+            <div class="flex flex-col lg:flex-row gap-8">
+                
                 <!-- Cart Items -->
-                <div class="md:w-2/3">
+                <div class="lg:w-2/3">
                     <div class="bg-white rounded-lg shadow cart-card p-6">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-2xl font-bold text-gray-800">Seu Carrinho</h2>
-                            <span class="text-gray-600">{{ carrinho.total_itens }} itens</span>
+                            <span id="cart-items-count" class="text-gray-600">{{ carrinho.total_itens }} itens</span>
                         </div>
 
                         <!-- Cart Items List -->
-                        <div class="space-y-6">
+                        <div id="cart-items-container" class="space-y-4">
                             {% for item in carrinho.itens.all %}
-                            <!-- Dentro do loop dos itens -->
-                            <div id="item-{{ item.id }}"
-                                class="cart-item flex flex-col md:flex-row justify-between p-4 border-b border-gray-200 rounded-lg">
-                                <div class="flex cart-item-details mb-4 md:mb-0">
-                                    <div class="cart-item-image w-24 h-24 bg-gray-100 rounded-md overflow-hidden mr-4">
-                                        <img src="{{ item.produto.imagem.url }}" alt="{{ item.produto.nome }}"
-                                            class="w-full h-full object-cover">
+                            <div id="item-{{ item.id }}" class="cart-item flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-white">
+                                <!-- Imagem e detalhes do produto -->
+                                <div class="flex items-center space-x-4 flex-1">
+                                    <div class="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                                        <img src="{{ item.produto.imagem.url }}" alt="{{ item.produto.nome }}" 
+                                             class="w-full h-full object-cover">
                                     </div>
-                                    <div>
+                                    <div class="flex-1">
                                         <h3 class="font-medium text-gray-800">{{ item.produto.nome }}</h3>
-                                        <p class="text-sm text-gray-500">{{ item.produto.descricao|truncatewords:10 }}
-                                        </p>
+                                        <p class="text-sm text-gray-500">{{ item.produto.descricao|truncatewords:10 }}</p>
+                                        <p class="text-lg font-bold text-blue-600 mt-1">R$ {{ item.preco_unitario }}</p>
                                     </div>
                                 </div>
 
-                                <div class="flex items-center">
-                                    <button onclick="adicionarCarrinho('{{ item.produto.id }}')"
-                                        class="quantity-btn rounded-l-md">
-                                        <i class="fas fa-plus"></i>
+                                <!-- Controles de quantidade -->
+                                <div class="flex items-center space-x-2 mr-4">
+                                    <button onclick="alterarQuantidade('{{ item.id }}', -1)" 
+                                            class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition">
+                                        <i class="fas fa-minus text-sm"></i>
                                     </button>
-
-                                    <input type="number" value="{{ item.quantidade }}" min="1"
-                                        class="quantity-input h-8 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                        readonly>
-
-                                    <!-- Aqui precisa ser o item.id -->
-                                    <button onclick="removerCarrinho('{{ item.id }}')"
-                                        class="quantity-btn rounded-r-md">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                </div>
-
-                                <div class="flex items-center">
-                                    <span class="font-bold text-gray-800 mr-4">R$ {{ item.subtotal }}</span>
-                                    <!-- Aqui também precisa ser o item.id -->
-                                    <button onclick="removerCarrinho('{{ item.id }}')" class="remove-btn">
-                                        <i class="fas fa-trash"></i>
+                                    
+                                    <span id="quantity-{{ item.id }}" class="w-8 text-center font-medium">
+                                        {{ item.quantidade }}
+                                    </span>
+                                    
+                                    <button onclick="alterarQuantidade('{{ item.id }}', 1)" 
+                                            class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition">
+                                        <i class="fas fa-plus text-sm"></i>
                                     </button>
                                 </div>
 
+                                <!-- Subtotal e remover -->
+                                <div class="flex items-center space-x-4">
+                                    <span class="font-bold text-gray-800 text-lg">
+                                        R$ <span id="subtotal-{{ item.id }}">{{ item.subtotal }}</span>
+                                    </span>
+                                    <button onclick="removerItem('{{ item.id }}')" 
+                                            class="w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 rounded hover:bg-red-200 transition">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
                             </div>
+                            {% empty %}
+                            <div id="empty-cart-message" class="text-center py-12">
+                                <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+                                <p class="text-xl text-gray-500 mb-4">Seu carrinho está vazio</p>
+                                <a href="{% url 'index' %}#products" 
+                                   class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                    <i class="fas fa-store mr-2"></i>
+                                    Ver produtos
+                                </a>
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% empty %}
-                        <p class="text-gray-500">Seu carrinho está vazio.</p>
-                        {% endfor %}
                     </div>
 
                     <!-- Continue Shopping Button -->
                     <div class="mt-6">
-                        <a href="{% url 'index' %}#products"
-                            class="flex items-center text-blue-600 hover:text-blue-800">
+                        <a href="{% url 'index' %}#products" 
+                           class="inline-flex items-center text-blue-600 hover:text-blue-800 transition">
                             <i class="fas fa-arrow-left mr-2"></i>
                             Continuar comprando
                         </a>
                     </div>
                 </div>
-            </div>
 
-            <!-- Order Summary -->
-            <div class="md:w-1/3">
-                <div class="bg-white rounded-lg shadow cart-card p-6 sticky top-4">
-                    <h2 class="text-xl font-bold text-gray-800 mb-6">Resumo do Pedido</h2>
+                <!-- Order Summary CORRIGIDO -->
+                <div class="lg:w-1/3">
+                    <div class="bg-white rounded-lg shadow cart-card p-6 sticky top-4">
+                        <h2 class="text-xl font-bold text-gray-800 mb-6">Resumo do Pedido</h2>
 
-                    <!-- Coupon Code -->
-                    <div class="mb-6">
-                        <label for="coupon" class="block text-sm font-medium text-gray-700 mb-2">Cupom de
-                            desconto</label>
-                        <div class="flex">
-                            <input type="text" id="coupon" placeholder="Digite o código"
-                                class="coupon-input flex-1 min-w-0 block w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <button
-                                class="coupon-btn inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                Aplicar
-                            </button>
+                        <!-- Coupon Code -->
+                        <div class="mb-6">
+                            <label for="coupon" class="block text-sm font-medium text-gray-700 mb-2">Cupom de
+                                desconto</label>
+                            <div class="flex">
+                                <input type="text" id="coupon" placeholder="Digite o código"
+                                    class="coupon-input flex-1 min-w-0 block w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <button
+                                    class="coupon-btn inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Aplicar
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Order Details -->
-                    <div class="space-y-3 mb-6">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Subtotal</span>
-                            <span id="subtotal" class="text-gray-800">R$ {{ carrinho.total_preco }}</span>
+                        <!-- Order Details -->
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Subtotal</span>
+                                <span id="resumo-subtotal" class="text-gray-800">R$ {{ carrinho.total_preco }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Frete</span>
+                                <span id="resumo-frete" class="text-gray-800">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Desconto</span>
+                                <span id="resumo-desconto" class="text-green-600">-R$ 0,00</span>
+                            </div>
+                            <div class="border-t border-gray-200 pt-3 flex justify-between">
+                                <span class="font-medium text-gray-800">Total</span>
+                                <span id="resumo-total" class="font-bold text-gray-900 text-lg">
+                                    R$ {{ carrinho.total_preco }}
+                                </span>
+                            </div>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Frete</span>
-                            <span id="frete" class="text-gray-800">R$ 0,00</span>
-                            <!-- depois vamos integrar a API -->
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Desconto</span>
-                            <span class="text-green-600">-R$ 0,00</span>
-                        </div>
-                        <div class="border-t border-gray-200 pt-3 flex justify-between">
-                            <span class="font-medium text-gray-800">Total</span>
-                            <span id="total" class="font-bold text-gray-900">R$ {{ carrinho.total_preco }}</span>
-                        </div>
-                    </div>
 
-                    <!-- Checkout Button -->
-                    <button id="finalizar-compra" class="checkout-btn w-full gradient-bg text-white py-3 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Finalizar Compra
-                    </button>
+                        <!-- No Order Summary, antes do botão Finalizar Compra -->
+                        <div id="user-auth-info" class="mb-4 p-3 bg-blue-50 rounded-lg hidden">
+                            <div class="flex items-center">
+                                <i class="fas fa-user-check text-blue-500 mr-2"></i>
+                                <span class="text-blue-700 text-sm">Você está logado como: <span id="user-email"></span></span>
+                            </div>
+                        </div>
 
+                        <div id="user-not-auth-info" class="mb-4 p-3 bg-yellow-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                                <span class="text-yellow-700 text-sm">Você precisa estar logado para finalizar a compra</span>
+                            </div>
+                        </div>
 
-                    <!-- Payment Methods -->
-                    <div class="mt-6">
-                        <p class="text-sm text-gray-500 mb-2">Métodos de pagamento aceitos:</p>
-                        <div class="flex space-x-2">
-                            <img src="{% static 'core/front-end/imgs/visa.png' %}" alt="Visa" class="h-8">
-                            <img src="{% static 'core/front-end/imgs/mastercard.png' %}" alt="Mastercard" class="h-8">
-                            <img src="{% static 'core/front-end/imgs/elo.png' %}" alt="Elo" class="h-8">
-                            <img src="{% static 'core/front-end/imgs/American Express.jfif' %}" alt="American Express"
-                                class="h-8">
-                            <img src="{% static 'core/front-end/imgs/pix.png' %}" alt="Pix" class="h-8">
+                        <!-- Checkout Button -->
+                        <button id="finalizar-compra" 
+                                class="checkout-btn w-full gradient-bg text-white py-3 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Finalizar Compra
+                        </button>
+
+                        <!-- Payment Methods -->
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <p class="text-sm text-gray-500 mb-3">Métodos de pagamento aceitos:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <img src="{% static 'core/front-end/imgs/visa.png' %}" alt="Visa" class="h-6">
+                                <img src="{% static 'core/front-end/imgs/mastercard.png' %}" alt="Mastercard" class="h-6">
+                                <img src="{% static 'core/front-end/imgs/elo.png' %}" alt="Elo" class="h-6">
+                                <img src="{% static 'core/front-end/imgs/American Express.jfif' %}" alt="American Express" class="h-6">
+                                <img src="{% static 'core/front-end/imgs/pix.png' %}" alt="Pix" class="h-6">
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    </div>
-
-    <!-- Empty Cart State (hidden by default) -->
-    <div id="empty-cart" class="hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="empty-cart bg-white rounded-lg shadow p-8 text-center">
-                <div class="empty-cart-icon">
-                    <i class="fas fa-shopping-cart"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">Seu carrinho está vazio</h2>
-                <p class="text-gray-600 mb-6">Parece que você ainda não adicionou nenhum item ao seu carrinho.</p>
-                <a href="{% url 'index' %}#products"
-                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                    <i class="fas fa-store mr-2"></i>
-                    Ver produtos
-                </a>
             </div>
         </div>
     </div>
@@ -338,8 +344,7 @@
         </div>
     </footer>
 
-    <script src="{% static 'core/front-end/scripts.js' %}"></script>
-    <script src="{% static 'core/front-end/carrinho.js' %}"></script>
+    <script src="{% static 'core/front-end/js/scripts.js' %}"></script>
+    <script src="{% static 'core/front-end/js/carrinho.js' %}"></script>
 </body>
-
 </html>

@@ -26,6 +26,7 @@ from core.models.orders import Pedido
 
 import uuid
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -424,18 +425,14 @@ def get_or_create_carrinho(request):
     
     return carrinho
 
-
 def carrinho(request):
     """Página do carrinho - acesso público"""
     carrinho_obj = get_or_create_carrinho(request)
     return render(request, 'core/front-end/carrinho.html', {'carrinho': carrinho_obj})
 
-
 @require_http_methods(["POST"])
 @csrf_protect
-@require_http_methods(["POST"])
-@csrf_protect
-def adicionar_carrinho(request, produto_id):
+def adicionar_carrinho(request, produto_id):  # ✅ REMOVER DECORATORS DUPLICADOS
     """Adiciona item ao carrinho - acesso público"""
     try:
         produto = get_object_or_404(Produto, id=produto_id)
@@ -484,42 +481,111 @@ def adicionar_carrinho(request, produto_id):
             'error': str(e)
         }, status=500)
 
-
 @require_http_methods(["POST"])
 @csrf_protect
 def remover_carrinho(request, item_id):
     """Remove item do carrinho - acesso público"""
-    item = get_object_or_404(ItemCarrinho, id=item_id)
-    
-    # Verifica se o item pertence ao carrinho do usuário/sessão
-    carrinho_obj = get_or_create_carrinho(request)
-    if item.carrinho != carrinho_obj:
-        return JsonResponse({'success': False, 'error': 'Item não encontrado'})
-    
-    item.delete()
-    
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+    try:
+        item = get_object_or_404(ItemCarrinho, id=item_id)
+        
+        # Verifica se o item pertence ao carrinho do usuário/sessão
+        carrinho_obj = get_or_create_carrinho(request)
+        if item.carrinho != carrinho_obj:
+            return JsonResponse({'success': False, 'error': 'Item não encontrado'})
+        
+        item.delete()
+        
+        # Recarregar carrinho para dados atualizados
+        carrinho_obj.refresh_from_db()
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'total_itens': carrinho_obj.total_itens,
+                'message': 'Produto removido do carrinho!'
+            })
+        
+        return redirect('carrinho')
+    except Exception as e:
         return JsonResponse({
-            'success': True,
-            'total_itens': carrinho_obj.total_itens,
-            'message': 'Produto removido do carrinho!'
-        })
-    
-    return redirect('carrinho')
-
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 def carrinho_json(request):
     """API do carrinho - acesso público"""
-    carrinho_obj = get_or_create_carrinho(request)
-    frete = 0  # fixo por enquanto
+    try:
+        carrinho_obj = get_or_create_carrinho(request)
+        frete = 0  # fixo por enquanto
 
-    return JsonResponse({
-        'subtotal': float(carrinho_obj.total_preco),
-        'frete': frete,
-        'total': float(carrinho_obj.total_preco) + frete,
-        'total_itens': carrinho_obj.total_itens
-    })
+        return JsonResponse({
+            'subtotal': float(carrinho_obj.total_preco),
+            'frete': frete,
+            'total': float(carrinho_obj.total_preco) + frete,
+            'total_itens': carrinho_obj.total_itens
+        })
+    except Exception as e:
+        return JsonResponse({
+            'subtotal': 0,
+            'frete': 0,
+            'total': 0,
+            'total_itens': 0
+        })
 
+@require_http_methods(["POST"])
+@csrf_protect
+def alterar_quantidade(request, item_id):
+    """Altera quantidade do item no carrinho"""
+    try:
+        item = get_object_or_404(ItemCarrinho, id=item_id)
+        carrinho_obj = get_or_create_carrinho(request)
+        
+        # Verificar se o item pertence ao carrinho do usuário/sessão
+        if item.carrinho != carrinho_obj:
+            return JsonResponse({'success': False, 'error': 'Item não encontrado'})
+        
+        # Verificar se o body não está vazio
+        if not request.body:
+            return JsonResponse({'success': False, 'error': 'Dados não fornecidos'})
+        
+        data = json.loads(request.body)
+        nova_quantidade = int(data.get('quantidade', 1))
+        
+        # Verificar estoque
+        if nova_quantidade > item.produto.estoque:
+            return JsonResponse({
+                'success': False, 
+                'error': f'Estoque insuficiente. Disponível: {item.produto.estoque}'
+            })
+        
+        if nova_quantidade < 1:
+            item.delete()
+            subtotal_item = 0
+        else:
+            item.quantidade = nova_quantidade
+            item.save()
+            subtotal_item = float(item.subtotal)
+        
+        # Recarregar carrinho para dados atualizados
+        carrinho_obj.refresh_from_db()
+        
+        return JsonResponse({
+            'success': True,
+            'subtotal_item': subtotal_item,
+            'total_itens': carrinho_obj.total_itens,
+            'message': 'Quantidade atualizada!'
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Dados JSON inválidos'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 # ==================== PEDIDOS ====================
 @api_view(['POST'])
@@ -547,16 +613,25 @@ def criar_pedido(request):
 
         # 3️⃣ Obtém ou cria o status "Pendente"
         from core.models.orders import StatusPedido, ItemPedido
-        status_pedido = StatusPedido.objects.first() or StatusPedido.objects.create(nome="Pendente")
+        status_pedido = StatusPedido.objects.first() 
+        if not status_pedido:
+            status_pedido = StatusPedido.objects.create(
+                nome="Pendente", 
+                cor="#6B7280", 
+                ordem=1
+            )
 
-        # 4️⃣ Cria o pedido
+        # 4️⃣ Cria o pedido (sem calcular totais ainda)
         pedido = Pedido.objects.create(
             usuario=usuario,
             status=status_pedido,
-            endereco_entrega=endereco_entrega
+            endereco_entrega=endereco_entrega,
+            total_produtos=0,  # Inicializa com 0
+            total_final=0      # Inicializa com 0
         )
 
         # 5️⃣ Transfere os itens do carrinho para o pedido
+        total_pedido = 0
         for item in carrinho.itens.all():
             ItemPedido.objects.create(
                 pedido=pedido,
@@ -564,20 +639,25 @@ def criar_pedido(request):
                 quantidade=item.quantidade,
                 preco_unitario=item.produto.preco
             )
+            total_pedido += float(item.quantidade * item.produto.preco)
 
-        pedido.calcular_totais()
+        # 6️⃣ Atualiza os totais do pedido manualmente
+        pedido.total_produtos = total_pedido
+        pedido.total_final = total_pedido  # Por enquanto sem descontos/frete
         pedido.save()
 
-        # 6️⃣ Limpa o carrinho
+        # 7️⃣ Limpa o carrinho
         carrinho.itens.all().delete()
 
-        # 7️⃣ Gera o pagamento
+        # 8️⃣ Gera o pagamento
+        pagamento = None
         try:
             metodo_pagamento = MetodoPagamento.objects.get(tipo=metodo_pagamento_tipo)
             pagamento = gerar_pagamento(pedido, metodo_pagamento)
         except MetodoPagamento.DoesNotExist:
             logger.warning("Método de pagamento não configurado. Pulando geração automática.")
-            pagamento = None
+        except Exception as e:
+            logger.error(f"Erro ao gerar pagamento: {str(e)}")
 
         logger.info(f"Pedido #{pedido.id} criado com sucesso para {usuario.email}")
 
@@ -601,7 +681,20 @@ def criar_pedido(request):
     except Exception as e:
         logger.error(f"Erro ao criar pedido: {str(e)}", exc_info=True)
         return Response({'error': f'Erro interno: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    
+# ==================== API PARA VERIFICAR AUTENTICAÇÃO ====================
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def check_auth(request):
+    """API para verificar se o usuário está autenticado"""
+    return Response({
+        'authenticated': request.user.is_authenticated,
+        'user': {
+            'email': request.user.email if request.user.is_authenticated else None,
+            'first_name': request.user.first_name if request.user.is_authenticated else None,
+            'last_name': request.user.last_name if request.user.is_authenticated else None,
+        } if request.user.is_authenticated else None
+    })
 
 # ==================== CONTATO E PÁGINAS PÚBLICAS ====================
 @require_http_methods(["POST"])

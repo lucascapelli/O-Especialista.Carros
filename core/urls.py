@@ -3,7 +3,8 @@ from .views import (
     produtos_listagem, LoginView, RegisterView, ProdutoViewSet,
     logout_view, carrinho, contato_envio, login_page, esqueceu_senha_page,
     criar_conta_page, carrinho_json, admin_login, admin_index, delete_user,
-    criar_pagamento_abacatepay, criar_pedido, adicionar_carrinho, remover_carrinho
+    criar_pagamento_abacatepay, criar_pedido, adicionar_carrinho, remover_carrinho,
+    alterar_quantidade, check_auth 
 )
 
 from .integrations.abacatepay_webhook import abacatepay_webhook
@@ -22,8 +23,11 @@ urlpatterns = [
     # APIs
     path('api/login/', LoginView.as_view(), name='api-login'),
     path('api/register/', RegisterView.as_view(), name='api-register'),
-    path('api/criar-pagamento-abacatepay/<int:pedido_id>/', criar_pagamento_abacatepay, name='criar_pagamento_abacatepay'),  # ✅ NOVA ROTA
+    path('api/criar-pagamento-abacatepay/<int:pedido_id>/', criar_pagamento_abacatepay, name='criar_pagamento_abacatepay'),
     path('api/pedido/criar/', criar_pedido, name='criar_pedido'),
+
+    # API de autenticação
+    path('api/check-auth/', check_auth, name='check_auth'),
 
     # Admin
     path('admin-login/', admin_login, name='admin_login'),
@@ -36,8 +40,9 @@ urlpatterns = [
     path('contato-envio/', contato_envio, name='contato-envio'),
     path('carrinho-json/', carrinho_json, name='carrinho_json'),
     path('adicionar_carrinho/<int:produto_id>/', adicionar_carrinho, name='adicionar_carrinho'),  
-     path('remover_carrinho/<int:item_id>/', remover_carrinho, name='remover_carrinho'),
-    
+    path('remover_carrinho/<int:item_id>/', remover_carrinho, name='remover_carrinho'),
+    path('alterar-quantidade/<int:item_id>/', alterar_quantidade, name='alterar_quantidade'),
+
     # Webhooks
     path('pagamento/abacatepay/webhook/', abacatepay_webhook, name='abacatepay_webhook'),
 ]

@@ -40,13 +40,33 @@ class Pedido(BaseModel):
         if not self.numero_pedido:
             timestamp = timezone.now().strftime('%y%m%d%H%M%S')
             self.numero_pedido = f"ORD{timestamp}"
-        self.calcular_totais()
+        
+        # Primeiro salva para ter um ID
+        is_new = self.pk is None
         super().save(*args, **kwargs)
+        
+        # Se for um novo pedido, calcula os totais
+        if is_new:
+            self.calcular_totais()
+            # Salva novamente com os totais calculados
+            super().save(update_fields=['total_produtos', 'total_descontos', 'total_frete', 'total_final'])
 
     def calcular_totais(self):
-        if hasattr(self, 'itens'):
-            self.total_produtos = sum(item.subtotal for item in self.itens.all())
-            self.total_final = self.total_produtos - self.total_descontos + self.total_frete
+        """Calcula totais do pedido de forma segura"""
+        try:
+            # Verifica se o pedido tem ID e itens
+            if self.pk and hasattr(self, 'itens'):
+                self.total_produtos = sum(item.subtotal for item in self.itens.all())
+                self.total_final = self.total_produtos - self.total_descontos + self.total_frete
+            else:
+                # Se não tem itens ainda, define valores padrão
+                self.total_produtos = 0
+                self.total_final = 0
+        except Exception as e:
+            # Em caso de erro, define valores seguros
+            self.total_produtos = 0
+            self.total_final = 0
+            print(f"Erro ao calcular totais do pedido: {e}")
 
 
 class ItemPedido(models.Model):
@@ -58,3 +78,6 @@ class ItemPedido(models.Model):
     @property
     def subtotal(self):
         return self.quantidade * self.preco_unitario
+
+    def __str__(self):
+        return f"{self.quantidade}x {self.produto.nome} - R$ {self.subtotal}"
