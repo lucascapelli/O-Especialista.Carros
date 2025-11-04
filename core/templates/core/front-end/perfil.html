@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil | O Especialista.Carros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Navigation (usar a mesma do carrinho) -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="{% url 'index' %}" class="text-xl font-bold text-blue-900">O Especialista.Carros</a>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'index' %}#home" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Home</a>
+                    <a href="{% url 'index' %}#products" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Produtos</a>
+                    <a href="{% url 'index' %}#services" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Serviços</a>
+                </div>
+
+                <!-- User Menu -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="relative">
+                        <a id="user-icon" href="javascript:void(0)" class="text-gray-700 hover:text-blue-500">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </a>
+                        <!-- Dropdown Menu -->
+                        <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="{% url 'perfil' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-user mr-2"></i>Meu Perfil
+                            </a>
+                            <a href="{% url 'meus_pedidos' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-shopping-bag mr-2"></i>Meus Pedidos
+                            </a>
+                            <button onclick="fazerLogout()" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Sair
+                            </button>
+                        </div>
+                    </div>
+                    <a href="{% url 'carrinho' %}" class="text-gray-700 hover:text-blue-500 relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Perfil Section -->
+    <div class="max-w-4xl mx-auto py-8 px-4">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Header do Perfil -->
+            <div class="bg-blue-600 px-6 py-4">
+                <h1 class="text-2xl font-bold text-white">Meu Perfil</h1>
+                <p class="text-blue-100">Gerencie suas informações pessoais</p>
+            </div>
+
+            <!-- Informações do Usuário -->
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Informações Pessoais -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-user-circle mr-2 text-blue-500"></i>
+                            Informações Pessoais
+                        </h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-sm font-medium text-gray-600">Nome</label>
+                                <p class="text-gray-800">{{ usuario.first_name }} {{ usuario.last_name }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-600">Email</label>
+                                <p class="text-gray-800">{{ usuario.email }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-600">Data de Cadastro</label>
+                                <p class="text-gray-800">{{ usuario.date_joined|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estatísticas -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-chart-bar mr-2 text-green-500"></i>
+                            Minhas Estatísticas
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Pedidos Realizados</span>
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
+                                    {{ usuario.pedidos.count }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Membro desde</span>
+                                <span class="text-gray-800">{{ usuario.date_joined|date:"M Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ações Rápidas -->
+                <div class="mt-8 border-t pt-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Ações Rápidas</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <a href="{% url 'meus_pedidos' %}" class="bg-white border border-gray-200 rounded-lg p-4 text-center hover:shadow-md transition-shadow">
+                            <i class="fas fa-shopping-bag text-blue-500 text-2xl mb-2"></i>
+                            <p class="text-sm font-medium text-gray-800">Meus Pedidos</p>
+                        </a>
+                        <a href="{% url 'carrinho' %}" class="bg-white border border-gray-200 rounded-lg p-4 text-center hover:shadow-md transition-shadow">
+                            <i class="fas fa-shopping-cart text-green-500 text-2xl mb-2"></i>
+                            <p class="text-sm font-medium text-gray-800">Meu Carrinho</p>
+                        </a>
+                        <a href="{% url 'index' %}#products" class="bg-white border border-gray-200 rounded-lg p-4 text-center hover:shadow-md transition-shadow">
+                            <i class="fas fa-store text-purple-500 text-2xl mb-2"></i>
+                            <p class="text-sm font-medium text-gray-800">Continuar Comprando</p>
+                        </a>
+                        <button onclick="fazerLogout()" class="bg-white border border-gray-200 rounded-lg p-4 text-center hover:shadow-md transition-shadow w-full">
+                            <i class="fas fa-sign-out-alt text-red-500 text-2xl mb-2"></i>
+                            <p class="text-sm font-medium text-gray-800">Sair</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'core/front-end/js/scripts.js' %}"></script>
+</body>
+</html>

@@ -1,156 +1,171 @@
-// Função para pegar o CSRFToken
-function getCSRFToken() {
-    const name = 'csrftoken=';
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const cookies = decodedCookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        let c = cookies[i].trim();
-        if (c.startsWith(name)) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return '';
-}
+// ===== DEBUG MELHORADO =====
+console.log('✅ carrinho.js carregado!');
+console.log('DOM Content carregado?', document.readyState);
 
-// Toast notifications
-function showToast(message, type = 'success') {
-    // Remove toast existente se houver
-    const existingToast = document.querySelector('.custom-toast');
-    if (existingToast) {
-        existingToast.remove();
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `custom-toast fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 text-white font-medium ${
-        type === 'success' ? 'bg-green-500' : 
-        type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-    }`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
-
-// Verificar se usuário está autenticado
-async function checkUserAuthentication() {
-    try {
-        const response = await fetch('/api/check-auth/', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            return data.authenticated;
-        }
-        return false;
-    } catch (error) {
-        console.error('Erro ao verificar autenticação:', error);
-        return false;
-    }
-}
-
-// Adicionar esta função para atualizar info de usuário
-async function updateUserInfo() {
-    const isAuthenticated = await checkUserAuthentication();
-    const authInfo = document.getElementById('user-auth-info');
-    const notAuthInfo = document.getElementById('user-not-auth-info');
-    const userEmail = document.getElementById('user-email');
+// ===== INICIALIZAÇÃO DO CARRINHO =====
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ carrinho.js - DOM totalmente carregado');
     
-    if (authInfo && notAuthInfo) {
-        if (isAuthenticated) {
-            authInfo.classList.remove('hidden');
-            notAuthInfo.classList.add('hidden');
-            // Você pode buscar mais informações do usuário se necessário
-        } else {
-            authInfo.classList.add('hidden');
-            notAuthInfo.classList.remove('hidden');
+    // Debug: verificar todos os elementos importantes
+    const finalizarBtn = document.getElementById('finalizar-compra');
+    console.log('Botão finalizar encontrado:', finalizarBtn);
+    
+    const cartItems = document.querySelectorAll('[id^="item-"]');
+    console.log('Itens do carrinho encontrados:', cartItems.length);
+    
+    const quantityButtons = document.querySelectorAll('[onclick*="alterarQuantidade"]');
+    console.log('Botões de quantidade encontrados:', quantityButtons.length);
+    
+    const removeButtons = document.querySelectorAll('[onclick*="removerItem"]');
+    console.log('Botões de remover encontrados:', removeButtons.length);
+
+    // Inicializar funções
+    inicializarEventListeners();
+    atualizarCarrinhoResumo();
+});
+
+// ===== INICIALIZAR EVENT LISTENERS =====
+function inicializarEventListeners() {
+    console.log('🔄 Inicializando event listeners...');
+    
+    // Botão finalizar compra
+    const finalizarBtn = document.getElementById('finalizar-compra');
+    if (finalizarBtn) {
+        finalizarBtn.addEventListener('click', handleFinalizarCompra);
+        console.log('✅ Event listener adicionado ao botão finalizar');
+    } else {
+        console.log('❌ Botão finalizar-compra não encontrado!');
+    }
+
+    // Delegation para botões de quantidade e remover
+    document.addEventListener('click', function(event) {
+        // Botões de aumentar quantidade
+        if (event.target.matches('.btn-aumentar') || event.target.closest('.btn-aumentar')) {
+            const button = event.target.matches('.btn-aumentar') ? event.target : event.target.closest('.btn-aumentar');
+            const itemId = button.dataset.itemId;
+            if (itemId) {
+                console.log('🔼 Botão aumentar clicado para item:', itemId);
+                alterarQuantidade(itemId, 1);
+            }
         }
+        
+        // Botões de diminuir quantidade
+        if (event.target.matches('.btn-diminuir') || event.target.closest('.btn-diminuir')) {
+            const button = event.target.matches('.btn-diminuir') ? event.target : event.target.closest('.btn-diminuir');
+            const itemId = button.dataset.itemId;
+            if (itemId) {
+                console.log('🔽 Botão diminuir clicado para item:', itemId);
+                alterarQuantidade(itemId, -1);
+            }
+        }
+        
+        // Botões de remover
+        if (event.target.matches('.btn-remover') || event.target.closest('.btn-remover')) {
+            const button = event.target.matches('.btn-remover') ? event.target : event.target.closest('.btn-remover');
+            const itemId = button.dataset.itemId;
+            if (itemId) {
+                console.log('🗑️ Botão remover clicado para item:', itemId);
+                removerItem(itemId);
+            }
+        }
+    });
+}
+
+// ===== HANDLER DO BOTÃO FINALIZAR =====
+async function handleFinalizarCompra() {
+    console.log('✅ Botão finalizar clicado!');
+    
+    try {
+        // Verificar se carrinho não está vazio
+        const cartResponse = await fetch('/carrinho-json/');
+        if (!cartResponse.ok) throw new Error('Erro ao verificar carrinho');
+        
+        const cartData = await cartResponse.json();
+        console.log('Dados do carrinho:', cartData);
+        
+        if (cartData.total_itens === 0) {
+            showToast('Seu carrinho está vazio!', 'error');
+            return;
+        }
+
+        // Verificar se usuário está logado
+        console.log('Verificando autenticação...');
+        const userIsAuthenticated = await checkUserAuthentication();
+        console.log('Usuário autenticado:', userIsAuthenticated);
+        
+        if (!userIsAuthenticated) {
+            showLoginModal();
+            return;
+        }
+
+        // Se chegou aqui, usuário está logado - criar pedido
+        console.log('Iniciando criação de pedido...');
+        await criarPedido();
+        
+    } catch (error) {
+        console.error('Erro no click:', error);
+        showToast('Erro ao processar pedido: ' + error.message, 'error');
     }
 }
 
-// Modal de login
-function showLoginModal() {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    modal.innerHTML = `
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Login Necessário</h3>
-                <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <p class="text-gray-600 mb-4">Você precisa estar logado para finalizar a compra.</p>
-            <div class="flex space-x-3">
-                <button onclick="redirectToLogin()" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">
-                    Fazer Login
-                </button>
-                <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 transition">
-                    Continuar Comprando
-                </button>
-            </div>
-            <p class="text-sm text-gray-500 mt-4 text-center">
-                Não tem conta? <a href="/criar-conta/" class="text-blue-600 hover:underline">Cadastre-se</a>
-            </p>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-// Redirecionar para login
-function redirectToLogin() {
-    // Salvar a página atual para voltar após login
-    sessionStorage.setItem('redirectAfterLogin', window.location.href);
-    window.location.href = '/login/';
-}
+// ===== FUNÇÕES ESPECÍFICAS DO CARRINHO =====
 
 // Atualizar resumo do carrinho
 async function atualizarCarrinhoResumo() {
+    console.log('🔄 Atualizando resumo do carrinho...');
     try {
         const response = await fetch('/carrinho-json/');
         if (!response.ok) throw new Error('Erro ao carregar carrinho');
         
         const data = await response.json();
+        console.log('Dados do carrinho recebidos:', data);
         
         // Atualizar resumo
-        document.getElementById('resumo-subtotal').textContent = `R$ ${data.subtotal.toFixed(2)}`;
-        document.getElementById('resumo-total').textContent = `R$ ${data.total.toFixed(2)}`;
+        const subtotalElement = document.getElementById('resumo-subtotal');
+        const totalElement = document.getElementById('resumo-total');
+        
+        if (subtotalElement) {
+            subtotalElement.textContent = `R$ ${data.subtotal.toFixed(2)}`;
+            console.log('Subtotal atualizado:', subtotalElement.textContent);
+        }
+        if (totalElement) {
+            totalElement.textContent = `R$ ${data.total.toFixed(2)}`;
+            console.log('Total atualizado:', totalElement.textContent);
+        }
         
         // Atualizar contador de itens
         const cartItemsCount = document.getElementById('cart-items-count');
         if (cartItemsCount) {
             cartItemsCount.textContent = `${data.total_itens} ${data.total_itens === 1 ? 'item' : 'itens'}`;
-        }
-        
-        // Atualizar badge do carrinho na navegação
-        const cartBadge = document.getElementById('cart-count');
-        if (cartBadge) {
-            cartBadge.textContent = data.total_itens;
+            console.log('Contador de itens atualizado:', cartItemsCount.textContent);
         }
         
         // Se carrinho vazio, mostrar mensagem
         if (data.total_itens === 0) {
-            document.getElementById('cart-items-container').innerHTML = `
-                <div class="text-center py-12">
-                    <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
-                    <p class="text-xl text-gray-500 mb-4">Seu carrinho está vazio</p>
-                    <a href="/home/#products" 
-                       class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        <i class="fas fa-store mr-2"></i>
-                        Ver produtos
-                    </a>
-                </div>
-            `;
+            console.log('🛒 Carrinho vazio detectado');
+            const cartContainer = document.getElementById('cart-items-container');
+            if (cartContainer) {
+                cartContainer.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-xl text-gray-500 mb-4">Seu carrinho está vazio</p>
+                        <a href="/home/#products" 
+                           class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-store mr-2"></i>
+                            Ver produtos
+                        </a>
+                    </div>
+                `;
+            }
+            
             // Esconder botão finalizar compra
             const finalizarBtn = document.getElementById('finalizar-compra');
             if (finalizarBtn) {
                 finalizarBtn.style.display = 'none';
+                console.log('❌ Botão finalizar escondido - carrinho vazio');
             }
+        } else {
+            console.log('✅ Carrinho com itens, botão finalizar visível');
         }
         
     } catch (error) {
@@ -161,14 +176,20 @@ async function atualizarCarrinhoResumo() {
 
 // Alterar quantidade do item
 async function alterarQuantidade(itemId, change) {
+    console.log(`🔄 Alterando quantidade do item ${itemId}: ${change > 0 ? '+' : ''}${change}`);
     try {
         const quantityElement = document.getElementById(`quantity-${itemId}`);
-        if (!quantityElement) return;
+        if (!quantityElement) {
+            console.log('❌ Elemento de quantidade não encontrado para item:', itemId);
+            return;
+        }
         
         const currentQuantity = parseInt(quantityElement.textContent);
         const newQuantity = currentQuantity + change;
+        console.log(`Quantidade atual: ${currentQuantity}, nova: ${newQuantity}`);
         
         if (newQuantity < 1) {
+            console.log('❌ Quantidade menor que 1, removendo item...');
             await removerItem(itemId);
             return;
         }
@@ -186,33 +207,39 @@ async function alterarQuantidade(itemId, change) {
         });
         
         const data = await response.json();
+        console.log('Resposta da alteração de quantidade:', data);
         
         if (data.success) {
             // Atualizar quantidade no DOM
             quantityElement.textContent = newQuantity;
+            console.log('✅ Quantidade atualizada no DOM');
             
             // Atualizar subtotal do item
             const subtotalElement = document.getElementById(`subtotal-${itemId}`);
             if (subtotalElement) {
                 subtotalElement.textContent = data.subtotal_item.toFixed(2);
+                console.log('✅ Subtotal do item atualizado:', subtotalElement.textContent);
             }
             
             // Atualizar resumo geral
             await atualizarCarrinhoResumo();
             showToast('Quantidade atualizada!', 'success');
         } else {
+            console.log('❌ Erro na resposta:', data.error);
             showToast(data.error || 'Erro ao atualizar quantidade', 'error');
         }
         
     } catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro na alteração de quantidade:', error);
         showToast('Erro de conexão', 'error');
     }
 }
 
 // Remover item do carrinho
 async function removerItem(itemId) {
+    console.log(`🗑️ Iniciando remoção do item: ${itemId}`);
     if (!confirm('Tem certeza que deseja remover este item do carrinho?')) {
+        console.log('❌ Remoção cancelada pelo usuário');
         return;
     }
     
@@ -226,16 +253,19 @@ async function removerItem(itemId) {
         });
         
         const data = await response.json();
+        console.log('Resposta da remoção:', data);
         
         if (data.success) {
             // Remover item do DOM
             const itemElement = document.getElementById(`item-${itemId}`);
             if (itemElement) {
+                console.log('✅ Removendo elemento do DOM');
                 itemElement.style.opacity = '0';
                 setTimeout(() => {
                     itemElement.remove();
                     // Verificar se ainda há itens
                     const remainingItems = document.querySelectorAll('[id^="item-"]');
+                    console.log('Itens restantes no carrinho:', remainingItems.length);
                     if (remainingItems.length === 0) {
                         atualizarCarrinhoResumo();
                     }
@@ -244,17 +274,19 @@ async function removerItem(itemId) {
             
             showToast('Item removido do carrinho', 'success');
         } else {
+            console.log('❌ Erro na remoção:', data.error);
             showToast(data.error || 'Erro ao remover item', 'error');
         }
         
     } catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro na remoção:', error);
         showToast('Erro de conexão', 'error');
     }
 }
 
 // Função para criar pedido (após verificação de login)
 async function criarPedido() {
+    console.log('🚀 Iniciando criação de pedido...');
     const finalizarBtn = document.getElementById('finalizar-compra');
     
     try {
@@ -262,6 +294,7 @@ async function criarPedido() {
         const originalText = finalizarBtn.innerHTML;
         finalizarBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...';
         finalizarBtn.disabled = true;
+        console.log('⏳ Botão desabilitado e mostrando loading');
 
         // Coletar endereço de entrega
         const enderecoEntrega = {
@@ -272,6 +305,8 @@ async function criarPedido() {
             estado: "SP",
             cep: "01000-000"
         };
+
+        console.log('📦 Endereço de entrega:', enderecoEntrega);
 
         const response = await fetch('/api/pedido/criar/', {
             method: 'POST',
@@ -287,109 +322,99 @@ async function criarPedido() {
         });
         
         const data = await response.json();
+        console.log('📨 Resposta da criação do pedido:', data);
         
         if (response.ok) {
-            showToast('Pedido criado com sucesso! Redirecionando...', 'success');
+            console.log('✅ Pedido criado com sucesso!');
+            showToast('Pedido criado com sucesso!', 'success');
             
-            // Redirecionar para página de pagamento ou detalhes do pedido
-            setTimeout(() => {
-                if (data.pagamento_url) {
-                    window.location.href = data.pagamento_url;
-                } else if (data.pedido_id) {
-                    window.location.href = `/pedido/${data.pedido_id}/`;
-                } else if (data.numero_pedido) {
-                    // Fallback - mostrar número do pedido
-                    alert(`Pedido criado! Número: ${data.numero_pedido}`);
-                    window.location.href = '/';
+            // Tratamento de pagamento PIX
+            if (data.pagamento) {
+                console.log('💰 Dados de pagamento recebidos:', data.pagamento);
+                if (data.pagamento.codigo_pagamento) {
+                    // Mostrar modal com QR Code PIX
+                    console.log('📱 Mostrando QR Code PIX');
+                    mostrarQRCodePIX(data.pagamento);
                 } else {
-                    // Fallback - redirecionar para home
-                    window.location.href = '/';
+                    console.log('🔀 Redirecionando para meus pedidos');
+                    window.location.href = '/meus-pedidos/';
                 }
-            }, 2000);
+            } else {
+                console.log('🔀 Redirecionando para meus pedidos (sem pagamento)');
+                window.location.href = '/meus-pedidos/';
+            }
             
         } else {
+            console.log('❌ Erro na criação do pedido:', data.error);
             showToast('Erro: ' + (data.error || 'Erro ao criar pedido'), 'error');
         }
         
     } catch (error) {
-        console.error('Erro:', error);
+        console.error('💥 Erro na criação do pedido:', error);
         showToast('Erro de conexão ao finalizar compra', 'error');
     } finally {
         // Restaurar botão
         if (finalizarBtn) {
             finalizarBtn.innerHTML = 'Finalizar Compra';
             finalizarBtn.disabled = false;
+            console.log('🔄 Botão restaurado');
         }
     }
 }
 
-// Finalizar compra - VERSÃO CORRIGIDA COM VERIFICAÇÃO DE LOGIN
-document.addEventListener('DOMContentLoaded', function() {
-    const finalizarBtn = document.getElementById('finalizar-compra');
-    
-    if (finalizarBtn) {
-        finalizarBtn.addEventListener('click', async function() {
-            try {
-                // Verificar se carrinho não está vazio
-                const cartCountElement = document.getElementById('cart-items-count');
-                if (!cartCountElement) {
-                    showToast('Erro: não foi possível verificar o carrinho', 'error');
-                    return;
-                }
-                
-                const cartCount = parseInt(cartCountElement.textContent);
-                if (cartCount === 0) {
-                    showToast('Seu carrinho está vazio!', 'error');
-                    return;
-                }
-
-                // Verificar se usuário está logado
-                const userIsAuthenticated = await checkUserAuthentication();
-                if (!userIsAuthenticated) {
-                    showLoginModal();
-                    return;
-                }
-
-                // Se chegou aqui, usuário está logado - criar pedido
-                await criarPedido();
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                showToast('Erro ao processar pedido', 'error');
-            }
-        });
-    }
-
-    // Inicializar contador do carrinho
-    atualizarCarrinhoResumo();
-    updateUserInfo(); // ✅ ADICIONAR ESTA LINHA
-});
-
-// Adicionar produto ao carrinho (para usar em outras páginas)
-async function adicionarAoCarrinho(produtoId) {
-    try {
-        const response = await fetch(`/adicionar_carrinho/${produtoId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCSRFToken(),
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showToast('Produto adicionado ao carrinho!', 'success');
-            // Atualizar contador se estiver na página do carrinho
-            if (window.location.pathname === '/carrinho/') {
-                await atualizarCarrinhoResumo();
-            }
-        } else {
-            showToast(data.error || 'Erro ao adicionar produto', 'error');
-        }
-        
-    } catch (error) {
-        console.error('Erro:', error);
-        showToast('Erro de conexão', 'error');
-    }
+// Mostrar QR Code PIX
+function mostrarQRCodePIX(pagamento) {
+    console.log('🎨 Criando modal do QR Code PIX');
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Pagamento PIX</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="text-center">
+                <p class="text-gray-600 mb-4">Escaneie o QR Code ou copie o código PIX</p>
+                <div class="bg-gray-100 p-4 rounded-lg mb-4">
+                    <!-- Aqui viria o QR Code -->
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-qrcode text-4xl mb-2"></i>
+                        <p>QR Code PIX</p>
+                        <p class="text-sm mt-2">Código: ${pagamento.codigo_pagamento}</p>
+                    </div>
+                </div>
+                <button onclick="copiarPIX('${pagamento.codigo_pagamento}')" 
+                        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <i class="fas fa-copy mr-2"></i>Copiar Código PIX
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    console.log('✅ Modal do QR Code PIX criado');
 }
+
+function copiarPIX(codigo) {
+    console.log('📋 Copiando código PIX para clipboard');
+    navigator.clipboard.writeText(codigo).then(() => {
+        console.log('✅ Código PIX copiado com sucesso');
+        showToast('Código PIX copiado!', 'success');
+    }).catch(err => {
+        console.error('❌ Erro ao copiar código PIX:', err);
+        showToast('Erro ao copiar código', 'error');
+    });
+}
+
+// ===== EXPORTAR FUNÇÕES ESPECÍFICAS =====
+window.alterarQuantidade = alterarQuantidade;
+window.removerItem = removerItem;
+window.criarPedido = criarPedido;
+window.mostrarQRCodePIX = mostrarQRCodePIX;
+window.copiarPIX = copiarPIX;
+window.handleFinalizarCompra = handleFinalizarCompra;
+window.inicializarEventListeners = inicializarEventListeners;
+
+console.log('✅ Funções do carrinho disponíveis');
+console.log('🎯 carrinho.js totalmente carregado e inicializado');

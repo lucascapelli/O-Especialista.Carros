@@ -4,7 +4,7 @@ from .views import (
     logout_view, carrinho, contato_envio, login_page, esqueceu_senha_page,
     criar_conta_page, carrinho_json, admin_login, admin_index, delete_user,
     criar_pagamento_abacatepay, criar_pedido, adicionar_carrinho, remover_carrinho,
-    alterar_quantidade, check_auth 
+    alterar_quantidade, check_auth, perfil_usuario, meus_pedidos
 )
 
 from .integrations.abacatepay_webhook import abacatepay_webhook
@@ -25,6 +25,10 @@ urlpatterns = [
     path('api/register/', RegisterView.as_view(), name='api-register'),
     path('api/criar-pagamento-abacatepay/<int:pedido_id>/', criar_pagamento_abacatepay, name='criar_pagamento_abacatepay'),
     path('api/pedido/criar/', criar_pedido, name='criar_pedido'),
+
+    # Perfil e pedidos
+    path('perfil/', perfil_usuario, name='perfil'),
+    path('meus-pedidos/', meus_pedidos, name='meus_pedidos'),
 
     # API de autenticação
     path('api/check-auth/', check_auth, name='check_auth'),

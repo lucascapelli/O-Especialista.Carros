@@ -2,6 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth import authenticate, logout, login
+from django.contrib.auth.decorators import login_required 
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
@@ -14,7 +15,7 @@ from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets
-from rest_framework.permissions import AllowAny, BasePermission, SAFE_METHODS, IsAuthenticated  # ✅ ADICIONEI IsAuthenticated AQUI
+from rest_framework.permissions import AllowAny, BasePermission, SAFE_METHODS, IsAuthenticated
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.decorators import action, api_view, permission_classes
 
@@ -241,6 +242,20 @@ def produtos_listagem(request):
     """View pública para listagem de produtos"""
     produtos = Produto.objects.all()
     return render(request, 'core/front-end/index.html', {'produtos': produtos})
+
+
+@login_required
+def perfil_usuario(request):
+    """Página de perfil do usuário"""
+    usuario = request.user
+    return render(request, 'core/front-end/perfil.html', {'usuario': usuario})
+
+
+@login_required
+def meus_pedidos(request):
+    """Página de pedidos do usuário"""
+    pedidos = Pedido.objects.filter(usuario=request.user).order_by('-criado_em')
+    return render(request, 'core/front-end/meus_pedidos.html', {'pedidos': pedidos})
 
 
 @csrf_protect

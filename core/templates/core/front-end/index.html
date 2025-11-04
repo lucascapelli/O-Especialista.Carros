@@ -36,71 +36,83 @@
     </a>
 
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center">
-                    <a href="{% url 'index' %}" class="text-xl font-bold text-primary-start">O Especialista.Carros</a>
-                </div>
+<nav class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+            <!-- Logo -->
+            <div class="flex-shrink-0 flex items-center">
+                <a href="{% url 'index' %}" class="text-xl font-bold text-primary-start">O Especialista.Carros</a>
+            </div>
 
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex space-x-8">
-                    <a href="#home" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Home</a>
-                    <a href="#products" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Produtos</a>
-                    <a href="#services" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Serviços</a>
-                    <a href="#about" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Sobre Nós</a>
-                    <a href="#blog" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Blog</a>
-                    <a href="#contact" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Contato</a>
-                </div>
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-8">
+                <a href="#home" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Home</a>
+                <a href="#products" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Produtos</a>
+                <a href="#services" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Serviços</a>
+                <a href="#about" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Sobre Nós</a>
+                <a href="#blog" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Blog</a>
+                <a href="#contact" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Contato</a>
+            </div>
 
-                <!-- Login/Cart -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary-end">
+            <!-- User/Cart Menu -->
+            <div class="hidden md:flex items-center space-x-4">
+                <!-- User Menu Dropdown -->
+                <div class="relative">
+                    <a id="user-icon" href="javascript:void(0)" class="text-gray-700 hover:text-primary-end transition-colors">
                         <i class="fas fa-user"></i>
                     </a>
-                    <a href="{% url 'carrinho' %}" class="text-gray-700 hover:text-primary-end relative">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span
-                            class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-                    </a>
+                    <!-- Dropdown Menu -->
+                    <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-100">
+                        <!-- Conteúdo será preenchido pelo JavaScript -->
+                    </div>
                 </div>
+                
+                <!-- Cart -->
+                <a href="{% url 'carrinho' %}" class="text-gray-700 hover:text-primary-end relative transition-colors">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                </a>
+            </div>
 
-                <!-- Mobile menu button -->
-                <div class="md:hidden flex items-center">
-                    <button
-                        class="mobile-menu-button p-2 rounded-md text-gray-700 hover:text-primary-end hover:bg-gray-100 focus:outline-none">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
+            <!-- Mobile menu button -->
+            <div class="md:hidden flex items-center">
+                <button
+                    class="mobile-menu-button p-2 rounded-md text-gray-700 hover:text-primary-end hover:bg-gray-100 focus:outline-none">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
         </div>
+    </div>
 
-        <!-- Mobile Menu -->
-        <div class="mobile-menu hidden md:hidden bg-white shadow-lg">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#home"
-                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Home</a>
-                <a href="#products"
-                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Produtos</a>
-                <a href="#services"
-                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Serviços</a>
-                <a href="#about"
-                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Sobre
-                    Nós</a>
-                <a href="#blog"
-                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Blog</a>
-                <a href="#contact"
-                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Contato</a>
-                <div class="pt-4 border-t border-gray-200">
-                    <a href="{% url 'login' %}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Login</a>
-                    <a href="{% url 'carrinho' %}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Carrinho</a>
+    <!-- Mobile Menu -->
+    <div class="mobile-menu hidden md:hidden bg-white shadow-lg">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="#home"
+                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Home</a>
+            <a href="#products"
+                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Produtos</a>
+            <a href="#services"
+                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Serviços</a>
+            <a href="#about"
+                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Sobre
+                Nós</a>
+            <a href="#blog"
+                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Blog</a>
+            <a href="#contact"
+                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">Contato</a>
+            <div class="pt-4 border-t border-gray-200">
+                <div id="mobile-user-menu">
+                    <!-- Conteúdo mobile será preenchido pelo JavaScript -->
                 </div>
+                <a href="{% url 'carrinho' %}"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">
+                    <i class="fas fa-shopping-cart mr-2"></i>Carrinho
+                    <span id="mobile-cart-count" class="ml-2 bg-accent text-white text-xs rounded-full px-2 py-1">0</span>
+                </a>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <!-- Hero Section -->
     <section id="home" class="gradient-bg text-white py-20">

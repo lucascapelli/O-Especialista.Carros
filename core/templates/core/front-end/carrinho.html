@@ -122,10 +122,10 @@
                                     </div>
                                 </div>
 
-                                <!-- Controles de quantidade -->
+                                <!-- CONTROLES DE QUANTIDADE - VERSÃO CORRIGIDA -->
                                 <div class="flex items-center space-x-2 mr-4">
-                                    <button onclick="alterarQuantidade('{{ item.id }}', -1)" 
-                                            class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition">
+                                    <button class="btn-diminuir w-8 h-8 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition" 
+                                            data-item-id="{{ item.id }}">
                                         <i class="fas fa-minus text-sm"></i>
                                     </button>
                                     
@@ -133,19 +133,19 @@
                                         {{ item.quantidade }}
                                     </span>
                                     
-                                    <button onclick="alterarQuantidade('{{ item.id }}', 1)" 
-                                            class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition">
+                                    <button class="btn-aumentar w-8 h-8 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition" 
+                                            data-item-id="{{ item.id }}">
                                         <i class="fas fa-plus text-sm"></i>
                                     </button>
                                 </div>
 
-                                <!-- Subtotal e remover -->
+                                <!-- SUBTOTAL E REMOVER - VERSÃO CORRIGIDA -->
                                 <div class="flex items-center space-x-4">
                                     <span class="font-bold text-gray-800 text-lg">
                                         R$ <span id="subtotal-{{ item.id }}">{{ item.subtotal }}</span>
                                     </span>
-                                    <button onclick="removerItem('{{ item.id }}')" 
-                                            class="w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 rounded hover:bg-red-200 transition">
+                                    <button class="btn-remover w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 rounded hover:bg-red-200 transition" 
+                                            data-item-id="{{ item.id }}">
                                         <i class="fas fa-trash text-sm"></i>
                                     </button>
                                 </div>
@@ -172,9 +172,9 @@
                             Continuar comprando
                         </a>
                     </div>
-                </div>
+                </div> <!-- Fecha div lg:w-2/3 -->
 
-                <!-- Order Summary CORRIGIDO -->
+                <!-- Order Summary CORRIGIDO - FORA DA SEÇÃO DE ITENS -->
                 <div class="lg:w-1/3">
                     <div class="bg-white rounded-lg shadow cart-card p-6 sticky top-4">
                         <h2 class="text-xl font-bold text-gray-800 mb-6">Resumo do Pedido</h2>
@@ -248,10 +248,10 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                </div> <!-- Fecha div lg:w-1/3 -->
+            </div> <!-- Fecha div flex -->
+        </div> <!-- Fecha div max-w-7xl -->
+    </div> <!-- Fecha div cart-container -->
 
     <!-- Footer -->
     <footer class="bg-gray-900 text-white pt-12 pb-6">
