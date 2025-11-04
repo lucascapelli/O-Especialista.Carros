@@ -602,13 +602,15 @@ def alterar_quantidade(request, item_id):
             'error': str(e)
         }, status=500)
 
+
+
 # ==================== PEDIDOS ====================
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def criar_pedido(request):
     """
     Cria um pedido a partir do carrinho do usuário autenticado
-    e gera o pagamento via AbacatePay.
+    e gera o pagamento PIX (simulado).
     """
     logger.info(f"Usuário {request.user.email} solicitou criação de pedido.")
 
@@ -664,38 +666,70 @@ def criar_pedido(request):
         # 7️⃣ Limpa o carrinho
         carrinho.itens.all().delete()
 
-        # 8️⃣ Gera o pagamento
+        # 8️⃣ Gera o pagamento PIX (SIMULADO)
         pagamento = None
         try:
             metodo_pagamento = MetodoPagamento.objects.get(tipo=metodo_pagamento_tipo)
             pagamento = gerar_pagamento(pedido, metodo_pagamento)
+            logger.info(f"✅ Pagamento simulado criado: {pagamento.id_transacao}")
         except MetodoPagamento.DoesNotExist:
-            logger.warning("Método de pagamento não configurado. Pulando geração automática.")
+            logger.warning("Método de pagamento PIX não configurado.")
+            # Cria método PIX se não existir
+            metodo_pagamento = MetodoPagamento.objects.create(
+                nome="PIX",
+                tipo="pix",
+                config={}
+            )
+            pagamento = gerar_pagamento(pedido, metodo_pagamento)
         except Exception as e:
             logger.error(f"Erro ao gerar pagamento: {str(e)}")
+            # Mesmo com erro, cria um pagamento básico
+            metodo_pagamento = MetodoPagamento.objects.get_or_create(
+                tipo="pix", 
+                defaults={"nome": "PIX"}
+            )[0]
+            pagamento = gerar_pagamento(pedido, metodo_pagamento)
 
         logger.info(f"Pedido #{pedido.id} criado com sucesso para {usuario.email}")
 
+        # ✅✅✅ DADOS COMPLETOS PARA O FRONTEND ✅✅✅
         response_data = {
-            'message': 'Pedido criado com sucesso',
+            'message': 'Pedido criado com sucesso!',
             'pedido_id': pedido.id,
             'numero_pedido': pedido.numero_pedido,
             'total_final': float(pedido.total_final),
             'status': pedido.status.nome,
         }
 
+        # ✅✅✅ SEMPRE retorna dados do pagamento (agora simulado) ✅✅✅
         if pagamento:
             response_data['pagamento'] = {
-                'codigo_pagamento': pagamento.codigo_pagamento,
+                'codigo_pagamento': pagamento.codigo_pagamento or "CODIGO_PIX_SIMULADO",
                 'status': pagamento.status,
-                'id_transacao': pagamento.id_transacao
+                'id_transacao': pagamento.id_transacao,
+                'simulado': True,  # ✅ Indica que é simulado para o frontend
+                'qr_code': pagamento.dados_transacao.get('qr_code', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2ZmZiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QSVggU0lNVUxBRE88L3RleHQ+PC9zdmc+')
             }
+        else:
+            # ✅ Fallback se não gerou pagamento
+            response_data['pagamento'] = {
+                'codigo_pagamento': "00020126580014BR.GOV.BCB.PIX0136simulado5204000053039865802BR5900MERCADO6008SAO PAULO6304",
+                'status': 'pending',
+                'id_transacao': f'sim_fallback_{pedido.id}',
+                'simulado': True,
+                'qr_code': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2ZmZiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QSVggU0lNVUxBRE88L3RleHQ+PC9zdmc+'
+            }
+
+        logger.info(f"📦 Response data: {response_data}")
 
         return Response(response_data, status=status.HTTP_201_CREATED)
 
     except Exception as e:
         logger.error(f"Erro ao criar pedido: {str(e)}", exc_info=True)
         return Response({'error': f'Erro interno: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+
     
 # ==================== API PARA VERIFICAR AUTENTICAÇÃO ====================
 @api_view(['GET'])

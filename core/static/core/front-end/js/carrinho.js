@@ -284,9 +284,8 @@ async function removerItem(itemId) {
     }
 }
 
-// Função para criar pedido (após verificação de login)
+// ===== NOVA VERSÃO DA FUNÇÃO CRIAR PEDIDO COM PIX SIMULADO =====
 async function criarPedido() {
-    console.log('🚀 Iniciando criação de pedido...');
     const finalizarBtn = document.getElementById('finalizar-compra');
     
     try {
@@ -294,26 +293,22 @@ async function criarPedido() {
         const originalText = finalizarBtn.innerHTML;
         finalizarBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...';
         finalizarBtn.disabled = true;
-        console.log('⏳ Botão desabilitado e mostrando loading');
 
-        // Coletar endereço de entrega
+        // Endereço fixo por enquanto
         const enderecoEntrega = {
-            rua: "Rua do Cliente",  // TODO: Coletar do usuário
-            numero: "123",
-            bairro: "Centro", 
+            rua: "Rua do Cliente",
+            numero: "123", 
+            bairro: "Centro",
             cidade: "São Paulo",
             estado: "SP",
             cep: "01000-000"
         };
-
-        console.log('📦 Endereço de entrega:', enderecoEntrega);
 
         const response = await fetch('/api/pedido/criar/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCSRFToken(),
                 'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({
                 metodo_pagamento: "pix",
@@ -322,78 +317,126 @@ async function criarPedido() {
         });
         
         const data = await response.json();
-        console.log('📨 Resposta da criação do pedido:', data);
         
         if (response.ok) {
-            console.log('✅ Pedido criado com sucesso!');
-            showToast('Pedido criado com sucesso!', 'success');
+            showToast('✅ Pedido criado com sucesso!', 'success');
             
-            // Tratamento de pagamento PIX
+            // ✅ SEMPRE mostra modal PIX (agora simulado)
             if (data.pagamento) {
-                console.log('💰 Dados de pagamento recebidos:', data.pagamento);
-                if (data.pagamento.codigo_pagamento) {
-                    // Mostrar modal com QR Code PIX
-                    console.log('📱 Mostrando QR Code PIX');
-                    mostrarQRCodePIX(data.pagamento);
-                } else {
-                    console.log('🔀 Redirecionando para meus pedidos');
-                    window.location.href = '/meus-pedidos/';
-                }
+                console.log('🎭 Pagamento simulado:', data.pagamento);
+                mostrarQRCodePIX(data.pagamento);
             } else {
-                console.log('🔀 Redirecionando para meus pedidos (sem pagamento)');
+                // Se não tem pagamento, redireciona
                 window.location.href = '/meus-pedidos/';
             }
             
         } else {
-            console.log('❌ Erro na criação do pedido:', data.error);
-            showToast('Erro: ' + (data.error || 'Erro ao criar pedido'), 'error');
+            showToast('❌ Erro: ' + (data.error || 'Erro ao criar pedido'), 'error');
         }
         
     } catch (error) {
-        console.error('💥 Erro na criação do pedido:', error);
-        showToast('Erro de conexão ao finalizar compra', 'error');
+        console.error('Erro:', error);
+        showToast('⚠️ Erro de conexão ao finalizar compra', 'error');
     } finally {
         // Restaurar botão
         if (finalizarBtn) {
             finalizarBtn.innerHTML = 'Finalizar Compra';
             finalizarBtn.disabled = false;
-            console.log('🔄 Botão restaurado');
         }
     }
 }
 
-// Mostrar QR Code PIX
+// ===== NOVA VERSÃO DA FUNÇÃO MOSTRAR QR CODE PIX (SIMULADO) =====
 function mostrarQRCodePIX(pagamento) {
-    console.log('🎨 Criando modal do QR Code PIX');
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
         <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Pagamento PIX</h3>
+                <h3 class="text-xl font-bold text-gray-800">
+                    Pagamento PIX ${pagamento.simulado ? '(Modo Simulação)' : ''}
+                </h3>
                 <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
+            
             <div class="text-center">
                 <p class="text-gray-600 mb-4">Escaneie o QR Code ou copie o código PIX</p>
+                
                 <div class="bg-gray-100 p-4 rounded-lg mb-4">
-                    <!-- Aqui viria o QR Code -->
+                    <!-- QR Code Simulado -->
                     <div class="text-center text-gray-500 py-8">
-                        <i class="fas fa-qrcode text-4xl mb-2"></i>
-                        <p>QR Code PIX</p>
-                        <p class="text-sm mt-2">Código: ${pagamento.codigo_pagamento}</p>
+                        <i class="fas fa-qrcode text-6xl text-blue-500 mb-4"></i>
+                        <p class="font-bold text-lg">PIX SIMULADO</p>
+                        <p class="text-sm mt-2">Para testes de desenvolvimento</p>
                     </div>
                 </div>
-                <button onclick="copiarPIX('${pagamento.codigo_pagamento}')" 
-                        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    <i class="fas fa-copy mr-2"></i>Copiar Código PIX
-                </button>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle text-yellow-500 mr-2"></i>
+                        <p class="text-yellow-700 text-sm">
+                            <strong>Modo Desenvolvimento:</strong> Este é um pagamento simulado.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <button onclick="copiarPIX('${pagamento.codigo_pagamento}')" 
+                            class="w-full bg-blue-600 text-white px-4 py-3 rounded hover:bg-blue-700 font-medium">
+                        <i class="fas fa-copy mr-2"></i>Copiar Código PIX
+                    </button>
+                    
+                    <button onclick="simularPagamentoAprovado('${pagamento.id_transacao}')" 
+                            class="w-full bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700 font-medium">
+                        <i class="fas fa-check mr-2"></i>Simular Pagamento Aprovado
+                    </button>
+                    
+                    <button onclick="this.closest('.fixed').remove(); window.location.href = '/meus-pedidos/';" 
+                            class="w-full bg-gray-500 text-white px-4 py-3 rounded hover:bg-gray-600 font-medium">
+                        <i class="fas fa-shopping-bag mr-2"></i>Ver Meus Pedidos
+                    </button>
+                </div>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
-    console.log('✅ Modal do QR Code PIX criado');
+}
+
+// ===== NOVA FUNÇÃO PARA SIMULAR PAGAMENTO APROVADO =====
+function simularPagamentoAprovado(transactionId) {
+    console.log('🎭 Simulando pagamento aprovado:', transactionId);
+    
+    // Simula webhook de pagamento aprovado
+    fetch('/pagamento/abacatepay/webhook/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+            id: transactionId,
+            status: "aprovado",
+            dev_mode: true,
+            simulado: true
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        showToast('✅ Pagamento simulado aprovado!', 'success');
+        
+        // Fecha modal e redireciona após 2 segundos
+        setTimeout(() => {
+            const modal = document.querySelector('.fixed');
+            if (modal) modal.remove();
+            window.location.href = '/meus-pedidos/';
+        }, 2000);
+    })
+    .catch(error => {
+        console.error('Erro na simulação:', error);
+        showToast('⚠️ Erro na simulação', 'error');
+    });
 }
 
 function copiarPIX(codigo) {
@@ -413,6 +456,7 @@ window.removerItem = removerItem;
 window.criarPedido = criarPedido;
 window.mostrarQRCodePIX = mostrarQRCodePIX;
 window.copiarPIX = copiarPIX;
+window.simularPagamentoAprovado = simularPagamentoAprovado;
 window.handleFinalizarCompra = handleFinalizarCompra;
 window.inicializarEventListeners = inicializarEventListeners;
 

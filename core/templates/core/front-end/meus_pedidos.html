@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Pedidos | O Especialista.Carros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'core/front-end/css/styles.css' %}">
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/5511995366395" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="{% url 'index' %}" class="text-xl font-bold text-blue-900">O Especialista.Carros</a>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'index' %}#home" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Home</a>
+                    <a href="{% url 'index' %}#products" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Produtos</a>
+                    <a href="{% url 'index' %}#services" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Serviços</a>
+                    <a href="{% url 'index' %}#about" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Sobre Nós</a>
+                    <a href="{% url 'index' %}#blog" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Blog</a>
+                    <a href="{% url 'index' %}#contact" class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Contato</a>
+                </div>
+
+                <!-- Login/Cart -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="{% url 'perfil' %}" class="text-gray-700 hover:text-blue-500">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <a href="{% url 'carrinho' %}" class="text-gray-700 hover:text-blue-500 relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            {{ carrinho.total_itens|default:0 }}
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button class="mobile-menu-button p-2 rounded-md text-gray-700 hover:text-blue-500 hover:bg-gray-100 focus:outline-none">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu hidden md:hidden bg-white shadow-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="{% url 'index' %}#home" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Home</a>
+                <a href="{% url 'index' %}#products" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Produtos</a>
+                <a href="{% url 'index' %}#services" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Serviços</a>
+                <a href="{% url 'index' %}#about" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Sobre Nós</a>
+                <a href="{% url 'index' %}#blog" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Blog</a>
+                <a href="{% url 'index' %}#contact" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Contato</a>
+                <div class="pt-4 border-t border-gray-200">
+                    <a href="{% url 'perfil' %}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Meu Perfil</a>
+                    <a href="{% url 'meus_pedidos' %}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Meus Pedidos</a>
+                    <a href="{% url 'carrinho' %}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Carrinho</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Meus Pedidos Section -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-6">Meus Pedidos</h1>
+
+                {% if pedidos %}
+                    <div class="space-y-6">
+                        {% for pedido in pedidos %}
+                        <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Pedido #{{ pedido.numero_pedido }}</h3>
+                                    <p class="text-gray-600">Data: {{ pedido.criado_em|date:"d/m/Y H:i" }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                        {% if pedido.status.nome == 'Entregue' %}bg-green-100 text-green-800
+                                        {% elif pedido.status.nome == 'Processando' %}bg-blue-100 text-blue-800
+                                        {% elif pedido.status.nome == 'Cancelado' %}bg-red-100 text-red-800
+                                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                        {{ pedido.status.nome }}
+                                    </span>
+                                    <p class="text-lg font-bold text-gray-800 mt-2">R$ {{ pedido.total_final }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Itens do Pedido -->
+                            <div class="border-t border-gray-200 pt-4">
+                                <h4 class="font-medium text-gray-700 mb-3">Itens do Pedido:</h4>
+                                <div class="space-y-3">
+                                    {% for item in pedido.itens.all %}
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                                                {% if item.produto.imagem %}
+                                                <img src="{{ item.produto.imagem.url }}" alt="{{ item.produto.nome }}" class="w-full h-full object-cover">
+                                                {% else %}
+                                                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                    <i class="fas fa-image text-gray-400"></i>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-800">{{ item.produto.nome }}</p>
+                                                <p class="text-sm text-gray-600">Quantidade: {{ item.quantidade }}</p>
+                                            </div>
+                                        </div>
+                                        <p class="font-medium text-gray-800">R$ {{ item.subtotal }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Informações de Pagamento -->
+                            {% if pedido.pagamento %}
+                            <div class="border-t border-gray-200 pt-4 mt-4">
+                                <h4 class="font-medium text-gray-700 mb-2">Pagamento:</h4>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Método: {{ pedido.pagamento.metodo.nome }}</p>
+                                        <p class="text-sm text-gray-600">Status: 
+                                            <span class="{% if pedido.pagamento.status == 'aprovado' %}text-green-600
+                                                        {% elif pedido.pagamento.status == 'pendente' %}text-yellow-600
+                                                        {% elif pedido.pagamento.status == 'recusado' %}text-red-600
+                                                        {% else %}text-gray-600{% endif %}">
+                                                {{ pedido.pagamento.status|title }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    {% if pedido.pagamento.codigo_pagamento %}
+                                    <button onclick="copiarPIX('{{ pedido.pagamento.codigo_pagamento }}')" 
+                                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+                                        <i class="fas fa-copy mr-2"></i>Copiar PIX
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-shopping-bag text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-xl text-gray-500 mb-4">Você ainda não fez nenhum pedido</p>
+                        <a href="{% url 'index' %}#products" 
+                           class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-store mr-2"></i>
+                            Ver produtos
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-12 pb-6 mt-12">
+        <!-- ... (mesmo footer do carrinho.html) ... -->
+    </footer>
+
+    <script src="{% static 'core/front-end/js/scripts.js' %}"></script>
+    <script>
+        function copiarPIX(codigo) {
+            navigator.clipboard.writeText(codigo).then(() => {
+                // Mostrar toast de sucesso
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                toast.textContent = 'Código PIX copiado!';
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>

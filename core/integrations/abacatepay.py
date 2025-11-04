@@ -1,58 +1,48 @@
 # core/integrations/abacatepay.py
 import logging
-import requests
+import random
+import string
 from typing import Dict, Optional, Tuple
 from django.conf import settings
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
 def criar_pagamento(pedido, metodo_pagamento) -> Tuple[Optional[Dict], Optional[str]]:
     """
-    Cria um pagamento na API do AbacatePay
-    Retorna: (dados_response, mensagem_erro)
+    SEMPRE usa modo simulação - AbacatePay não existe
     """
-    try:
-        # Corrigir: get_full_name pode não existir, usar first_name + last_name
-        nome_cliente = f"{pedido.usuario.first_name} {pedido.usuario.last_name}".strip()
-        if not nome_cliente:
-            nome_cliente = pedido.usuario.email.split('@')[0]  # fallback
+    logger.info("🎭 Usando MODO SIMULAÇÃO para pagamentos")
+    
+    return criar_pagamento_simulado(pedido, metodo_pagamento), None
 
-        payload = {
-            "valor": float(pedido.total_final),
-            "moeda": "BRL",
-            "descricao": f"Pedido {pedido.numero_pedido}",
-            "metodo": metodo_pagamento.tipo,
-            "cliente": {
-                "nome": nome_cliente,
-                "email": pedido.usuario.email
-            },
-            "callback_url": f"{settings.SITE_URL}/pagamento/abacatepay/webhook/"
-        }
-
-        headers = {
-            "Authorization": f"Bearer {settings.ABACATEPAY_API_KEY}",
-            "Content-Type": "application/json"
-        }
-
-        logger.info(f"Enviando pagamento para AbacatePay: {payload}")
-
-        response = requests.post(
-            f"{settings.ABACATEPAY_API_URL}/pagamentos",
-            json=payload,
-            headers=headers,
-            timeout=30
-        )
-
-        response.raise_for_status()
-        data = response.json()
-        logger.info(f"Resposta AbacatePay: {data}")
-        return data, None
-
-    except requests.exceptions.RequestException as e:
-        error_msg = f"Erro na API AbacatePay: {str(e)}"
-        logger.error(error_msg)
-        return None, error_msg
-    except Exception as e:
-        error_msg = f"Erro inesperado: {str(e)}"
-        logger.error(error_msg)
-        return None, error_msg
+def criar_pagamento_simulado(pedido, metodo_pagamento) -> Dict:
+    """
+    Simula a criação de um pagamento PIX
+    """
+    # Gera ID único para a transação
+    transaction_id = f"sim_{pedido.id}_{''.join(random.choices(string.digits, k=8))}"
+    
+    # Gera código PIX simulado
+    pix_code = f"00020126580014BR.GOV.BCB.PIX0136{transaction_id}5204000053039865405{pedido.total_final:.2f}5802BR5900MERCADO6008SAO PAULO62140510{transaction_id}6304"
+    
+    # Data de expiração 1 hora no futuro
+    expires_at = datetime.now() + timedelta(hours=1)
+    
+    response_data = {
+        "id": transaction_id,
+        "status": "pending", 
+        "codigo_pagamento": pix_code,
+        "codigo": pix_code,  # Campo alternativo
+        "valor": float(pedido.total_final),
+        "qr_code": f"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2ZmZiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QSVggU0lNVUxBRE88L3RleHQ+PC9zdmc+",
+        "data_expiracao": expires_at.isoformat() + "Z",
+        "dev_mode": True,
+        "simulado": True,
+        "mensagem": "Modo de desenvolvimento - Pagamento simulado"
+    }
+    
+    logger.info(f"🎭 Pagamento PIX simulado criado: {transaction_id}")
+    logger.info(f"🎭 Código PIX: {pix_code}")
+    
+    return response_data

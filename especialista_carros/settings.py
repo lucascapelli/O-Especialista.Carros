@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret")
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = ['*', 'testserver', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*', 'testserver', 'localhost', '127.0.0.1', '.ngrok-free.app', 'd971d28c3499.ngrok-free.app']
 
 
 # Application definition
@@ -156,12 +156,18 @@ AUTHENTICATION_BACKENDS = [
 # Configurações de sessão (opcional)
 SESSION_COOKIE_AGE = 1209600  # 2 semanas em segundos
 
+# =============================================================================
+# CONFIGURAÇÕES PARA NGROK E DESENVOLVIMENTO
+# =============================================================================
+
 # Configurações de CORS (desenvolvimento)
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5500",
     "http://localhost:5500",
     "http://127.0.0.1:8000",    
     "http://localhost:8000",    
+    "https://d971d28c3499.ngrok-free.app",
+    "https://*.ngrok-free.app",
 ]
 
 CSRF_TRUSTED_ORIGINS = [  
@@ -169,6 +175,56 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:5500", 
     "http://127.0.0.1:5500",
+    "https://d971d28c3499.ngrok-free.app",
+    "https://*.ngrok-free.app",
 ]
 
+# Para desenvolvimento, podemos ser mais permissivos
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+else:
+    CORS_ALLOW_ALL_ORIGINS = False
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+
 CORS_ALLOW_CREDENTIALS = True
+
+# =============================================================================
+# CONFIGURAÇÕES ABACATEPAY
+# =============================================================================
+
+ABACATEPAY_API_KEY = os.getenv("ABACATEPAY_API_KEY")
+ABACATEPAY_API_URL = os.getenv("ABACATEPAY_API_URL")
+SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
+
+# =============================================================================
+# LOGGING PARA DEBUG
+# =============================================================================
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'core': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+    },
+}

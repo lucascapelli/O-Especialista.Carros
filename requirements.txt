@@ -12,3 +12,4 @@ pycparser==2.23
 django-extensions==3.4.0
 requests==2.32.5
 abacatepay
+pyngrok== 7.4.1 (somente para teste)
