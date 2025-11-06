@@ -1,39 +1,35 @@
 """
 URL configuration for especialista_carros project.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+O `urlpatterns` roteia URLs para views.
+Mais informações: https://docs.djangoproject.com/en/5.2/topics/http/urls/
 """
+
 from django.contrib import admin
-from django.urls import path, include  
+from django.urls import path, include
 from django.shortcuts import redirect
-from core.views import admin_index
+from core.views import index as public_index  # importa a view que carrega os produtos
 
 def root_redirect(request):
-    """Redirecionamento condicional da raiz"""
-    if request.user.is_authenticated and hasattr(request.user, 'is_admin') and request.user.is_admin:
+    """
+    Redireciona a raiz do site dependendo do tipo de usuário:
+    - Admin autenticado → painel admin customizado
+    - Visitante / usuário comum → página inicial pública
+    """
+    if request.user.is_authenticated and getattr(request.user, 'is_admin', False):
         return redirect('admin_index')
-    else:
-        return redirect('index')  # Redireciona para a página inicial pública
+    # Usa a mesma view pública da home (carrega os produtos)
+    return public_index(request)
+
 
 urlpatterns = [
-    # Redirecionamento da raiz
-    path('', root_redirect),
-    
-    # Admin Django padrão (nova rota para evitar conflito)
+    # Admin Django padrão (mantido pra evitar conflito com o painel custom)
     path('admin-django/', admin.site.urls),
-    
-    # URLs do app core (inclui todas as outras URLs)
+
+    # Redirecionamento condicional da raiz
+    path('', root_redirect, name='root_redirect'),
+
+    # Inclui todas as URLs do app core
     path('', include('core.urls')),
 ]
 

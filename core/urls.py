@@ -1,12 +1,15 @@
+# core/urls.py
 from django.urls import path, include
 from .views import (
-    produtos_listagem, LoginView, RegisterView, ProdutoViewSet,
-    logout_view, carrinho, contato_envio, login_page, esqueceu_senha_page,
-    criar_conta_page, carrinho_json, admin_login, admin_index, delete_user,
-    criar_pagamento_abacatepay, criar_pedido, adicionar_carrinho, remover_carrinho,
-    alterar_quantidade, check_auth, perfil_usuario, meus_pedidos
+    index, login_page, esqueceu_senha_page, criar_conta_page,
+    detalhes_produto, contato_envio, LoginView, RegisterView, logout_view,
+    carrinho, carrinho_json, adicionar_carrinho, remover_carrinho, alterar_quantidade,
+    admin_login, admin_index, delete_user, admin_pedidos, admin_produtos,
+    atualizar_status_pedido, perfil_usuario, meus_pedidos, checkout,
+    criar_pedido, meus_pedidos_api, detalhes_pedido_api, produtos_destaque,
+    buscar_produtos, atualizar_perfil, check_auth, CheckAuthView,
+    ProdutoViewSet, criar_pagamento_abacatepay
 )
-
 from .integrations.abacatepay_webhook import abacatepay_webhook
 from rest_framework.routers import DefaultRouter
 
@@ -14,42 +17,56 @@ router = DefaultRouter()
 router.register(r'api/produtos', ProdutoViewSet, basename='produto')
 
 urlpatterns = [
-    # URLs públicas
+    # PÁGINA INICIAL (ÚNICA)
+    path('', index, name='index'),           # ← Raiz do site
+    path('home/', index, name='home'),  
+
+    # AUTENTICAÇÃO
     path('login/', login_page, name='login'),
     path('esqueceu-senha/', esqueceu_senha_page, name='esqueceusenha'),
-    path('home/', produtos_listagem, name='index'),
     path('criar-conta/', criar_conta_page, name='criarconta'),
-    
+
+    # PRODUTOS
+    path('produto/<int:produto_id>/', detalhes_produto, name='detalhes_produto'),
+
     # APIs
     path('api/login/', LoginView.as_view(), name='api-login'),
     path('api/register/', RegisterView.as_view(), name='api-register'),
     path('api/criar-pagamento-abacatepay/<int:pedido_id>/', criar_pagamento_abacatepay, name='criar_pagamento_abacatepay'),
     path('api/pedido/criar/', criar_pedido, name='criar_pedido'),
-
-    # Perfil e pedidos
-    path('perfil/', perfil_usuario, name='perfil'),
-    path('meus-pedidos/', meus_pedidos, name='meus_pedidos'),
-
-    # API de autenticação
+    path('api/pedidos/', meus_pedidos_api, name='api_pedidos'),
+    path('api/pedidos/<int:pedido_id>/detalhes/', detalhes_pedido_api, name='api_pedido_detalhes'),
+    path('api/pedidos/<int:pedido_id>/status/', atualizar_status_pedido, name='api_pedido_status'),
+    path('api/produtos/destaque/', produtos_destaque, name='api_produtos_destaque'),
+    path('api/produtos/buscar/', buscar_produtos, name='api_produtos_buscar'),
+    path('api/perfil/atualizar/', atualizar_perfil, name='api_perfil_atualizar'),
+    path('api/auth/check/', CheckAuthView.as_view(), name='api_auth_check'),
     path('api/check-auth/', check_auth, name='check_auth'),
 
-    # Admin
-    path('admin-login/', admin_login, name='admin_login'),
-    path('admin-panel/', admin_index, name='admin_index'),
-    path('admin-panel/delete-user/<int:user_id>/', delete_user, name='delete_user'),
-    path('logout/', logout_view, name='logout'),
-    
-    # Carrinho e contato
+    # PÁGINAS DO USUÁRIO
+    path('perfil/', perfil_usuario, name='perfil'),
+    path('meus-pedidos/', meus_pedidos, name='meus_pedidos'),
+    path('checkout/', checkout, name='checkout'),
     path('carrinho/', carrinho, name='carrinho'),
     path('contato-envio/', contato_envio, name='contato-envio'),
     path('carrinho-json/', carrinho_json, name='carrinho_json'),
-    path('adicionar_carrinho/<int:produto_id>/', adicionar_carrinho, name='adicionar_carrinho'),  
+    path('adicionar_carrinho/<int:produto_id>/', adicionar_carrinho, name='adicionar_carrinho'),
     path('remover_carrinho/<int:item_id>/', remover_carrinho, name='remover_carrinho'),
     path('alterar-quantidade/<int:item_id>/', alterar_quantidade, name='alterar_quantidade'),
 
-    # Webhooks
+    # ADMIN
+    path('admin-login/', admin_login, name='admin_login'),
+    path('admin-panel/', admin_index, name='admin_index'),
+    path('admin-panel/delete-user/<int:user_id>/', delete_user, name='delete_user'),
+    path('admin-panel/pedidos/', admin_pedidos, name='admin_pedidos'),
+    path('admin-panel/produtos/', admin_produtos, name='admin_produtos'),
+
+    # LOGOUT
+    path('logout/', logout_view, name='logout'),
+
+    # WEBHOOK
     path('pagamento/abacatepay/webhook/', abacatepay_webhook, name='abacatepay_webhook'),
 ]
 
-# Adiciona as rotas do DRF
+# Router do DRF
 urlpatterns += router.urls

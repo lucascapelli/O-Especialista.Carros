@@ -1,0 +1,60 @@
+# views/public_views.py
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_protect
+from django.contrib import messages
+from ..models import Produto
+import logging
+
+logger = logging.getLogger(__name__)
+
+def home(request):
+    return HttpResponse("Bem-vindo ao especialista de carros!")
+
+def index(request):
+    produtos = Produto.objects.all()[:8]
+    return render(request, 'core/front-end/index.html', {'produtos': produtos})
+
+def produtos_listagem(request):
+    produtos = Produto.objects.all()
+    return render(request, 'core/front-end/index.html', {'produtos': produtos})
+
+def detalhes_produto(request, produto_id):
+    from django.shortcuts import get_object_or_404
+    produto = get_object_or_404(Produto, id=produto_id)
+    produtos_relacionados = Produto.objects.exclude(id=produto_id)[:4]
+    return render(request, 'core/front-end/detalhes_produto.html', {
+        'produto': produto,
+        'produtos_relacionados': produtos_relacionados
+    })
+
+@require_http_methods(["POST"])
+@csrf_protect
+def contato_envio(request):
+    nome = request.POST.get('name')
+    email = request.POST.get('email')
+    telefone = request.POST.get('phone')
+    assunto = request.POST.get('subject')
+    mensagem = request.POST.get('message')
+    if not all([nome, email, mensagem]):
+        return JsonResponse({
+            'success': False,
+            'error': 'Nome, email e mensagem são obrigatórios'
+        })
+    logger.info(f'Formulário de contato: {nome}, {email}, {telefone}, {assunto}, {mensagem}')
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': 'Mensagem enviada com sucesso!'
+        })
+    return redirect('index')
+
+def login_page(request):
+    return render(request, 'core/front-end/login.html')
+
+def esqueceu_senha_page(request):
+    return render(request, 'core/front-end/esqueceusenha.html')
+
+def criar_conta_page(request):
+    return render(request, 'core/front-end/criarconta.html')
