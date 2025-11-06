@@ -43,6 +43,9 @@ urlpatterns = [
     path('api/auth/check/', CheckAuthView.as_view(), name='api_auth_check'),
     path('api/check-auth/', check_auth, name='check_auth'),
 
+    # FRETE E ENVIO
+    path('api/frete/simular/', criar_pedido, name='api_frete_simular'),
+
     # PÁGINAS DO USUÁRIO
     path('perfil/', perfil_usuario, name='perfil'),
     path('meus-pedidos/', meus_pedidos, name='meus_pedidos'),
