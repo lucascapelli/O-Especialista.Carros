@@ -8,7 +8,7 @@ from .views import (
     atualizar_status_pedido, perfil_usuario, meus_pedidos, checkout,
     criar_pedido, meus_pedidos_api, detalhes_pedido_api, produtos_destaque,
     buscar_produtos, atualizar_perfil, check_auth, CheckAuthView,
-    ProdutoViewSet, criar_pagamento_abacatepay
+    ProdutoViewSet, criar_pagamento_abacatepay, detalhes_pedido_admin, atualizar_status_pedido
 )
 from .integrations.abacatepay_webhook import abacatepay_webhook
 from rest_framework.routers import DefaultRouter
@@ -63,6 +63,9 @@ urlpatterns = [
     path('admin-panel/delete-user/<int:user_id>/', delete_user, name='delete_user'),
     path('admin-panel/pedidos/', admin_pedidos, name='admin_pedidos'),
     path('admin-panel/produtos/', admin_produtos, name='admin_produtos'),
+    path('api/admin/pedidos/<int:pedido_id>/detalhes/', detalhes_pedido_admin, name='admin_pedido_detalhes'),
+    path('api/admin/pedidos/<int:pedido_id>/status/', atualizar_status_pedido, name='admin_pedido_status_api'),
+
 
     # LOGOUT
     path('logout/', logout_view, name='logout'),

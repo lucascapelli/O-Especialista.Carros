@@ -11,6 +11,7 @@ from .carrinho_views import (
     remover_carrinho, alterar_quantidade, get_or_create_carrinho
 )
 from .pagamento_views import criar_pagamento_abacatepay
+
 from .pedido_views import (
     criar_pedido, meus_pedidos_api, detalhes_pedido_api,
     meus_pedidos, checkout
@@ -20,7 +21,7 @@ from .produto_views import (
 )
 from .admin_views import (
     admin_index, delete_user, admin_pedidos, admin_produtos,
-    atualizar_status_pedido, perfil_usuario
+    atualizar_status_pedido, perfil_usuario, detalhes_pedido_admin
 )
 from .api_views import (
     check_auth, CheckAuthView, atualizar_perfil
