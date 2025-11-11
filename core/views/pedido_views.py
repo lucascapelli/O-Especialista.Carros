@@ -149,3 +149,12 @@ def criar_pedido_apos_pagamento(request):
     except Exception as e:
         logger.error(f"Erro ao criar pedido após pagamento: {str(e)}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@login_required
+def meus_pedidos(request):
+    """View para página de meus pedidos"""
+    pedidos = Pedido.objects.filter(usuario=request.user).order_by('-criado_em')
+    return render(request, 'core/front-end/meus_pedidos.html', {
+        'pedidos': pedidos,
+        'user': request.user
+    })

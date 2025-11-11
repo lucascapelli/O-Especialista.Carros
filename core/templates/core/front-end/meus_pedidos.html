@@ -144,7 +144,7 @@
                                             </span>
                                         </p>
                                     </div>
-                                    {% if pedido.pagamento.codigo_pagamento %}
+                                    {% if pedido.pagamento.codigo_pagamento and pedido.pagamento.status == 'pendente' %}  <!-- 🔥 ADICIONAR CONDIÇÃO -->
                                     <button onclick="copiarPIX('{{ pedido.pagamento.codigo_pagamento }}')" 
                                             class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
                                         <i class="fas fa-copy mr-2"></i>Copiar PIX

@@ -9,7 +9,7 @@ from .views import (
     buscar_produtos, atualizar_perfil, check_auth, CheckAuthView,
     ProdutoViewSet, criar_pagamento_abacatepay, detalhes_pedido_admin,
     simular_frete_api, rastrear_pedido_api, simular_frete_carrinho, preparar_pagamento,
-    criar_pedido_apos_pagamento
+    criar_pedido_apos_pagamento, meus_pedidos
 
 )
 from .integrations.abacatepay_webhook import abacatepay_webhook
@@ -57,6 +57,7 @@ urlpatterns = [
     path('remover_carrinho/<int:item_id>/', remover_carrinho, name='remover_carrinho'),
     path('alterar-quantidade/<int:item_id>/', alterar_quantidade, name='alterar_quantidade'),
     path('api/carrinho/simular-frete/', simular_frete_carrinho, name='api_carrinho_simular_frete'),
+    path('meus-pedidos/', meus_pedidos, name='meus_pedidos'), 
 
     # ADMIN
     path('admin-login/', admin_login, name='admin_login'),
