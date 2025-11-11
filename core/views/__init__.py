@@ -12,7 +12,7 @@ from .carrinho_views import (
     simular_frete_carrinho
 )
 from .pagamento_views import criar_pagamento_abacatepay
-from .pedido_views import criar_pedido
+from .pedido_views import  preparar_pagamento, criar_pedido_apos_pagamento  # 🔥 ATUALIZADO
 from .produto_views import (
     ProdutoViewSet, produtos_destaque, buscar_produtos
 )

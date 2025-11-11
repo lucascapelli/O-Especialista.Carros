@@ -30,14 +30,8 @@ def abacatepay_webhook(request):
         if status_pagamento.lower() in ["pago", "approved", "success"]:
             logger.info(f"Pagamento confirmado para pedido {pedido.id}. Criando envio...")
 
-            # Atualizar status do pedido para "Processando" (pronto para envio)
-            status_processando = StatusPedido.objects.get_or_create(
-                nome="Processando",
-                defaults={"cor": "#F97316", "ordem": 2, "is_final": False}
-            )[0]
-            pedido.status = status_processando
-            pedido.save()
-
+            # 🔥 AGORA O PEDIDO JÁ EXISTE (criado após pagamento) - apenas criar envio
+            
             # 🔹 CRIAR ENVIO USANDO O NOVO SHIPPING SERVICE
             try:
                 # Usar o método criar_envio que recebe o objeto pedido completo
@@ -78,19 +72,12 @@ def abacatepay_webhook(request):
 
                     logger.info(f"✅ Envio criado com sucesso para pedido {pedido.id}")
                     logger.info(f"📦 Código de rastreio: {resultado_envio['codigo_rastreio']}")
-                    logger.info(f"💰 Valor frete: R$ {resultado_envio['valor_frete']}")
-                    logger.info(f"⏱️ Prazo: {resultado_envio['prazo_dias']} dias")
                     
                 else:
-                    # Se houve erro na criação do envio
                     logger.error(f"❌ Erro ao criar envio para pedido {pedido.id}: {resultado_envio.get('erro')}")
-                    
-                    # Manter pedido como "Processando" mas com erro de envio
-                    # Pode-se criar um status específico para "Erro no Envio" se necessário
                     
             except Exception as envio_error:
                 logger.error(f"❌ Exceção ao criar envio para pedido {pedido.id}: {str(envio_error)}")
-                # Manter pedido como "Processando" mas registrar o erro
 
         elif status_pagamento.lower() in ["cancelado", "cancelled", "failed"]:
             # Atualizar status para "Cancelado" se o pagamento falhou

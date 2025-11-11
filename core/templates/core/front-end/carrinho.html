@@ -17,7 +17,7 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <!-- Navigation -->
+    <!-- Navigation CORRIGIDA -->
     <nav class="bg-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
@@ -42,11 +42,20 @@
                         class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Contato</a>
                 </div>
 
-                <!-- Login/Cart -->
+                <!-- Login/Cart CORRIGIDO -->
                 <div class="hidden md:flex items-center space-x-4">
-                    <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-500">
-                        <i class="fas fa-user"></i>
-                    </a>
+                    <!-- Ícone do Usuário com Menu Dropdown -->
+                    <div class="relative">
+                        <a id="user-icon" href="javascript:void(0)" class="text-gray-700 hover:text-blue-500">
+                            <i class="fas fa-user"></i>
+                        </a>
+                        <!-- Menu Dropdown do Usuário -->
+                        <div id="user-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <!-- Conteúdo será preenchido pelo JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Ícone do Carrinho -->
                     <a href="{% url 'carrinho' %}" class="text-gray-700 hover:text-blue-500 relative">
                         <i class="fas fa-shopping-cart"></i>
                         <span id="cart-count"
@@ -66,7 +75,7 @@
             </div>
         </div>
 
-        <!-- Mobile Menu -->
+        <!-- Mobile Menu CORRIGIDO -->
         <div class="mobile-menu hidden md:hidden bg-white shadow-lg">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="{% url 'index' %}#home"
@@ -83,8 +92,9 @@
                 <a href="{% url 'index' %}#contact"
                     class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Contato</a>
                 <div class="pt-4 border-t border-gray-200">
-                    <a href="{% url 'login' %}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Login</a>
+                    <div id="mobile-user-menu">
+                        <!-- Conteúdo será preenchido pelo JavaScript -->
+                    </div>
                     <a href="{% url 'carrinho' %}"
                         class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Carrinho</a>
                 </div>
@@ -92,7 +102,7 @@
         </div>
     </nav>
 
-    <!-- Cart Section CORRIGIDA -->
+    <!-- Cart Section -->
     <div class="cart-container py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-8">
@@ -122,7 +132,7 @@
                                     </div>
                                 </div>
 
-                                <!-- CONTROLES DE QUANTIDADE - VERSÃO CORRIGIDA -->
+                                <!-- CONTROLES DE QUANTIDADE -->
                                 <div class="flex items-center space-x-2 mr-4">
                                     <button class="btn-diminuir w-8 h-8 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition" 
                                             data-item-id="{{ item.id }}">
@@ -139,7 +149,7 @@
                                     </button>
                                 </div>
 
-                                <!-- SUBTOTAL E REMOVER - VERSÃO CORRIGIDA -->
+                                <!-- SUBTOTAL E REMOVER -->
                                 <div class="flex items-center space-x-4">
                                     <span class="font-bold text-gray-800 text-lg">
                                         R$ <span id="subtotal-{{ item.id }}">{{ item.subtotal }}</span>
@@ -172,9 +182,9 @@
                             Continuar comprando
                         </a>
                     </div>
-                </div> <!-- Fecha div lg:w-2/3 -->
+                </div>
 
-                <!-- Order Summary CORRIGIDO - FORA DA SEÇÃO DE ITENS -->
+                <!-- Order Summary -->
                 <div class="lg:w-1/3">
                     <div class="bg-white rounded-lg shadow cart-card p-6 sticky top-4">
                         <h2 class="text-xl font-bold text-gray-800 mb-6">Resumo do Pedido</h2>
@@ -232,7 +242,7 @@
                             </div>
                         </div>
 
-                        <!-- No Order Summary, antes do botão Finalizar Compra -->
+                        <!-- User Auth Info -->
                         <div id="user-auth-info" class="mb-4 p-3 bg-blue-50 rounded-lg hidden">
                             <div class="flex items-center">
                                 <i class="fas fa-user-check text-blue-500 mr-2"></i>
@@ -265,10 +275,10 @@
                             </div>
                         </div>
                     </div>
-                </div> <!-- Fecha div lg:w-1/3 -->
-            </div> <!-- Fecha div flex -->
-        </div> <!-- Fecha div max-w-7xl -->
-    </div> <!-- Fecha div cart-container -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-gray-900 text-white pt-12 pb-6">
@@ -361,7 +371,19 @@
         </div>
     </footer>
 
+    <!-- DEBUG TEMPORÁRIO - Remover depois -->
+    <div id="debug-auth-status" class="fixed bottom-4 left-4 bg-blue-100 p-2 rounded text-xs z-50">
+        <div>Usuário: {{ request.user.email|default:"Não logado" }}</div>
+        <div>Autenticado: {{ request.user.is_authenticated }}</div>
+    </div>
+
     <script src="{% static 'core/front-end/js/scripts.js' %}"></script>
     <script src="{% static 'core/front-end/js/carrinho.js' %}"></script>
+    
+    <script>
+    console.log('🔐 STATUS DE AUTENTICAÇÃO NO CARRINHO:');
+    console.log('- Template: {{ request.user.is_authenticated|yesno:"Logado,Não logado" }}');
+    console.log('- Email: {{ request.user.email|default:"N/A" }}');
+    </script>
 </body>
 </html>

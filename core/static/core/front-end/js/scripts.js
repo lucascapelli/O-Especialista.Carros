@@ -52,7 +52,7 @@ function showToast(message, type = 'success') {
 // Verificar se usuário está autenticado
 async function checkUserAuthentication() {
     try {
-        const response = await fetch('/api/check-auth/', {
+        const response = await fetch('/api/auth/check/', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ function redirectToLogin() {
 // ===== ATUALIZAR MENU DE USUÁRIO =====
 async function atualizarMenuUsuario() {
     try {
-        const response = await fetch('/api/check-auth/');
+        const response = await fetch('/api/auth/check/');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -141,8 +141,8 @@ async function atualizarMenuUsuario() {
                 
                 userMenu.innerHTML = `
                     <div class="px-4 py-3 border-b border-gray-100">
-                        <p class="text-sm font-medium text-gray-900">Olá, ${data.user.first_name || 'Usuário'}</p>
-                        <p class="text-xs text-gray-500 truncate">${data.user.email}</p>
+                        <p class="text-sm font-medium text-gray-900">Olá, ${data.user?.first_name || 'Usuário'}</p>
+                        <p class="text-xs text-gray-500 truncate">${data.user?.email || ''}</p>
                     </div>
                     <div class="py-1">
                         <a href="/perfil/" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
@@ -170,10 +170,10 @@ async function atualizarMenuUsuario() {
         if (mobileUserMenu) {
             if (data.authenticated) {
                 mobileUserMenu.innerHTML = `
-                    <a href="/perfil/" class="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">
+                    <a href="/perfil/" class="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">
                         <i class="fas fa-user mr-2"></i>Meu Perfil
                     </a>
-                    <a href="/meus-pedidos/" class="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">
+                    <a href="/meus-pedidos/" class="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">
                         <i class="fas fa-shopping-bag mr-2"></i>Meus Pedidos
                     </a>
                     <button onclick="fazerLogout()" class="w-full text-left flex items-center px-3 py-2 text-base font-medium text-red-600 hover:bg-gray-100">
@@ -182,10 +182,10 @@ async function atualizarMenuUsuario() {
                 `;
             } else {
                 mobileUserMenu.innerHTML = `
-                    <a href="/login/" class="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">
+                    <a href="/login/" class="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">
                         <i class="fas fa-sign-in-alt mr-2"></i>Login
                     </a>
-                    <a href="/criar-conta/" class="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-end hover:bg-gray-100">
+                    <a href="/criar-conta/" class="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">
                         <i class="fas fa-user-plus mr-2"></i>Criar Conta
                     </a>
                 `;
@@ -257,12 +257,18 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ scripts.js inicializado');
     
     try {
-        // Verificar se estamos na página do carrinho
-        if (window.location.pathname.includes('carrinho')) {
-            console.log('📦 Página do carrinho detectada - inicialização mínima');
-            // Não inicializar funções que podem conflitar
-            return;
+        // 🔥 VERIFICAÇÃO CRÍTICA: Se estamos no carrinho, inicializa APENAS funções essenciais
+        if (window.location.pathname.includes('/carrinho/')) {
+            console.log('📦 Página do carrinho detectada - inicializando apenas funções globais');
+            
+            // ⚠️ APENAS inicializa o que é ESSENCIAL e NÃO conflita
+            atualizarMenuUsuario();
+            atualizarContadorCarrinho();
+            return; // ⬅️ PARA AQUI - não executa o resto
         }
+        
+        // 🔥 SE NÃO ESTÁ NO CARRINHO, inicializa TUDO normalmente
+        console.log('🏠 Página normal - inicializando todas as funções');
         
         // ===== MENU MOBILE =====
         const mobileMenuButton = document.querySelector('.mobile-menu-button');

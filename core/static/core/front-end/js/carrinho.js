@@ -1,5 +1,3 @@
-// core/static/core/front-end/js/carrinho.js
-
 // ===== FUNÇÃO CSRF TOKEN (CRÍTICO PARA POSTS) =====
 function getCSRFToken() {
     let cookieValue = null;
@@ -23,6 +21,19 @@ console.log('DOM Content carregado?', document.readyState);
 // ===== INICIALIZAÇÃO DO CARRINHO =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ carrinho.js - DOM totalmente carregado');
+    
+    // 🔥 GARANTIR que as funções globais estão disponíveis
+    if (typeof atualizarMenuUsuario === 'function') {
+        console.log('👤 Inicializando menu de usuário no carrinho...');
+        atualizarMenuUsuario();
+    } else {
+        console.log('⚠️ Função atualizarMenuUsuario não encontrada');
+    }
+    
+    if (typeof atualizarContadorCarrinho === 'function') {
+        console.log('🛒 Atualizando contador do carrinho...');
+        atualizarContadorCarrinho();
+    }
     
     // Debug: verificar todos os elementos importantes
     const finalizarBtn = document.getElementById('finalizar-compra');
@@ -282,9 +293,9 @@ async function handleFinalizarCompra() {
     }
 }
 
-// ===== FUNÇÃO CRIAR PEDIDO CORRIGIDA COM DEBUG =====
+// ===== FUNÇÃO CRIAR PEDIDO CORRIGIDA - NÃO CRIA PEDIDO NO BANCO =====
 async function criarPedido() {
-    console.log('📦 INICIANDO CRIAÇÃO DE PEDIDO...');
+    console.log('🎯 PREPARANDO PAGAMENTO (SEM CRIAR PEDIDO NO BANCO)...');
     const finalizarBtn = document.getElementById('finalizar-compra');
     
     try {
@@ -293,7 +304,7 @@ async function criarPedido() {
         finalizarBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...';
         finalizarBtn.disabled = true;
 
-        // 🔥 CORREÇÃO: Obter CPF do usuário
+        // Obter CPF do usuário
         let cpfDestinatario = await obterCPFUsuario();
         console.log('📝 CPF obtido:', cpfDestinatario);
         
@@ -312,16 +323,17 @@ async function criarPedido() {
             cidade: "São Paulo",
             estado: "SP",
             cep: "01000-000",
-            nome_completo: "Cliente Teste" // 🔥 ADICIONAR NOME
+            nome_completo: "Cliente Teste"
         };
 
-        console.log('📦 Dados do pedido a serem enviados:', {
+        console.log('🎯 Dados para pagamento (SEM criar pedido):', {
             metodo_pagamento: "pix",
             endereco_entrega: enderecoEntrega,
             cpf_destinatario: cpfDestinatario
         });
 
-        const response = await fetch('/api/pedido/criar/', {
+        // 🔥 CHAMAR NOVA ROTA: preparar-pagamento (NÃO criar_pedido)
+        const response = await fetch('/api/preparar-pagamento/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCSRFToken(),
@@ -330,26 +342,28 @@ async function criarPedido() {
             body: JSON.stringify({
                 metodo_pagamento: "pix",
                 endereco_entrega: enderecoEntrega,
-                cpf_destinatario: cpfDestinatario // 🔥 ENVIAR CPF CORRETAMENTE
+                cpf_destinatario: cpfDestinatario
             })
         });
         
         const data = await response.json();
-        console.log('📨 Resposta da API:', data);
+        console.log('📨 Resposta da preparação de pagamento:', data);
         
         if (response.ok) {
-            showToast('✅ Pedido criado com sucesso!', 'success');
+            showToast('✅ Pagamento preparado! Aguardando confirmação...', 'success');
             
-            if (data.pagamento) {
-                console.log('🎭 Pagamento simulado:', data.pagamento);
-                mostrarQRCodePIX(data.pagamento);
+            // Mostrar PIX simulado
+            if (data.pagamento_simulado) {
+                console.log('🎭 Pagamento simulado preparado:', data.pagamento_simulado);
+                mostrarQRCodePIX(data.pagamento_simulado);
             } else {
-                window.location.href = '/meus-pedidos/';
+                console.log('⚠️ Nenhum pagamento simulado retornado');
+                showToast('Erro: Pagamento não preparado', 'error');
             }
             
         } else {
-            console.error('❌ Erro na criação do pedido:', data);
-            showToast('❌ Erro: ' + (data.error || 'Erro ao criar pedido'), 'error');
+            console.error('❌ Erro ao preparar pagamento:', data);
+            showToast('❌ Erro: ' + (data.error || 'Erro ao preparar pagamento'), 'error');
         }
         
     } catch (error) {
@@ -719,28 +733,6 @@ function copiarPIX(codigo) {
     });
 }
 
-// ===== FUNÇÕES AUXILIARES (EXISTENTES) =====
-async function checkUserAuthentication() {
-    try {
-        const response = await fetch('/api/auth/check/');
-        const data = await response.json();
-        return data.authenticated;
-    } catch (error) {
-        console.error('Erro ao verificar autenticação:', error);
-        return false;
-    }
-}
-
-function showLoginModal() {
-    // Implementar modal de login ou redirecionar
-    window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname);
-}
-
-function showToast(message, type = 'info') {
-    // Implementar toast notifications
-    alert(`${type.toUpperCase()}: ${message}`);
-}
-
 // ===== EXPORTAR FUNÇÕES ESPECÍFICAS =====
 window.alterarQuantidade = alterarQuantidade;
 window.removerItem = removerItem;
@@ -752,6 +744,7 @@ window.handleFinalizarCompra = handleFinalizarCompra;
 window.inicializarEventListeners = inicializarEventListeners;
 window.simularFreteCarrinho = simularFreteCarrinho;
 window.obterCPFUsuario = obterCPFUsuario;
+window.atualizarCarrinhoResumo = atualizarCarrinhoResumo;
 
 console.log('✅ Funções do carrinho disponíveis');
 console.log('🎯 carrinho.js totalmente carregado e inicializado');

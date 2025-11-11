@@ -5,11 +5,12 @@ from .views import (
     detalhes_produto, contato_envio, LoginView, RegisterView, logout_view,
     carrinho, carrinho_json, adicionar_carrinho, remover_carrinho, alterar_quantidade,
     admin_login, admin_index, delete_user, admin_pedidos, admin_produtos,
-    atualizar_status_pedido, perfil_usuario,
-    criar_pedido, produtos_destaque,
+    atualizar_status_pedido, perfil_usuario, produtos_destaque,
     buscar_produtos, atualizar_perfil, check_auth, CheckAuthView,
     ProdutoViewSet, criar_pagamento_abacatepay, detalhes_pedido_admin,
-    simular_frete_api, rastrear_pedido_api, simular_frete_carrinho
+    simular_frete_api, rastrear_pedido_api, simular_frete_carrinho, preparar_pagamento,
+    criar_pedido_apos_pagamento
+
 )
 from .integrations.abacatepay_webhook import abacatepay_webhook
 from rest_framework.routers import DefaultRouter
@@ -34,13 +35,14 @@ urlpatterns = [
     path('api/login/', LoginView.as_view(), name='api-login'),
     path('api/register/', RegisterView.as_view(), name='api-register'),
     path('api/criar-pagamento-abacatepay/<int:pedido_id>/', criar_pagamento_abacatepay, name='criar_pagamento_abacatepay'),
-    path('api/pedido/criar/', criar_pedido, name='criar_pedido'),
     path('api/pedidos/<int:pedido_id>/status/', atualizar_status_pedido, name='api_pedido_status'),
     path('api/produtos/destaque/', produtos_destaque, name='api_produtos_destaque'),
     path('api/produtos/buscar/', buscar_produtos, name='api_produtos_buscar'),
     path('api/perfil/atualizar/', atualizar_perfil, name='api_perfil_atualizar'),
     path('api/auth/check/', CheckAuthView.as_view(), name='api_auth_check'),
     path('api/check-auth/', check_auth, name='check_auth'),
+    path('api/preparar-pagamento/', preparar_pagamento, name='preparar_pagamento'),
+    path('api/criar-pedido-apos-pagamento/', criar_pedido_apos_pagamento, name='criar_pedido_apos_pagamento'),
 
     # FRETE E ENVIO - CORREÇÃO CRÍTICA
     path('api/frete/simular/', simular_frete_api, name='api_frete_simular'),  # CORRIGIDO: de criar_pedido para simular_frete_api
