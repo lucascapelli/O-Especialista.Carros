@@ -27,6 +27,7 @@ def criar_pedido(request):
         usuario = request.user
         endereco_entrega_raw = request.data.get('endereco_entrega')
         metodo_pagamento_tipo = request.data.get('metodo_pagamento', 'pix')
+        cpf_destinatario = request.data.get('cpf_destinatario', '')  # 🔹 NOVO CAMPO
 
         # 🔹 TRATAMENTO DO ENDEREÇO
         if isinstance(endereco_entrega_raw, str):
@@ -37,6 +38,10 @@ def criar_pedido(request):
         if not endereco_entrega or not endereco_entrega.get('cep'):
             return Response({'error': 'Endereço de entrega com CEP é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # 🔹 VALIDAR CPF/CNPJ DO DESTINATÁRIO
+        if not cpf_destinatario:
+            return Response({'error': 'CPF/CNPJ do destinatário é obrigatório para envio.'}, status=status.HTTP_400_BAD_REQUEST)
+
         carrinho = Carrinho.objects.filter(usuario=usuario).first()
         if not carrinho or not carrinho.itens.exists():
             return Response({'error': 'Carrinho vazio.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -45,10 +50,12 @@ def criar_pedido(request):
             nome="Pendente", cor="#6B7280", ordem=1
         )
 
+        # 🔹 CRIAR PEDIDO COM CPF_DESTINATARIO
         pedido = Pedido.objects.create(
             usuario=usuario,
             status=status_pedido,
             endereco_entrega=endereco_entrega,
+            cpf_destinatario=cpf_destinatario,  # 🔹 SALVAR CPF/CNPJ
             total_produtos=0,
             total_final=0
         )
@@ -77,7 +84,7 @@ def criar_pedido(request):
         pagamento = gerar_pagamento(pedido, metodo_pagamento)
 
         response_data = {
-            'message': 'Pedido criado com sucesso!',
+            'message': 'Pedido criado com sucesso! Aguardando pagamento.',
             'pedido_id': pedido.id,
             'numero_pedido': pedido.numero_pedido,
             'total_final': float(pedido.total_final),
@@ -91,11 +98,11 @@ def criar_pedido(request):
             },
             'envio': {
                 'status': 'aguardando_pagamento',
-                'mensagem': 'O envio será criado após a confirmação do pagamento.'
+                'mensagem': 'O envio será criado automaticamente após a confirmação do pagamento.'
             }
         }
 
-        logger.info(f"Pedido criado (aguardando pagamento): {pedido.id}")
+        logger.info(f"Pedido {pedido.id} criado com sucesso. Aguardando pagamento.")
 
         return Response(response_data, status=status.HTTP_201_CREATED)
 

@@ -1,3 +1,4 @@
+# core/integrations/abacatepay_webhook.py
 import json
 import logging
 from django.views.decorators.csrf import csrf_exempt
@@ -29,55 +30,77 @@ def abacatepay_webhook(request):
         if status_pagamento.lower() in ["pago", "approved", "success"]:
             logger.info(f"Pagamento confirmado para pedido {pedido.id}. Criando envio...")
 
-            status_pago, _ = StatusPedido.objects.get_or_create(
-                nome="Pago",
-                defaults={"cor": "#10B981", "ordem": 2}
-            )
-            pedido.status = status_pago
+            # Atualizar status do pedido para "Processando" (pronto para envio)
+            status_processando = StatusPedido.objects.get_or_create(
+                nome="Processando",
+                defaults={"cor": "#F97316", "ordem": 2, "is_final": False}
+            )[0]
+            pedido.status = status_processando
             pedido.save()
 
-            # 🔹 Criação do envio (só agora)
-            transportadora = Transportadora.objects.filter(nome__icontains="Jadlog").first()
-            if not transportadora:
-                transportadora = Transportadora.objects.create(
-                    nome="Jadlog",
-                    codigo="JADLOG_API",
-                    config={"api": "jadlog"},
-                    suporta_cotacao=True,
-                    suporta_rastreio=True
-                )
+            # 🔹 CRIAR ENVIO USANDO O NOVO SHIPPING SERVICE
+            try:
+                # Usar o método criar_envio que recebe o objeto pedido completo
+                resultado_envio = shipping_service.criar_envio(pedido)
+                
+                if resultado_envio.get('status') == 'sucesso':
+                    # Buscar ou criar transportadora Jadlog
+                    transportadora, _ = Transportadora.objects.get_or_create(
+                        codigo='JADLOG',
+                        defaults={
+                            'nome': 'Jadlog', 
+                            'ativo': True,
+                            'suporta_cotacao': True,
+                            'suporta_rastreio': True
+                        }
+                    )
+                    
+                    # Criar objeto Envio no banco
+                    envio = Envio.objects.create(
+                        pedido=pedido,
+                        transportadora=transportadora,
+                        valor_frete=resultado_envio['valor_frete'],
+                        prazo_dias=resultado_envio['prazo_dias'],
+                        servico=resultado_envio['servico'],
+                        codigo_rastreio=resultado_envio['codigo_rastreio'],
+                        url_rastreio=resultado_envio['url_rastreio'],
+                        status_entrega=resultado_envio['status_entrega'],
+                        eventos_rastreio=[]
+                    )
+                    
+                    # Atualizar status do pedido para "Enviado"
+                    status_enviado = StatusPedido.objects.get_or_create(
+                        nome="Enviado",
+                        defaults={"cor": "#3B82F6", "ordem": 3, "is_final": False}
+                    )[0]
+                    pedido.status = status_enviado
+                    pedido.save()
 
-            origem = {"cep": "01153000"}
-            destino = pedido.endereco_entrega
-            peso_total = sum((getattr(item.produto, "peso", None) or 1.0) for item in pedido.itens.all())
-            peso_total = max(peso_total, 0.1)
-            valor_total = float(pedido.total_final)
+                    logger.info(f"✅ Envio criado com sucesso para pedido {pedido.id}")
+                    logger.info(f"📦 Código de rastreio: {resultado_envio['codigo_rastreio']}")
+                    logger.info(f"💰 Valor frete: R$ {resultado_envio['valor_frete']}")
+                    logger.info(f"⏱️ Prazo: {resultado_envio['prazo_dias']} dias")
+                    
+                else:
+                    # Se houve erro na criação do envio
+                    logger.error(f"❌ Erro ao criar envio para pedido {pedido.id}: {resultado_envio.get('erro')}")
+                    
+                    # Manter pedido como "Processando" mas com erro de envio
+                    # Pode-se criar um status específico para "Erro no Envio" se necessário
+                    
+            except Exception as envio_error:
+                logger.error(f"❌ Exceção ao criar envio para pedido {pedido.id}: {str(envio_error)}")
+                # Manter pedido como "Processando" mas registrar o erro
 
-            # 🔹 Use apenas o email do usuário para evitar AttributeError
-            nome_cliente = getattr(pedido.usuario, "email", "Cliente")
-
-            envio_resultado = shipping_service.criar_envio(
-                pedido_id=pedido.id,
-                origem=origem,
-                destino=destino,
-                peso=peso_total,
-                valor=valor_total,
-                nome_cliente=nome_cliente
-            )
-
-            Envio.objects.create(
-                pedido=pedido,
-                transportadora=transportadora,
-                valor_frete=envio_resultado.get("valor_frete", 0),
-                prazo_dias=envio_resultado.get("prazo_dias", 5),
-                servico=envio_resultado.get("servico", "Jadlog Expresso"),
-                codigo_rastreio=envio_resultado.get("codigo_rastreio", ""),
-                url_rastreio=envio_resultado.get("url_rastreio", ""),
-                status_entrega="em_transporte",
-                eventos_rastreio=[]
-            )
-
-            logger.info(f"Envio criado com sucesso para pedido {pedido.id}")
+        elif status_pagamento.lower() in ["cancelado", "cancelled", "failed"]:
+            # Atualizar status para "Cancelado" se o pagamento falhou
+            status_cancelado = StatusPedido.objects.get_or_create(
+                nome="Cancelado",
+                defaults={"cor": "#EF4444", "ordem": 5, "is_final": True}
+            )[0]
+            pedido.status = status_cancelado
+            pedido.save()
+            logger.info(f"❌ Pagamento cancelado para pedido {pedido.id}")
 
         return JsonResponse({"success": True})
 

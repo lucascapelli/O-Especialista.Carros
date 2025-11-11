@@ -8,7 +8,8 @@ from .views import (
     atualizar_status_pedido, perfil_usuario,
     criar_pedido, produtos_destaque,
     buscar_produtos, atualizar_perfil, check_auth, CheckAuthView,
-    ProdutoViewSet, criar_pagamento_abacatepay, detalhes_pedido_admin, atualizar_status_pedido
+    ProdutoViewSet, criar_pagamento_abacatepay, detalhes_pedido_admin,
+    simular_frete_api, rastrear_pedido_api, simular_frete_carrinho
 )
 from .integrations.abacatepay_webhook import abacatepay_webhook
 from rest_framework.routers import DefaultRouter
@@ -41,8 +42,9 @@ urlpatterns = [
     path('api/auth/check/', CheckAuthView.as_view(), name='api_auth_check'),
     path('api/check-auth/', check_auth, name='check_auth'),
 
-    # FRETE E ENVIO
-    path('api/frete/simular/', criar_pedido, name='api_frete_simular'),
+    # FRETE E ENVIO - CORREÇÃO CRÍTICA
+    path('api/frete/simular/', simular_frete_api, name='api_frete_simular'),  # CORRIGIDO: de criar_pedido para simular_frete_api
+    path('api/rastreio/<str:codigo>/', rastrear_pedido_api, name='api_rastreio_pedido'),  # NOVO: Endpoint para rastreio
 
     # PÁGINAS DO USUÁRIO
     path('perfil/', perfil_usuario, name='perfil'),
@@ -52,6 +54,7 @@ urlpatterns = [
     path('adicionar_carrinho/<int:produto_id>/', adicionar_carrinho, name='adicionar_carrinho'),
     path('remover_carrinho/<int:item_id>/', remover_carrinho, name='remover_carrinho'),
     path('alterar-quantidade/<int:item_id>/', alterar_quantidade, name='alterar_quantidade'),
+    path('api/carrinho/simular-frete/', simular_frete_carrinho, name='api_carrinho_simular_frete'),
 
     # ADMIN
     path('admin-login/', admin_login, name='admin_login'),
@@ -61,7 +64,6 @@ urlpatterns = [
     path('admin-panel/produtos/', admin_produtos, name='admin_produtos'),
     path('api/admin/pedidos/<int:pedido_id>/detalhes/', detalhes_pedido_admin, name='admin_pedido_detalhes'),
     path('api/admin/pedidos/<int:pedido_id>/status/', atualizar_status_pedido, name='admin_pedido_status_api'),
-
 
     # LOGOUT
     path('logout/', logout_view, name='logout'),

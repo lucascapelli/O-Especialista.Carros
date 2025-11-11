@@ -1,3 +1,21 @@
+// core/static/core/front-end/js/carrinho.js
+
+// ===== FUNÇÃO CSRF TOKEN (CRÍTICO PARA POSTS) =====
+function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith('csrftoken' + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // ===== DEBUG MELHORADO =====
 console.log('✅ carrinho.js carregado!');
 console.log('DOM Content carregado?', document.readyState);
@@ -24,9 +42,19 @@ document.addEventListener('DOMContentLoaded', function() {
     atualizarCarrinhoResumo();
 });
 
-// ===== INICIALIZAR EVENT LISTENERS =====
+// ===== INICIALIZAR EVENT LISTENERS COM DEBUG COMPLETO =====
 function inicializarEventListeners() {
     console.log('🔄 Inicializando event listeners...');
+    
+    // 🔍 DEBUG COMPLETO DOS ELEMENTOS
+    console.log('🔍 DEBUG - Elementos importantes:');
+    console.log('- Botão finalizar:', document.getElementById('finalizar-compra'));
+    console.log('- Botão calcular frete:', document.getElementById('btn-calcular-frete'));
+    console.log('- Input CEP:', document.getElementById('cep-destino'));
+    console.log('- Resultado frete:', document.getElementById('resultado-frete'));
+    console.log('- Resumo frete:', document.getElementById('resumo-frete'));
+    console.log('- Resumo subtotal:', document.getElementById('resumo-subtotal'));
+    console.log('- Resumo total:', document.getElementById('resumo-total'));
     
     // Botão finalizar compra
     const finalizarBtn = document.getElementById('finalizar-compra');
@@ -35,6 +63,53 @@ function inicializarEventListeners() {
         console.log('✅ Event listener adicionado ao botão finalizar');
     } else {
         console.log('❌ Botão finalizar-compra não encontrado!');
+    }
+
+    // 🔍 DEBUG DETALHADO DO BOTÃO CALCULAR FRETE
+    console.log('🎯 DEBUG - Procurando botão calcular frete...');
+    const calcularFreteBtn = document.getElementById('btn-calcular-frete');
+    console.log('Botão calcular frete encontrado:', calcularFreteBtn);
+
+    if (calcularFreteBtn) {
+        console.log('✅ Botão calcular frete EXISTE no DOM');
+        
+        calcularFreteBtn.addEventListener('click', function(e) {
+            console.log('🎯🎯🎯 CLIQUE NO BOTÃO CALCULAR FRETE DETECTADO!');
+            console.log('Event:', e);
+            console.log('Botão clicado:', this);
+            simularFreteCarrinho();
+        });
+        
+        console.log('✅ Event listener adicionado ao botão calcular frete');
+        
+        // NOVO: Adiciona a máscara/formatação para o campo CEP
+        const inputCep = document.getElementById('cep-destino');
+        if (inputCep) {
+            console.log('✅ Input CEP encontrado, adicionando máscara...');
+            inputCep.addEventListener('input', (e) => {
+                console.log('📝 Input CEP alterado:', e.target.value);
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 5) {
+                    value = value.substring(0, 5) + '-' + value.substring(5, 8);
+                }
+                e.target.value = value;
+                console.log('📝 CEP formatado:', e.target.value);
+            });
+            
+            // Teste: adicionar CEP de exemplo para facilitar testes
+            if (!inputCep.value) {
+                inputCep.value = '01001-000';
+                console.log('📝 CEP de exemplo preenchido: 01001-000');
+            }
+        } else {
+            console.log('❌ Input CEP não encontrado!');
+        }
+    } else {
+        console.log('❌❌❌ BOTÃO CALCULAR FRETE NÃO ENCONTRADO!');
+        console.log('🔍 Procurando todos os botões na página:');
+        document.querySelectorAll('button').forEach(btn => {
+            console.log(`- Botão: ${btn.textContent}`, btn);
+        });
     }
 
     // Delegation para botões de quantidade e remover
@@ -69,6 +144,105 @@ function inicializarEventListeners() {
             }
         }
     });
+}
+
+// ===== FUNÇÃO DE CÁLCULO DE FRETE COM DEBUG COMPLETO =====
+async function simularFreteCarrinho() {
+    console.log('🚚 INICIANDO CÁLCULO DE FRETE...');
+    
+    const inputCep = document.getElementById('cep-destino');
+    const resultadoDiv = document.getElementById('resultado-frete');
+    const resumoFreteSpan = document.getElementById('resumo-frete');
+    
+    console.log('📦 Elementos encontrados:');
+    console.log('- Input CEP:', inputCep);
+    console.log('- Resultado div:', resultadoDiv);
+    console.log('- Resumo frete span:', resumoFreteSpan);
+    
+    if (!inputCep) {
+        console.log('❌ Input CEP não encontrado!');
+        return;
+    }
+    
+    // Formatação e validação
+    const cepDestino = inputCep.value.replace(/\D/g, '');
+    console.log('📍 CEP processado:', cepDestino);
+
+    if (cepDestino.length !== 8) {
+        console.log('❌ CEP inválido:', cepDestino);
+        resultadoDiv.innerHTML = '<p class="text-red-500">CEP inválido. Digite 8 dígitos.</p>';
+        return;
+    }
+
+    console.log('✅ CEP válido, iniciando cálculo...');
+
+    // Indica que o cálculo está em andamento
+    resultadoDiv.innerHTML = '<p class="text-blue-500"><i class="fas fa-spinner fa-spin mr-2"></i> Calculando...</p>';
+    resumoFreteSpan.textContent = 'R$ Calculando...';
+
+    try {
+        console.log('📤 Enviando requisição para /api/carrinho/simular-frete/');
+        console.log('📦 Dados enviados:', { cep_destino: cepDestino });
+        console.log('🔐 CSRF Token:', getCSRFToken() ? 'PRESENTE' : 'AUSENTE');
+
+        const response = await fetch('/api/carrinho/simular-frete/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({ cep_destino: cepDestino })
+        });
+
+        console.log('📥 Resposta recebida:', response.status, response.statusText);
+        
+        const data = await response.json();
+        console.log('📊 Dados da resposta:', data);
+
+        if (data.success) {
+            const frete = parseFloat(data.frete);
+            console.log('✅ Frete calculado com sucesso:', frete);
+            
+            // 1. Atualiza o frete no resumo
+            resumoFreteSpan.textContent = `R$ ${frete.toFixed(2).replace('.', ',')}`;
+
+            // 2. Armazena o valor do frete em localStorage
+            localStorage.setItem('frete_valor', frete.toFixed(2));
+            localStorage.setItem('frete_servico', data.servico);
+            localStorage.setItem('frete_prazo', data.prazo_dias);
+
+            console.log('💾 Frete salvo no localStorage:', {
+                valor: frete,
+                servico: data.servico,
+                prazo: data.prazo_dias
+            });
+
+            // 3. Atualiza o bloco de detalhes (prazo e modalidade)
+            resultadoDiv.innerHTML = `
+                <p class="text-green-600 font-medium">✓ Frete calculado com sucesso!</p>
+                <p>Serviço: <strong class="text-gray-800">${data.servico}</strong></p>
+                <p>Prazo: <strong class="text-gray-800">${data.prazo_dias} dias úteis</strong></p>
+                <p class="text-sm text-gray-500">Valor: R$ ${frete.toFixed(2).replace('.', ',')}</p>
+            `;
+            
+            // 4. Atualiza o total final no resumo
+            await atualizarCarrinhoResumo();
+            showToast('Frete calculado com sucesso!', 'success');
+
+        } else {
+            console.log('❌ Erro no cálculo do frete:', data.error);
+            resultadoDiv.innerHTML = `<p class="text-red-500">❌ Erro: ${data.error}</p>`;
+            resumoFreteSpan.textContent = 'R$ 0,00';
+            localStorage.removeItem('frete_valor'); // Limpa frete em caso de erro
+            await atualizarCarrinhoResumo();
+        }
+    } catch (error) {
+        console.error('❌ Erro na simulação de frete:', error);
+        resultadoDiv.innerHTML = `<p class="text-red-500">❌ Erro de comunicação. Tente novamente.</p>`;
+        resumoFreteSpan.textContent = 'R$ 0,00';
+        localStorage.removeItem('frete_valor');
+        await atualizarCarrinhoResumo();
+    }
 }
 
 // ===== HANDLER DO BOTÃO FINALIZAR =====
@@ -108,9 +282,126 @@ async function handleFinalizarCompra() {
     }
 }
 
-// ===== FUNÇÕES ESPECÍFICAS DO CARRINHO =====
+// ===== FUNÇÃO CRIAR PEDIDO CORRIGIDA COM DEBUG =====
+async function criarPedido() {
+    console.log('📦 INICIANDO CRIAÇÃO DE PEDIDO...');
+    const finalizarBtn = document.getElementById('finalizar-compra');
+    
+    try {
+        // Mostrar loading
+        const originalText = finalizarBtn.innerHTML;
+        finalizarBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...';
+        finalizarBtn.disabled = true;
 
-// Atualizar resumo do carrinho
+        // 🔥 CORREÇÃO: Obter CPF do usuário
+        let cpfDestinatario = await obterCPFUsuario();
+        console.log('📝 CPF obtido:', cpfDestinatario);
+        
+        if (!cpfDestinatario) {
+            showToast('CPF é obrigatório para envio', 'error');
+            finalizarBtn.innerHTML = originalText;
+            finalizarBtn.disabled = false;
+            return;
+        }
+
+        // Endereço fixo por enquanto (deveria vir de um formulário)
+        const enderecoEntrega = {
+            rua: "Rua do Cliente",
+            numero: "123", 
+            bairro: "Centro",
+            cidade: "São Paulo",
+            estado: "SP",
+            cep: "01000-000",
+            nome_completo: "Cliente Teste" // 🔥 ADICIONAR NOME
+        };
+
+        console.log('📦 Dados do pedido a serem enviados:', {
+            metodo_pagamento: "pix",
+            endereco_entrega: enderecoEntrega,
+            cpf_destinatario: cpfDestinatario
+        });
+
+        const response = await fetch('/api/pedido/criar/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                metodo_pagamento: "pix",
+                endereco_entrega: enderecoEntrega,
+                cpf_destinatario: cpfDestinatario // 🔥 ENVIAR CPF CORRETAMENTE
+            })
+        });
+        
+        const data = await response.json();
+        console.log('📨 Resposta da API:', data);
+        
+        if (response.ok) {
+            showToast('✅ Pedido criado com sucesso!', 'success');
+            
+            if (data.pagamento) {
+                console.log('🎭 Pagamento simulado:', data.pagamento);
+                mostrarQRCodePIX(data.pagamento);
+            } else {
+                window.location.href = '/meus-pedidos/';
+            }
+            
+        } else {
+            console.error('❌ Erro na criação do pedido:', data);
+            showToast('❌ Erro: ' + (data.error || 'Erro ao criar pedido'), 'error');
+        }
+        
+    } catch (error) {
+        console.error('Erro:', error);
+        showToast('⚠️ Erro de conexão ao finalizar compra', 'error');
+    } finally {
+        // Restaurar botão
+        if (finalizarBtn) {
+            finalizarBtn.innerHTML = 'Finalizar Compra';
+            finalizarBtn.disabled = false;
+        }
+    }
+}
+
+// ===== FUNÇÃO PARA OBTER CPF DO USUÁRIO =====
+async function obterCPFUsuario() {
+    console.log('🔍 Buscando CPF do usuário...');
+    
+    // Tentar obter do perfil do usuário primeiro
+    try {
+        const response = await fetch('/api/perfil/');
+        if (response.ok) {
+            const perfil = await response.json();
+            console.log('📋 Perfil do usuário:', perfil);
+            if (perfil.cpf) {
+                console.log('✅ CPF encontrado no perfil:', perfil.cpf);
+                return perfil.cpf;
+            }
+        }
+    } catch (error) {
+        console.log('ℹ️ Não foi possível obter CPF do perfil:', error);
+    }
+    
+    // Se não tem CPF, pedir ao usuário
+    console.log('🔄 Solicitando CPF do usuário...');
+    return new Promise((resolve) => {
+        const cpf = prompt('Por favor, informe seu CPF para envio (apenas números):');
+        console.log('📝 CPF informado pelo usuário:', cpf);
+        if (cpf && cpf.replace(/\D/g, '').length === 11) {
+            resolve(cpf.replace(/\D/g, ''));
+        } else if (cpf) {
+            alert('CPF inválido! Deve conter 11 dígitos.');
+            resolve(null);
+        } else {
+            resolve(null);
+        }
+    });
+}
+
+// ===== FUNÇÕES ESPECÍFICAS DO CARRINHO (AJUSTADA) =====
+
+// Função para atualizar o resumo, agora considerando o frete do localStorage
 async function atualizarCarrinhoResumo() {
     console.log('🔄 Atualizando resumo do carrinho...');
     try {
@@ -120,17 +411,37 @@ async function atualizarCarrinhoResumo() {
         const data = await response.json();
         console.log('Dados do carrinho recebidos:', data);
         
+        // NOVO: Obter frete do localStorage (se foi calculado)
+        const freteCalculado = parseFloat(localStorage.getItem('frete_valor')) || 0;
+        console.log('🚚 Frete do localStorage:', freteCalculado);
+        
+        const subtotal = data.subtotal;
+        const totalComFrete = subtotal + freteCalculado;
+
+        console.log('💰 Cálculos:');
+        console.log('- Subtotal:', subtotal);
+        console.log('- Frete:', freteCalculado);
+        console.log('- Total com frete:', totalComFrete);
+
         // Atualizar resumo
         const subtotalElement = document.getElementById('resumo-subtotal');
+        const freteElement = document.getElementById('resumo-frete');
         const totalElement = document.getElementById('resumo-total');
         
         if (subtotalElement) {
-            subtotalElement.textContent = `R$ ${data.subtotal.toFixed(2)}`;
-            console.log('Subtotal atualizado:', subtotalElement.textContent);
+            subtotalElement.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+            console.log('✅ Subtotal atualizado');
         }
+        
+        // Garantir que o campo frete seja atualizado se houver valor
+        if (freteElement) {
+             freteElement.textContent = `R$ ${freteCalculado.toFixed(2).replace('.', ',')}`;
+             console.log('✅ Frete atualizado');
+        }
+
         if (totalElement) {
-            totalElement.textContent = `R$ ${data.total.toFixed(2)}`;
-            console.log('Total atualizado:', totalElement.textContent);
+            totalElement.textContent = `R$ ${totalComFrete.toFixed(2).replace('.', ',')}`;
+            console.log('✅ Total atualizado');
         }
         
         // Atualizar contador de itens
@@ -284,67 +595,25 @@ async function removerItem(itemId) {
     }
 }
 
-// ===== NOVA VERSÃO DA FUNÇÃO CRIAR PEDIDO COM PIX SIMULADO =====
-async function criarPedido() {
-    const finalizarBtn = document.getElementById('finalizar-compra');
+// ===== CORREÇÃO DE EMERGÊNCIA =====
+// Se o botão ainda não funcionar após 2 segundos, força a vinculação
+setTimeout(() => {
+    console.log('🔄 CORREÇÃO DE EMERGÊNCIA - Re-vinculando eventos...');
     
-    try {
-        // Mostrar loading
-        const originalText = finalizarBtn.innerHTML;
-        finalizarBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...';
-        finalizarBtn.disabled = true;
-
-        // Endereço fixo por enquanto
-        const enderecoEntrega = {
-            rua: "Rua do Cliente",
-            numero: "123", 
-            bairro: "Centro",
-            cidade: "São Paulo",
-            estado: "SP",
-            cep: "01000-000"
-        };
-
-        const response = await fetch('/api/pedido/criar/', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCSRFToken(),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                metodo_pagamento: "pix",
-                endereco_entrega: enderecoEntrega
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            showToast('✅ Pedido criado com sucesso!', 'success');
-            
-            // ✅ SEMPRE mostra modal PIX (agora simulado)
-            if (data.pagamento) {
-                console.log('🎭 Pagamento simulado:', data.pagamento);
-                mostrarQRCodePIX(data.pagamento);
-            } else {
-                // Se não tem pagamento, redireciona
-                window.location.href = '/meus-pedidos/';
-            }
-            
-        } else {
-            showToast('❌ Erro: ' + (data.error || 'Erro ao criar pedido'), 'error');
-        }
-        
-    } catch (error) {
-        console.error('Erro:', error);
-        showToast('⚠️ Erro de conexão ao finalizar compra', 'error');
-    } finally {
-        // Restaurar botão
-        if (finalizarBtn) {
-            finalizarBtn.innerHTML = 'Finalizar Compra';
-            finalizarBtn.disabled = false;
-        }
+    const btnCalcular = document.getElementById('btn-calcular-frete');
+    if (btnCalcular) {
+        console.log('🎯 EMERGÊNCIA: Vinculando evento ao botão calcular frete');
+        btnCalcular.onclick = simularFreteCarrinho;
+    } else {
+        console.log('❌ EMERGÊNCIA: Botão calcular frete ainda não encontrado');
     }
-}
+    
+    const inputCep = document.getElementById('cep-destino');
+    if (inputCep && !inputCep.value) {
+        inputCep.value = '01001-000'; // CEP de exemplo para teste
+        console.log('📝 EMERGÊNCIA: CEP de exemplo preenchido');
+    }
+}, 2000);
 
 // ===== NOVA VERSÃO DA FUNÇÃO MOSTRAR QR CODE PIX (SIMULADO) =====
 function mostrarQRCodePIX(pagamento) {
@@ -450,6 +719,28 @@ function copiarPIX(codigo) {
     });
 }
 
+// ===== FUNÇÕES AUXILIARES (EXISTENTES) =====
+async function checkUserAuthentication() {
+    try {
+        const response = await fetch('/api/auth/check/');
+        const data = await response.json();
+        return data.authenticated;
+    } catch (error) {
+        console.error('Erro ao verificar autenticação:', error);
+        return false;
+    }
+}
+
+function showLoginModal() {
+    // Implementar modal de login ou redirecionar
+    window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname);
+}
+
+function showToast(message, type = 'info') {
+    // Implementar toast notifications
+    alert(`${type.toUpperCase()}: ${message}`);
+}
+
 // ===== EXPORTAR FUNÇÕES ESPECÍFICAS =====
 window.alterarQuantidade = alterarQuantidade;
 window.removerItem = removerItem;
@@ -459,6 +750,8 @@ window.copiarPIX = copiarPIX;
 window.simularPagamentoAprovado = simularPagamentoAprovado;
 window.handleFinalizarCompra = handleFinalizarCompra;
 window.inicializarEventListeners = inicializarEventListeners;
+window.simularFreteCarrinho = simularFreteCarrinho;
+window.obterCPFUsuario = obterCPFUsuario;
 
 console.log('✅ Funções do carrinho disponíveis');
 console.log('🎯 carrinho.js totalmente carregado e inicializado');

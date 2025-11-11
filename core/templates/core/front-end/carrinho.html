@@ -179,6 +179,23 @@
                     <div class="bg-white rounded-lg shadow cart-card p-6 sticky top-4">
                         <h2 class="text-xl font-bold text-gray-800 mb-6">Resumo do Pedido</h2>
 
+                        <!-- NOVA SEÇÃO: Simulação de Frete -->
+                        <div id="secao-frete" class="mb-6 border-b border-gray-100 pb-4">
+                            <h3 class="text-lg font-bold text-gray-800 mb-3">Simular Frete</h3>
+                            <label for="cep-destino" class="block text-sm font-medium text-gray-700 mb-2">CEP de Destino</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="cep-destino" placeholder="00000-000" maxlength="9"
+                                    class="flex-1 min-w-0 block w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <button id="btn-calcular-frete" type="button"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition">
+                                    Calcular
+                                </button>
+                            </div>
+                            <div id="resultado-frete" class="mt-2 text-sm text-gray-600">
+                                <!-- Resultado do frete será exibido aqui -->
+                            </div>
+                        </div>
+
                         <!-- Coupon Code -->
                         <div class="mb-6">
                             <label for="coupon" class="block text-sm font-medium text-gray-700 mb-2">Cupom de

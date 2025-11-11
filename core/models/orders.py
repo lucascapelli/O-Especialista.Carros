@@ -13,6 +13,8 @@ class StatusPedido(models.Model):
 
     class Meta:
         ordering = ['ordem']
+        verbose_name = "Status do Pedido"
+        verbose_name_plural = "Status dos Pedidos"
 
     def __str__(self):
         return self.nome
@@ -46,6 +48,14 @@ class Pedido(BaseModel):
     numero_pedido = models.CharField(max_length=20, unique=True, editable=False)
     usuario = models.ForeignKey(User, on_delete=models.PROTECT, related_name='pedidos')
     status = models.ForeignKey(StatusPedido, on_delete=models.PROTECT)
+    
+    # CPF/CNPJ do destinatário (OBRIGATÓRIO para Jadlog)
+    cpf_destinatario = models.CharField(
+        max_length=14,
+        blank=True,
+        help_text="CPF ou CNPJ do destinatário (obrigatório para envio)"
+    )
+    
     total_produtos = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_descontos = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_frete = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -60,6 +70,8 @@ class Pedido(BaseModel):
             models.Index(fields=['status', 'criado_em']),
             models.Index(fields=['usuario', 'criado_em']),
         ]
+        verbose_name = "Pedido"
+        verbose_name_plural = "Pedidos"
 
     def save(self, *args, **kwargs):
         if not self.numero_pedido:
@@ -99,6 +111,43 @@ class Pedido(BaseModel):
             self.total_final = 0
             print(f"Erro ao calcular totais do pedido: {e}")
 
+    @property
+    def endereco_completo(self):
+        """Retorna o endereço formatado para exibição"""
+        if not self.endereco_entrega:
+            return "Endereço não informado"
+        
+        end = self.endereco_entrega
+        return f"{end.get('logradouro', '')}, {end.get('numero', '')} - {end.get('bairro', '')}, {end.get('cidade', '')} - {end.get('estado', '')}"
+
+    def validar_para_envio(self):
+        """
+        Valida se o pedido tem todos os dados necessários para envio
+        Returns: (bool, str) - (válido, mensagem_erro)
+        """
+        # Verificar CPF/CNPJ do destinatário
+        if not self.cpf_destinatario:
+            return False, "CPF/CNPJ do destinatário não informado"
+        
+        # Verificar endereço completo
+        if not self.endereco_entrega:
+            return False, "Endereço de entrega não informado"
+        
+        campos_obrigatorios = ['logradouro', 'numero', 'bairro', 'cidade', 'estado', 'cep']
+        for campo in campos_obrigatorios:
+            if not self.endereco_entrega.get(campo):
+                return False, f"Campo {campo} do endereço não informado"
+        
+        # Verificar se tem itens com dimensões
+        if not self.itens.exists():
+            return False, "Pedido não possui itens"
+        
+        for item in self.itens.all():
+            if not item.produto.peso or float(item.produto.peso) <= 0:
+                return False, f"Produto {item.produto.nome} não possui peso definido"
+        
+        return True, "Pedido válido para envio"
+
 
 class ItemPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='itens')
@@ -106,9 +155,18 @@ class ItemPedido(models.Model):
     quantidade = models.PositiveIntegerField()
     preco_unitario = models.DecimalField(max_digits=10, decimal_places=2)
 
+    class Meta:
+        verbose_name = "Item do Pedido"
+        verbose_name_plural = "Itens do Pedido"
+
     @property
     def subtotal(self):
         return self.quantidade * self.preco_unitario
 
     def __str__(self):
         return f"{self.quantidade}x {self.produto.nome} - R$ {self.subtotal}"
+    
+    @property
+    def peso_total(self):
+        """Retorna o peso total do item (quantidade * peso unitário)"""
+        return float(self.produto.peso) * self.quantidade
