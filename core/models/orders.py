@@ -1,3 +1,4 @@
+# core/models/orders.py
 from django.db import models
 from django.utils import timezone
 from .base import BaseModel
@@ -15,6 +16,30 @@ class StatusPedido(models.Model):
 
     def __str__(self):
         return self.nome
+
+    @classmethod
+    def criar_status_padrao(cls):
+        """Cria os status padrão do sistema se não existirem"""
+        status_padrao = [
+            {'nome': 'Pendente', 'ordem': 1, 'cor': '#F59E0B', 'is_final': False},
+            {'nome': 'Processando', 'ordem': 2, 'cor': '#F97316', 'is_final': False},
+            {'nome': 'Enviado', 'ordem': 3, 'cor': '#3B82F6', 'is_final': False},
+            {'nome': 'Entregue', 'ordem': 4, 'cor': '#10B981', 'is_final': True},
+            {'nome': 'Cancelado', 'ordem': 5, 'cor': '#EF4444', 'is_final': True},
+        ]
+        
+        criados = []
+        for status_data in status_padrao:
+            obj, created = cls.objects.get_or_create(
+                nome=status_data['nome'],
+                defaults=status_data
+            )
+            if created:
+                criados.append(obj.nome)
+        
+        if criados:
+            print(f"✅ Status criados: {', '.join(criados)}")
+        return criados
 
 
 class Pedido(BaseModel):
@@ -40,6 +65,12 @@ class Pedido(BaseModel):
         if not self.numero_pedido:
             timestamp = timezone.now().strftime('%y%m%d%H%M%S')
             self.numero_pedido = f"ORD{timestamp}"
+        
+        # Garantir que existe pelo menos o status Pendente
+        if not self.status_id:
+            StatusPedido.criar_status_padrao()
+            status_padrao = StatusPedido.objects.get(nome='Pendente')
+            self.status = status_padrao
         
         # Primeiro salva para ter um ID
         is_new = self.pk is None

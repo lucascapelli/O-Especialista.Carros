@@ -5,8 +5,8 @@ from .views import (
     detalhes_produto, contato_envio, LoginView, RegisterView, logout_view,
     carrinho, carrinho_json, adicionar_carrinho, remover_carrinho, alterar_quantidade,
     admin_login, admin_index, delete_user, admin_pedidos, admin_produtos,
-    atualizar_status_pedido, perfil_usuario, meus_pedidos, checkout,
-    criar_pedido, meus_pedidos_api, detalhes_pedido_api, produtos_destaque,
+    atualizar_status_pedido, perfil_usuario,
+    criar_pedido, produtos_destaque,
     buscar_produtos, atualizar_perfil, check_auth, CheckAuthView,
     ProdutoViewSet, criar_pagamento_abacatepay, detalhes_pedido_admin, atualizar_status_pedido
 )
@@ -34,8 +34,6 @@ urlpatterns = [
     path('api/register/', RegisterView.as_view(), name='api-register'),
     path('api/criar-pagamento-abacatepay/<int:pedido_id>/', criar_pagamento_abacatepay, name='criar_pagamento_abacatepay'),
     path('api/pedido/criar/', criar_pedido, name='criar_pedido'),
-    path('api/pedidos/', meus_pedidos_api, name='api_pedidos'),
-    path('api/pedidos/<int:pedido_id>/detalhes/', detalhes_pedido_api, name='api_pedido_detalhes'),
     path('api/pedidos/<int:pedido_id>/status/', atualizar_status_pedido, name='api_pedido_status'),
     path('api/produtos/destaque/', produtos_destaque, name='api_produtos_destaque'),
     path('api/produtos/buscar/', buscar_produtos, name='api_produtos_buscar'),
@@ -48,8 +46,6 @@ urlpatterns = [
 
     # PÁGINAS DO USUÁRIO
     path('perfil/', perfil_usuario, name='perfil'),
-    path('meus-pedidos/', meus_pedidos, name='meus_pedidos'),
-    path('checkout/', checkout, name='checkout'),
     path('carrinho/', carrinho, name='carrinho'),
     path('contato-envio/', contato_envio, name='contato-envio'),
     path('carrinho-json/', carrinho_json, name='carrinho_json'),

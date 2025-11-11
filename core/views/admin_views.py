@@ -42,11 +42,11 @@ def calcular_stats_reais():
     
     return {
         'total_sales': total_vendas,
-        'sales_growth': 12.5,  # Pode calcular baseado no mês anterior
+        'sales_growth': 12.5,
         'orders_today': pedidos_hoje_count,
         'orders_today_change': mudanca_hoje_str,
         'pending_orders': pedidos_pendentes.count(),
-        'pending_orders_change': -2,  # Pode calcular similar
+        'pending_orders_change': -2,
         'average_ticket': ticket_medio,
         'average_ticket_growth': 5.2
     }
@@ -65,21 +65,19 @@ def admin_index(request):
         return redirect('admin_login')
 
     site_language = request.GET.get('site_language', 'pt-BR')
-    allowed_status = ['Todos', 'Pendente', 'Processando', 'Enviado', 'Entregue', 'Cancelado']
-    status_filter = request.GET.get('status', 'Todos')
     section = request.GET.get('section', 'dashboard')
 
-    if status_filter not in allowed_status:
-        status_filter = 'Todos'
+    # DEBUG - Verificar parâmetros recebidos
+    print(f"🎯 DEBUG ADMIN - Section: {section}, GET: {dict(request.GET)}")
 
-    # Filtro de usuários
+    # Filtro de usuários (para outras seções)
     users_list = User.objects.all().order_by('-id')
-    search_query = request.GET.get('search', '')
-    if search_query:
+    users_search = request.GET.get('search', '')
+    if users_search:
         users_list = users_list.filter(
-            models.Q(first_name__icontains=search_query) |
-            models.Q(last_name__icontains=search_query) |
-            models.Q(email__icontains=search_query)
+            models.Q(first_name__icontains=users_search) |
+            models.Q(last_name__icontains=users_search) |
+            models.Q(email__icontains=users_search)
         )
 
     paginator = Paginator(users_list, 10)
@@ -89,35 +87,12 @@ def admin_index(request):
     # CALCULAR STATS REAIS SEMPRE
     stats_reais = calcular_stats_reais()
     
-    # SEMPRE buscar pedidos para a section de vendas
-    orders_search = request.GET.get('search', '')
-    orders_status = request.GET.get('status', 'Todos')
-    orders_list = Pedido.objects.all().select_related(
-        'usuario', 'status', 'pagamento'
-    ).order_by('-criado_em')
-
-    if orders_status != 'Todos':
-        orders_list = orders_list.filter(status__nome=orders_status)
-    if orders_search:
-        orders_list = orders_list.filter(
-            models.Q(numero_pedido__icontains=orders_search) |
-            models.Q(usuario__first_name__icontains=orders_search) |
-            models.Q(usuario__last_name__icontains=orders_search) |
-            models.Q(usuario__email__icontains=orders_search)
-        )
-
-    orders_paginator = Paginator(orders_list, 10)
-    orders_page_number = request.GET.get('page', 1)
-    orders_page = orders_paginator.get_page(orders_page_number)
-
-    # Context base - SEMPRE com dados reais
+    # CONTEXT BASE - sempre inclui stats básicos
     context = {
-        'status': status_filter,
         'site_language': site_language,
         'is_admin': True,
         'current_section': section,
-        'sales_stats': stats_reais,  # ← DADOS REAIS
-        'orders': orders_page,       # ← DADOS REAIS
+        'sales_stats': stats_reais,
         'dashboard_stats': stats_reais,
         'recent_orders': Pedido.objects.all().select_related('usuario', 'status')[:5],
         'recent_products': Produto.objects.all()[:5],
@@ -125,6 +100,46 @@ def admin_index(request):
         'users': users_page,
         'user_roles': ['Admin', 'Usuário']
     }
+
+    # SEÇÃO VENDAS - tratamento específico
+    if section == 'vendas':
+        orders_search = request.GET.get('search', '')
+        orders_status = request.GET.get('status', 'Todos')
+        orders_page_num = request.GET.get('page', 1)
+        
+        print(f"📊 DEBUG VENDAS - Status: {orders_status}, Search: {orders_search}, Page: {orders_page_num}")
+
+        # Query base para pedidos
+        orders_list = Pedido.objects.all().select_related(
+            'usuario', 'status', 'pagamento'
+        ).order_by('-criado_em')
+
+        # Aplicar filtros
+        if orders_status and orders_status != 'Todos':
+            orders_list = orders_list.filter(status__nome=orders_status)
+            print(f"🔍 Filtro status aplicado: {orders_status} -> {orders_list.count()} pedidos")
+        
+        if orders_search:
+            orders_list = orders_list.filter(
+                models.Q(numero_pedido__icontains=orders_search) |
+                models.Q(usuario__first_name__icontains=orders_search) |
+                models.Q(usuario__last_name__icontains=orders_search) |
+                models.Q(usuario__email__icontains=orders_search)
+            )
+            print(f"🔍 Filtro busca aplicado: {orders_search} -> {orders_list.count()} pedidos")
+
+        # Paginação
+        orders_paginator = Paginator(orders_list, 10)
+        orders_page = orders_paginator.get_page(orders_page_num)
+        
+        # Atualizar context para vendas
+        context.update({
+            'orders': orders_page,
+            'status': orders_status,  # Usar orders_status para a seção vendas
+            'search_query': orders_search
+        })
+        
+        print(f"✅ VENDAS - Pedidos na página: {len(orders_page)}")
 
     logger.info(f"Admin acessou painel: {request.user.email} - Seção: {section}")
     return render(request, 'core/admin-front-end/admin_index.html', context)
@@ -183,6 +198,7 @@ def detalhes_pedido_admin(request, pedido_id):
         data = {
             'success': True,
             'pedido': {
+                'id': pedido.id,
                 'numero_pedido': pedido.numero_pedido,
                 'cliente_nome': f"{pedido.usuario.first_name} {pedido.usuario.last_name}",
                 'cliente_email': pedido.usuario.email,
@@ -198,6 +214,10 @@ def detalhes_pedido_admin(request, pedido_id):
                 'total_produtos': float(pedido.total_produtos or 0),
                 'total_frete': float(pedido.total_frete or 0),
                 'total_descontos': float(pedido.total_descontos or 0),
+                'total_final': float(pedido.total_final or 0),
+                'status': pedido.status.nome,
+                'status_pagamento': getattr(pedido.pagamento, 'status', 'N/A') if pedido.pagamento else 'N/A',
+                'criado_em': pedido.criado_em.isoformat()
             }
         }
         return JsonResponse(data)
@@ -233,19 +253,41 @@ def admin_produtos(request):
 def atualizar_status_pedido(request, pedido_id):
     if not request.user.is_admin:
         return JsonResponse({'success': False, 'error': 'Permissão negada'}, status=403)
+    
     try:
         data = json.loads(request.body)
         novo_status_nome = data.get('status')
+        
+        print(f"🔄 ATUALIZAR STATUS - Pedido: {pedido_id}, Novo Status: {novo_status_nome}")
+        
         if not novo_status_nome:
             return JsonResponse({'success': False, 'error': 'Status não informado'}, status=400)
 
-        status_obj = get_object_or_404(StatusPedido, nome=novo_status_nome)
+        # CORREÇÃO: Buscar o status existente no banco
+        try:
+            status_obj = StatusPedido.objects.get(nome=novo_status_nome)
+        except StatusPedido.DoesNotExist:
+            # Listar status disponíveis para ajudar no debug
+            status_disponiveis = list(StatusPedido.objects.values_list('nome', flat=True))
+            return JsonResponse({
+                'success': False, 
+                'error': f'Status "{novo_status_nome}" não encontrado. Status disponíveis: {", ".join(status_disponiveis)}'
+            }, status=400)
+        
         pedido = get_object_or_404(Pedido, id=pedido_id)
         pedido.status = status_obj
         pedido.save()
 
         logger.info(f"Status do pedido {pedido_id} alterado para {novo_status_nome}")
-        return JsonResponse({'success': True, 'message': 'Status atualizado com sucesso!'})
+        return JsonResponse({
+            'success': True, 
+            'message': f'Status atualizado para: {novo_status_nome}',
+            'novo_status': novo_status_nome
+        })
+        
     except Exception as e:
         logger.error(f"Erro ao atualizar status pedido {pedido_id}: {str(e)}")
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        return JsonResponse({
+            'success': False, 
+            'error': f'Erro interno: {str(e)}'
+        }, status=500)

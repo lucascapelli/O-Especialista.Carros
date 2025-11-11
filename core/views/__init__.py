@@ -13,8 +13,7 @@ from .carrinho_views import (
 from .pagamento_views import criar_pagamento_abacatepay
 
 from .pedido_views import (
-    criar_pedido, meus_pedidos_api, detalhes_pedido_api,
-    meus_pedidos, checkout
+    criar_pedido
 )
 from .produto_views import (
     ProdutoViewSet, produtos_destaque, buscar_produtos
