@@ -16,39 +16,56 @@ import json
 logger = logging.getLogger(__name__)
 
 def calcular_stats_reais():
-    """Calcula estatísticas REAIS do banco de dados"""
+    """Calcula estatísticas REAIS do banco de dados - CORRIGIDA"""
     hoje = timezone.now().date()
     ontem = hoje - timedelta(days=1)
+    mes_passado = hoje - timedelta(days=30)
     
-    # Total de vendas
+    # Pedidos totais
     total_pedidos = Pedido.objects.all()
     pedidos_hoje = total_pedidos.filter(criado_em__date=hoje)
     pedidos_ontem = total_pedidos.filter(criado_em__date=ontem)
+    pedidos_mes_passado = total_pedidos.filter(criado_em__date__gte=mes_passado, criado_em__date__lt=hoje)
     pedidos_pendentes = total_pedidos.filter(status__nome='Pendente')
     
-    # Cálculos reais
+    # Cálculos REAIS
     total_vendas = float(total_pedidos.aggregate(total=models.Sum('total_final'))['total'] or 0)
+    total_vendas_mes_passado = float(pedidos_mes_passado.aggregate(total=models.Sum('total_final'))['total'] or 0)
+    
     pedidos_hoje_count = pedidos_hoje.count()
     pedidos_ontem_count = pedidos_ontem.count()
+    
+    # Crescimento REAL (não estático)
+    sales_growth = 0
+    if total_vendas_mes_passado > 0:
+        sales_growth = ((total_vendas - total_vendas_mes_passado) / total_vendas_mes_passado) * 100
     
     # Mudança desde ontem
     mudanca_hoje = pedidos_hoje_count - pedidos_ontem_count
     mudanca_hoje_str = f"+{mudanca_hoje}" if mudanca_hoje >= 0 else f"{mudanca_hoje}"
     
-    # Ticket médio
+    # Ticket médio REAL
     ticket_medio = 0
+    ticket_medio_mes_passado = 0
     if total_pedidos.count() > 0:
         ticket_medio = float(total_pedidos.aggregate(avg=models.Avg('total_final'))['avg'] or 0)
+    if pedidos_mes_passado.count() > 0:
+        ticket_medio_mes_passado = float(pedidos_mes_passado.aggregate(avg=models.Avg('total_final'))['avg'] or 0)
+    
+    # Crescimento do ticket REAL
+    ticket_growth = 0
+    if ticket_medio_mes_passado > 0:
+        ticket_growth = ((ticket_medio - ticket_medio_mes_passado) / ticket_medio_mes_passado) * 100
     
     return {
         'total_sales': total_vendas,
-        'sales_growth': 12.5,
+        'sales_growth': round(sales_growth, 1),  # AGORA DINÂMICO
         'orders_today': pedidos_hoje_count,
         'orders_today_change': mudanca_hoje_str,
         'pending_orders': pedidos_pendentes.count(),
-        'pending_orders_change': -2,
+        'pending_orders_change': mudanca_hoje,  # AGORA DINÂMICO
         'average_ticket': ticket_medio,
-        'average_ticket_growth': 5.2
+        'average_ticket_growth': round(ticket_growth, 1)  # AGORA DINÂMICO
     }
 
 # ===================== PERFIL USUÁRIO =====================

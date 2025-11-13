@@ -71,6 +71,20 @@ async function goToOrdersPage(page) {
     }
 }
 
+// ====================
+// ATUALIZAÇÃO DE PAGINAÇÃO
+// ====================
+
+function atualizarPaginacao(start, end, total) {
+    document.getElementById('start-index').textContent = start;
+    document.getElementById('end-index').textContent = end;
+    document.getElementById('total-results').textContent = total;
+}
+
+// ====================
+// PROCESSAMENTO DA RESPOSTA AJAX
+// ====================
+
 function processAjaxResponse(html) {
     return new Promise((resolve, reject) => {
         try {
@@ -82,12 +96,23 @@ function processAjaxResponse(html) {
                 throw new Error('Seção de vendas não encontrada na resposta');
             }
             
+            // EXTRAIR DADOS DA PAGINAÇÃO da nova resposta
+            const newStartIndex = newVendasSection.querySelector('#start-index')?.textContent || '0';
+            const newEndIndex = newVendasSection.querySelector('#end-index')?.textContent || '0';
+            const newTotalResults = newVendasSection.querySelector('#total-results')?.textContent || '0';
+            
+            // ATUALIZAR STATS
+            atualizarStatsComDados(html);
+            
+            // ATUALIZAR PAGINAÇÃO
+            atualizarPaginacao(newStartIndex, newEndIndex, newTotalResults);
+            
             const currentVendasSection = document.getElementById('vendas-section');
             if (!currentVendasSection) {
                 throw new Error('Seção de vendas atual não encontrada');
             }
             
-            // IMPORTANTE: Substituir APENAS o conteúdo interno, mantendo a seção
+            // Substituir o conteúdo (agora os números já foram atualizados)
             const newContent = newVendasSection.innerHTML;
             currentVendasSection.innerHTML = newContent;
             
@@ -105,6 +130,62 @@ function processAjaxResponse(html) {
             reject(error);
         }
     });
+}
+
+// ====================
+// ATUALIZAÇÃO DE STATS COM AJAX
+// ====================
+
+function atualizarStatsComDados(html) {
+    try {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        
+        // Buscar as NOVAS stats da resposta
+        const newStatsSection = tempDiv.querySelector('#vendas-section');
+        if (!newStatsSection) return;
+        
+        // Extrair os valores das novas stats
+        const newTotalSales = newStatsSection.querySelector('[data-stat="total-sales"]')?.textContent;
+        const newOrdersToday = newStatsSection.querySelector('[data-stat="orders-today"]')?.textContent;
+        const newPendingOrders = newStatsSection.querySelector('[data-stat="pending-orders"]')?.textContent;
+        const newAverageTicket = newStatsSection.querySelector('[data-stat="average-ticket"]')?.textContent;
+        const newSalesGrowth = newStatsSection.querySelector('[data-stat="sales-growth"]')?.textContent;
+        const newOrdersTodayChange = newStatsSection.querySelector('[data-stat="orders-today-change"]')?.textContent;
+        const newPendingOrdersChange = newStatsSection.querySelector('[data-stat="pending-orders-change"]')?.textContent;
+        const newAverageTicketGrowth = newStatsSection.querySelector('[data-stat="average-ticket-growth"]')?.textContent;
+        
+        // Atualizar os elementos atuais
+        if (newTotalSales) {
+            document.querySelector('[data-stat="total-sales"]').textContent = newTotalSales;
+        }
+        if (newOrdersToday) {
+            document.querySelector('[data-stat="orders-today"]').textContent = newOrdersToday;
+        }
+        if (newPendingOrders) {
+            document.querySelector('[data-stat="pending-orders"]').textContent = newPendingOrders;
+        }
+        if (newAverageTicket) {
+            document.querySelector('[data-stat="average-ticket"]').textContent = newAverageTicket;
+        }
+        if (newSalesGrowth) {
+            document.querySelector('[data-stat="sales-growth"]').textContent = newSalesGrowth;
+        }
+        if (newOrdersTodayChange) {
+            document.querySelector('[data-stat="orders-today-change"]').textContent = newOrdersTodayChange;
+        }
+        if (newPendingOrdersChange) {
+            document.querySelector('[data-stat="pending-orders-change"]').textContent = newPendingOrdersChange;
+        }
+        if (newAverageTicketGrowth) {
+            document.querySelector('[data-stat="average-ticket-growth"]').textContent = newAverageTicketGrowth;
+        }
+        
+        console.log('📊 Stats atualizadas via AJAX');
+        
+    } catch (error) {
+        console.error('❌ Erro ao atualizar stats:', error);
+    }
 }
 
 function handleOrdersFilter() {
@@ -578,3 +659,5 @@ window.editarStatusPedido = editarStatusPedido;
 window.fecharModal = fecharModal;
 window.goToOrdersPage = goToOrdersPage;
 window.handleOrdersFilter = handleOrdersFilter;
+window.atualizarPaginacao = atualizarPaginacao;
+window.processAjaxResponse = processAjaxResponse;
