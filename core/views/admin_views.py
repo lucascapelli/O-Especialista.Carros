@@ -194,36 +194,81 @@ def detalhes_pedido_admin(request, pedido_id):
         return JsonResponse({'success': False, 'error': 'Permissão negada'}, status=403)
     try:
         pedido = get_object_or_404(Pedido, id=pedido_id)
-        itens = pedido.itenspedido_set.all()
-        data = {
-            'success': True,
-            'pedido': {
-                'id': pedido.id,
-                'numero_pedido': pedido.numero_pedido,
-                'cliente_nome': f"{pedido.usuario.first_name} {pedido.usuario.last_name}",
-                'cliente_email': pedido.usuario.email,
-                'cliente_telefone': getattr(pedido.usuario, 'telefone', 'N/A'),
-                'endereco_entrega': getattr(pedido, 'endereco_entrega', None),
-                'itens': [
-                    {
-                        'produto_nome': item.produto.nome,
-                        'quantidade': item.quantidade,
-                        'subtotal': float(item.subtotal)
-                    } for item in itens
-                ],
-                'total_produtos': float(pedido.total_produtos or 0),
-                'total_frete': float(pedido.total_frete or 0),
-                'total_descontos': float(pedido.total_descontos or 0),
-                'total_final': float(pedido.total_final or 0),
-                'status': pedido.status.nome,
-                'status_pagamento': getattr(pedido.pagamento, 'status', 'N/A') if pedido.pagamento else 'N/A',
-                'criado_em': pedido.criado_em.isoformat()
-            }
+        
+        # DEBUG: Verificar relações disponíveis
+        print(f"🔍 DEBUG - Buscando itens do pedido {pedido_id}")
+        print(f"📦 Atributos do pedido: {[attr for attr in dir(pedido) if 'item' in attr.lower()]}")
+        
+        # CORREÇÃO: Use a relação correta baseada no seu modelo
+        # Tente diferentes nomes comuns para a relação de itens
+        itens = []
+        
+        # Opção 1: Tentar 'itens' (mais comum)
+        if hasattr(pedido, 'itens') and callable(getattr(pedido, 'itens')):
+            try:
+                itens = pedido.itens.all()
+                print(f"✅ Itens encontrados via 'itens': {itens.count()}")
+            except Exception as e:
+                print(f"❌ Erro em 'itens': {e}")
+        
+        # Opção 2: Se 'itens' não funcionar, tentar acessar via related_name
+        if not itens:
+            try:
+                # Buscar qualquer relação que contenha 'item' no nome
+                for field_name in dir(pedido):
+                    if 'item' in field_name.lower() and not field_name.startswith('_'):
+                        field = getattr(pedido, field_name)
+                        if hasattr(field, 'all'):
+                            itens = field.all()
+                            print(f"✅ Itens encontrados via '{field_name}': {itens.count()}")
+                            break
+            except Exception as e:
+                print(f"❌ Erro em busca por related_name: {e}")
+        
+        # Opção 3: Último recurso - buscar manualmente
+        if not itens:
+            try:
+                from core.models.orders import ItemPedido  # Ajuste conforme seu modelo
+                itens = ItemPedido.objects.filter(pedido=pedido)
+                print(f"✅ Itens encontrados manualmente: {itens.count()}")
+            except Exception as e:
+                print(f"❌ Erro em busca manual: {e}")
+        
+        # Se ainda não encontrou, criar lista vazia
+        if not itens:
+            itens = []
+            print("⚠️ Nenhum item encontrado para o pedido")
+
+        # Serializar os dados
+        dados_pedido = {
+            'id': pedido.id,
+            'numero_pedido': pedido.numero_pedido,
+            'cliente_nome': f"{pedido.usuario.first_name} {pedido.usuario.last_name}".strip() or pedido.usuario.email,
+            'cliente_email': pedido.usuario.email,
+            'cliente_telefone': getattr(pedido.usuario.cliente, 'telefone', 'N/A') if hasattr(pedido.usuario, 'cliente') else 'N/A',
+            'endereco_entrega': getattr(pedido, 'endereco_entrega', 'N/A'),
+            'itens': [
+                {
+                    'produto_nome': item.produto.nome if item.produto else 'Produto não encontrado',
+                    'quantidade': item.quantidade,
+                    'subtotal': float(item.subtotal) if item.subtotal else 0.0
+                } for item in itens
+            ],
+            'total_produtos': float(pedido.total_produtos or 0),
+            'total_frete': float(pedido.total_frete or 0),
+            'total_descontos': float(pedido.total_descontos or 0),
+            'total_final': float(pedido.total_final or 0),
+            'status': pedido.status.nome if pedido.status else 'N/A',
+            'status_pagamento': getattr(pedido.pagamento, 'status', 'N/A') if pedido.pagamento else 'N/A',
+            'criado_em': pedido.criado_em.isoformat() if pedido.criado_em else None
         }
-        return JsonResponse(data)
+
+        print(f"✅ Dados serializados - {len(dados_pedido['itens'])} itens")
+        return JsonResponse({'success': True, 'pedido': dados_pedido})
+        
     except Exception as e:
         logger.error(f"Erro ao buscar detalhes do pedido {pedido_id}: {str(e)}")
-        return JsonResponse({'success': False, 'error': 'Erro interno'}, status=500)
+        return JsonResponse({'success': False, 'error': f'Erro interno: {str(e)}'}, status=500)
 
 # ===================== ADMIN PRODUTOS =====================
 @login_required

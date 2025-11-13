@@ -281,7 +281,7 @@ async function verDetalhesPedido(pedidoId) {
     try {
         mostrarLoading();
         
-        const response = await fetch(`/api/pedidos/${pedidoId}/detalhes/`);
+        const response = await fetch(`/api/admin/pedidos/${pedidoId}/detalhes/`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         const data = await response.json();
@@ -346,7 +346,7 @@ async function atualizarStatusPedido(pedidoId, novoStatus) {
         
         console.log(`🔄 Atualizando pedido ${pedidoId} para status: ${novoStatus}`);
         
-        const response = await fetch(`/api/pedidos/${pedidoId}/status/`, {
+        const response = await fetch(`/api/admin/pedidos/${pedidoId}/status/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
