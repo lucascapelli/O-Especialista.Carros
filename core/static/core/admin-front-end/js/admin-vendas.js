@@ -21,11 +21,38 @@ function setupVendasSection() {
     
     console.log('✅ Seção de vendas encontrada');
     
+    // INICIALIZAR PAGINAÇÃO COM VALORES INICIAIS DO DJANGO
+    inicializarPaginacaoComDados();
+    
     initializeFilters();
     initializePagination();
     initializeVendasButtons();
     
     console.log('🎉 Setup da seção de vendas COMPLETO!');
+}
+
+// ====================
+// INICIALIZAÇÃO DA PAGINAÇÃO COM DADOS DO DJANGO
+// ====================
+
+function inicializarPaginacaoComDados() {
+    try {
+        // Extrair valores iniciais do HTML renderizado pelo Django
+        const startIndexElement = document.getElementById('start-index');
+        const endIndexElement = document.getElementById('end-index'); 
+        const totalResultsElement = document.getElementById('total-results');
+        
+        if (startIndexElement && endIndexElement && totalResultsElement) {
+            // Se os elementos já têm valores do Django, manter
+            const startIndex = startIndexElement.textContent;
+            const endIndex = endIndexElement.textContent;
+            const totalResults = totalResultsElement.textContent;
+            
+            console.log('📊 Paginação inicializada:', { startIndex, endIndex, totalResults });
+        }
+    } catch (error) {
+        console.error('❌ Erro ao inicializar paginação:', error);
+    }
 }
 
 // Inicialização imediata + DOMContentLoaded
@@ -661,3 +688,4 @@ window.goToOrdersPage = goToOrdersPage;
 window.handleOrdersFilter = handleOrdersFilter;
 window.atualizarPaginacao = atualizarPaginacao;
 window.processAjaxResponse = processAjaxResponse;
+window.inicializarPaginacaoComDados = inicializarPaginacaoComDados;

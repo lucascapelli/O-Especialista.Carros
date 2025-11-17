@@ -1,4 +1,10 @@
 # core/views/__init__.py
+from .admin_views import (
+    admin_index, delete_user, admin_pedidos, admin_produtos,
+    atualizar_status_pedido, perfil_usuario, detalhes_pedido_admin,
+    admin_user_profile, toggle_user_status, force_logout_user, send_password_reset,
+    toggle_suspicious_user, update_user_risk_level  # FUNÇÕES COMPLETAS
+)
 from .public_views import (
     index, login_page, esqueceu_senha_page, criar_conta_page,
     produtos_listagem, detalhes_produto, contato_envio, home
@@ -12,13 +18,9 @@ from .carrinho_views import (
     simular_frete_carrinho
 )
 from .pagamento_views import criar_pagamento_abacatepay
-from .pedido_views import  preparar_pagamento, criar_pedido_apos_pagamento ,meus_pedidos 
+from .pedido_views import preparar_pagamento, criar_pedido_apos_pagamento, meus_pedidos
 from .produto_views import (
     ProdutoViewSet, produtos_destaque, buscar_produtos
-)
-from .admin_views import (
-    admin_index, delete_user, admin_pedidos, admin_produtos,
-    atualizar_status_pedido, perfil_usuario, detalhes_pedido_admin
 )
 from .api_views import (
     check_auth, CheckAuthView, atualizar_perfil

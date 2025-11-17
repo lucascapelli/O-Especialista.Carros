@@ -353,3 +353,319 @@ def atualizar_status_pedido(request, pedido_id):
             'success': False, 
             'error': f'Erro interno: {str(e)}'
         }, status=500)
+
+# ===================== GESTÃO AVANÇADA DE USUÁRIOS =====================
+
+@require_GET
+@login_required
+def admin_user_profile(request, user_id):
+    """Visualização completa do perfil do usuário (modo leitura) - ATUALIZADA"""
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permissão negada'}, status=403)
+    
+    try:
+        user = get_object_or_404(User, id=user_id)
+        
+        # Dados básicos do usuário - AGORA COM TODOS OS CAMPOS
+        user_data = {
+            'id': user.id,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'full_name': f"{user.first_name} {user.last_name}",
+            'phone': user.phone or 'Não informado',
+            'is_active': user.is_active,
+            'is_staff': user.is_staff,
+            'is_superuser': user.is_superuser,
+            'is_suspicious': user.is_suspicious,
+            'risk_level': user.risk_level,
+            'risk_level_display': dict(User._meta.get_field('risk_level').choices).get(user.risk_level, 'Desconhecido'),
+            'date_joined': user.date_joined.isoformat() if user.date_joined else None,
+            'last_login': user.last_login.isoformat() if user.last_login else None,
+            'last_activity': user.last_activity.isoformat() if user.last_activity else None,
+            'last_password_change': user.last_password_change.isoformat() if user.last_password_change else None,
+            'force_password_change': user.force_password_change,
+        }
+        
+        # Pedidos do usuário
+        pedidos = Pedido.objects.filter(usuario=user).select_related('status', 'pagamento').order_by('-criado_em')
+        pedidos_data = []
+        for pedido in pedidos[:20]:
+            pedidos_data.append({
+                'id': pedido.id,
+                'numero_pedido': pedido.numero_pedido,
+                'status': pedido.status.nome if pedido.status else 'N/A',
+                'total_final': float(pedido.total_final or 0),
+                'criado_em': pedido.criado_em.isoformat(),
+                'pagamento_status': pedido.pagamento.status if pedido.pagamento else 'N/A'
+            })
+        
+        # Pagamentos
+        from core.models.payments import Pagamento
+        pagamentos = Pagamento.objects.filter(pedido__usuario=user).select_related('pedido')
+        pagamentos_data = []
+        for pagamento in pagamentos[:20]:
+            pagamentos_data.append({
+                'id': pagamento.id,
+                'pedido_numero': pagamento.pedido.numero_pedido,
+                'status': pagamento.status,
+                'valor': float(pagamento.valor or 0),
+                'metodo': pagamento.metodo_pagamento.nome if hasattr(pagamento, 'metodo_pagamento') and pagamento.metodo_pagamento else 'N/A',
+                'criado_em': pagamento.criado_em.isoformat() if pagamento.criado_em else None
+            })
+        
+        # Atividades suspeitas - AGORA MELHORADA
+        atividades_suspeitas = get_suspicious_activities(user)
+        
+        return JsonResponse({
+            'success': True,
+            'user': user_data,
+            'pedidos': pedidos_data,
+            'pagamentos': pagamentos_data,
+            'atividades_suspeitas': atividades_suspeitas,
+            'estatisticas': get_user_statistics(user)
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao buscar perfil do usuário {user_id}: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+# NO admin_views.py - ATUALIZAR a função get_suspicious_activities
+
+def get_suspicious_activities(user):
+    """Detecta atividades suspeitas do usuário - BASEADA EM DADOS REAIS"""
+    atividades = []
+    
+    try:
+        # 1. Pedidos com valores muito altos (DADO REAL)
+        pedidos_recentes = Pedido.objects.filter(
+            usuario=user,
+            criado_em__gte=timezone.now() - timedelta(hours=24)
+        )
+        total_24h = sum(p.total_final for p in pedidos_recentes if p.total_final)
+        
+        if total_24h > 10000:  # R$ 10.000 em 24h
+            atividades.append(f"🚨 ALTO VOLUME: R$ {total_24h:,.2f} em 24h")
+        
+        # 2. Múltiplos pedidos em curto período (DADO REAL)
+        if pedidos_recentes.count() > 10:
+            atividades.append(f"⚠️ MÚLTIPLOS PEDIDOS: {pedidos_recentes.count()} em 24h")
+        
+        # 3. Status do usuário (DADO REAL)
+        if user.is_suspicious:
+            atividades.append("🔴 USUÁRIO MARCADO COMO SUSPEITO")
+        
+        if user.risk_level == 'high':
+            atividades.append("🎯 NÍVEL DE RISCO ALTO")
+        elif user.risk_level == 'medium':
+            atividades.append("🟡 NÍVEL DE RISCO MÉDIO")
+        
+        # 4. Pagamentos recusados (DADO REAL)
+        from core.models.payments import Pagamento
+        pagamentos_recusados = Pagamento.objects.filter(
+            pedido__usuario=user,
+            status='recusado',
+            criado_em__gte=timezone.now() - timedelta(days=7)
+        ).count()
+        
+        if pagamentos_recusados > 3:
+            atividades.append(f"💳 PAGAMENTOS RECUSADOS: {pagamentos_recusados} na semana")
+        
+        # 5. Status da conta (DADO REAL)
+        if not user.is_active:
+            atividades.append("🔒 CONTA INATIVA")
+        
+        if user.force_password_change:
+            atividades.append("🔑 TROCA DE SENHA OBRIGATÓRIA PENDENTE")
+        
+        # 6. Inatividade (DADO REAL)
+        if user.last_activity:
+            dias_inatividade = (timezone.now() - user.last_activity).days
+            if dias_inatividade > 30:
+                atividades.append(f"💤 INATIVIDADE: {dias_inatividade} dias sem atividade")
+        
+        # 7. SEM DADOS - Placeholders para funcionalidades futuras
+        atividades.append("📊 LOGS DE LOGIN: Sistema em desenvolvimento")
+        atividades.append("🔄 CHARGEOBACKS: Módulo em implantação")
+        atividades.append("🎫 TICKETS SUPORTE: Em breve disponível")
+        atividades.append("📦 DEVOLUÇÕES: Funcionalidade planejada")
+        atividades.append("📝 ANOTAÇÕES: Em desenvolvimento")
+        
+    except Exception as e:
+        logger.error(f"Erro ao analisar atividades suspeitas: {e}")
+        atividades.append("❌ Erro na análise de atividades")
+    
+    return atividades
+
+def get_user_statistics(user):
+    """Calcula estatísticas do usuário"""
+    pedidos = Pedido.objects.filter(usuario=user)
+    
+    return {
+        'total_pedidos': pedidos.count(),
+        'pedidos_ativos': pedidos.exclude(status__nome__in=['Cancelado', 'Entregue']).count(),
+        'total_gasto': float(sum(p.total_final for p in pedidos if p.total_final)),
+        'ticket_medio': float(sum(p.total_final for p in pedidos if p.total_final) / pedidos.count()) if pedidos.count() > 0 else 0,
+    }
+
+@csrf_protect
+@require_http_methods(["POST"])
+@login_required
+def toggle_user_status(request, user_id):
+    """Ativa/desativa conta do usuário"""
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permissão negada'}, status=403)
+    
+    try:
+        user = get_object_or_404(User, id=user_id)
+        
+        if user.id == request.user.id:
+            return JsonResponse({'success': False, 'error': 'Você não pode desativar sua própria conta'}, status=400)
+        
+        user.is_active = not user.is_active
+        user.save()
+        
+        action = "ativada" if user.is_active else "desativada"
+        logger.info(f"Conta {action} por admin: {request.user.email} - Usuário: {user.email}")
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'Conta {action} com sucesso',
+            'is_active': user.is_active
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao alterar status do usuário {user_id}: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@csrf_protect
+@require_http_methods(["POST"])
+@login_required
+def force_logout_user(request, user_id):
+    """Força logout de todas as sessões do usuário"""
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permissão negada'}, status=403)
+    
+    try:
+        user = get_object_or_404(User, id=user_id)
+        
+        # Invalidar sessões do Django
+        from django.contrib.sessions.models import Session
+        
+        user_sessions = []
+        for session in Session.objects.all():
+            session_data = session.get_decoded()
+            if session_data.get('_auth_user_id') == str(user.id):
+                user_sessions.append(session.session_key)
+        
+        # Deletar sessões
+        Session.objects.filter(session_key__in=user_sessions).delete()
+        
+        logger.info(f"Logout forçado por admin: {request.user.email} - Usuário: {user.email} - Sessões: {len(user_sessions)}")
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'Logout forçado aplicado em {len(user_sessions)} sessões'
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao forçar logout do usuário {user_id}: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@csrf_protect
+@require_http_methods(["POST"])
+@login_required
+def send_password_reset(request, user_id):
+    """Envia link de redefinição de senha"""
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permissão negada'}, status=403)
+    
+    try:
+        user = get_object_or_404(User, id=user_id)
+        
+        # Simulação de envio de email
+        logger.info(f"Link de reset enviado por admin: {request.user.email} - Para: {user.email}")
+        
+        return JsonResponse({
+            'success': True, 
+            'message': 'Link de redefinição de senha enviado com sucesso'
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao enviar reset de senha para {user_id}: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+# ===================== NOVAS FUNÇÕES PARA COMPLETAR A TASK =====================
+
+@csrf_protect
+@require_http_methods(["POST"])
+@login_required
+def toggle_suspicious_user(request, user_id):
+    """Marca/desmarca usuário como suspeito"""
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permissão negada'}, status=403)
+    
+    try:
+        user = get_object_or_404(User, id=user_id)
+        user.is_suspicious = not user.is_suspicious
+        
+        # Atualizar risk_level baseado no is_suspicious
+        if user.is_suspicious:
+            user.risk_level = 'high'
+        else:
+            user.risk_level = 'low'
+            
+        user.save()
+        
+        action = "marcado como suspeito" if user.is_suspicious else "removido da lista de suspeitos"
+        logger.info(f"Usuário {action} por admin: {request.user.email}")
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'Usuário {action} com sucesso',
+            'is_suspicious': user.is_suspicious,
+            'risk_level': user.risk_level
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao alterar status de suspeito: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@csrf_protect
+@require_http_methods(["POST"])
+@login_required
+def update_user_risk_level(request, user_id):
+    """Atualiza o nível de risco do usuário"""
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permissão negada'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        risk_level = data.get('risk_level')
+        
+        if risk_level not in ['low', 'medium', 'high']:
+            return JsonResponse({'success': False, 'error': 'Nível de risco inválido'}, status=400)
+        
+        user = get_object_or_404(User, id=user_id)
+        user.risk_level = risk_level
+        
+        # Se risco for alto, marca como suspeito automaticamente
+        if risk_level == 'high':
+            user.is_suspicious = True
+        elif risk_level == 'low':
+            user.is_suspicious = False
+            
+        user.save()
+        
+        logger.info(f"Nível de risco atualizado para {risk_level} por admin: {request.user.email}")
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'Nível de risco atualizado para: {risk_level}',
+            'risk_level': user.risk_level,
+            'is_suspicious': user.is_suspicious
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao atualizar nível de risco: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

@@ -9,8 +9,10 @@ from .views import (
     buscar_produtos, atualizar_perfil, check_auth, CheckAuthView,
     ProdutoViewSet, criar_pagamento_abacatepay, detalhes_pedido_admin,
     simular_frete_api, rastrear_pedido_api, simular_frete_carrinho, preparar_pagamento,
-    criar_pedido_apos_pagamento, meus_pedidos
-
+    criar_pedido_apos_pagamento, meus_pedidos,
+    # NOVAS IMPORTACOES - Gestão Avançada de Usuários
+    admin_user_profile, toggle_user_status, force_logout_user, send_password_reset,
+    toggle_suspicious_user, update_user_risk_level  # TODAS AS FUNÇÕES IMPORTADAS
 )
 from .integrations.abacatepay_webhook import abacatepay_webhook
 from rest_framework.routers import DefaultRouter
@@ -67,6 +69,14 @@ urlpatterns = [
     path('admin-panel/produtos/', admin_produtos, name='admin_produtos'),
     path('api/admin/pedidos/<int:pedido_id>/detalhes/', detalhes_pedido_admin, name='admin_pedido_detalhes'),
     path('api/admin/pedidos/<int:pedido_id>/status/', atualizar_status_pedido, name='admin_pedido_status_api'),
+    
+    # NOVAS URLs PARA GESTÃO AVANÇADA DE USUÁRIOS - COMPLETAS
+    path('admin-panel/user-profile/<int:user_id>/', admin_user_profile, name='admin_user_profile'),
+    path('admin-panel/toggle-user-status/<int:user_id>/', toggle_user_status, name='toggle_user_status'),
+    path('admin-panel/force-logout/<int:user_id>/', force_logout_user, name='force_logout_user'),
+    path('admin-panel/send-password-reset/<int:user_id>/', send_password_reset, name='send_password_reset'),
+    path('admin-panel/toggle-suspicious/<int:user_id>/', toggle_suspicious_user, name='toggle_suspicious_user'),
+    path('admin-panel/update-risk-level/<int:user_id>/', update_user_risk_level, name='update_user_risk_level'),  # NOVA URL ADICIONADA
 
     # LOGOUT
     path('logout/', logout_view, name='logout'),
