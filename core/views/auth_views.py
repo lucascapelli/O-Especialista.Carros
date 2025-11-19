@@ -33,7 +33,16 @@ class LoginView(APIView):
             )
 
         user = authenticate(request, email=email, password=password)
+        
         if user is not None:
+            # ✅ VERIFICAÇÃO CRÍTICA: Usuário está ativo?
+            if not user.is_active:
+                logger.warning(f"Tentativa de login de usuário INATIVO: {email}")
+                return Response(
+                    {'error': 'Esta conta está desativada. Entre em contato com o administrador.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
             login(request, user)
             serializer = UserSerializer(user)
             logger.info(f"Login bem-sucedido: {email} - Admin: {user.is_admin}")
@@ -91,21 +100,25 @@ def admin_login(request):
         remember_me = request.POST.get('remember_me')
 
         user = auth_auth(request, username=username, password=password)
-        if user is not None and getattr(user, 'is_admin', False):
+        
+        # ✅ VERIFICAÇÃO ADICIONAL: Usuário ativo E admin
+        if user is not None and getattr(user, 'is_admin', False) and user.is_active:
             auth_login(request, user)
 
+            # Tempo de sessão
             if not remember_me:
                 request.session.set_expiry(0)
             else:
-                request.session.set_expiry(1209600)
+                request.session.set_expiry(1209600)  # 2 semanas
 
             logger.info(f"Admin logado com sucesso: {user.email}")
             return redirect('admin_index')
-
-        messages.error(
-            request,
-            'Acesso permitido apenas para administradores.' if user else 'Usuário ou senha incorretos.'
-        )
+        
+        # ✅ MENSAGEM ESPECÍFICA PARA USUÁRIO INATIVO
+        elif user is not None and not user.is_active:
+            messages.error(request, 'Esta conta de administrador está desativada.')
+        else:
+            messages.error(request, 'Acesso permitido apenas para administradores ativos.' if user else 'Usuário ou senha incorretos.')
 
     return render(request, 'core/admin-front-end/admin-login.html')
 

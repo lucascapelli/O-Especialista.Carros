@@ -8,20 +8,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = document.getElementById('email').value;
       const senha = document.getElementById('senha').value;
 
+      // Limpa erros anteriores
+      clearErrors();
+
       // Validação básica no frontend
       if (!email || !senha) {
-        alert('Email e senha são obrigatórios');
+        showError('Email e senha são obrigatórios');
         return;
       }
 
       try {
-        // ✅ CORRETO: Use URL relativa do Django
         const response = await fetch('/api/login/', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': getCSRFToken()  // ✅ Adicione CSRF token
+            'X-CSRFToken': getCSRFToken()
           },
           body: JSON.stringify({ 
             email: email,
@@ -32,38 +34,73 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
         
         if (response.ok) {
-          // Login bem-sucedido
           alert(data.message || 'Login realizado com sucesso!');
-          
-          // Armazena os dados do usuário
           localStorage.setItem('user', JSON.stringify(data.user));
-          
-          // ✅ CORRETO: Redireciona para a URL nomeada do Django
-          window.location.href = data.redirect_to || '/';  // Ou use a URL do name='index'
+          window.location.href = data.redirect_to || '/';
         } else {
-          // Trata erros do backend
-          alert(data.error || 'Credenciais inválidas');
+          // Tratamento específico para conta desativada
+          if (data.error && data.error.includes('desativada')) {
+            showError(data.error, 'account-disabled');
+          } else {
+            showError(data.error || 'Credenciais inválidas');
+          }
         }
       } catch (error) {
         console.error('Erro:', error);
-        alert('Erro ao conectar com o servidor');
+        showError('Erro ao conectar com o servidor');
       }
     });
   }
 
-  // ✅ Função para pegar o CSRF token (adicione esta função)
   function getCSRFToken() {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
       const cookies = document.cookie.split(';');
       for (let i = 0; i < cookies.length; i++) {
         const cookie = cookies[i].trim();
-        if (cookie.startsWith('csrftoken' + '=')) {
+        if (cookie.startsWith('csrftoken=')) {
           cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
           break;
         }
       }
     }
     return cookieValue;
+  }
+
+  // Função para mostrar erros personalizados
+  function showError(message, errorType = '') {
+    // Remove erros anteriores
+    clearErrors();
+
+    // Cria elemento de erro
+    const errorDiv = document.createElement('div');
+    errorDiv.className = `error-message ${errorType}`;
+    errorDiv.textContent = message;
+
+    // Insere antes do formulário
+    form.parentNode.insertBefore(errorDiv, form);
+
+    // Destaca campos inválidos
+    if (!message.includes('desativada')) {
+      highlightInvalidFields();
+    }
+  }
+
+  function clearErrors() {
+    // Remove mensagens de erro
+    document.querySelectorAll('.error-message').forEach(error => error.remove());
+    
+    // Remove destaque de campos
+    document.querySelectorAll('.input-invalid').forEach(field => {
+      field.classList.remove('input-invalid');
+    });
+  }
+
+  function highlightInvalidFields() {
+    const email = document.getElementById('email');
+    const senha = document.getElementById('senha');
+
+    if (!email.value) email.classList.add('input-invalid');
+    if (!senha.value) senha.classList.add('input-invalid');
   }
 });
