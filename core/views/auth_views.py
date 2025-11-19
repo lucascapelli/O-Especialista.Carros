@@ -3,6 +3,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model
+from django.contrib.auth import update_session_auth_hash
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,6 +15,7 @@ from ..serializers import UserSerializer, RegisterSerializer
 import logging
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 # ==== API LOGIN ====
@@ -108,6 +113,35 @@ def admin_login(request):
         )
 
     return render(request, 'core/admin-front-end/admin-login.html')
+
+
+# ==== REDEFINIÇÃO DE SENHA ====
+def password_reset_confirm(request, uidb64=None, token=None):
+    """View para confirmar redefinição de senha - usuário define nova senha"""
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            
+            if new_password and new_password == confirm_password:
+                user.set_password(new_password)
+                user.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Senha redefinida com sucesso!')
+                return redirect('login')
+            else:
+                messages.error(request, 'As senhas não coincidem.')
+        
+        return render(request, 'core/front-end/password_reset_confirm.html')
+    else:
+        return render(request, 'core/front-end/password_reset_invalid.html', 
+                     {'message': 'Link inválido ou expirado.'})
 
 
 # ==== LOGOUT ====

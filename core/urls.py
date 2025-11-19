@@ -12,7 +12,7 @@ from .views import (
     criar_pedido_apos_pagamento, meus_pedidos,
     # NOVAS IMPORTACOES - Gestão Avançada de Usuários
     admin_user_profile, toggle_user_status, force_logout_user, send_password_reset,
-    toggle_suspicious_user, update_user_risk_level  # TODAS AS FUNÇÕES IMPORTADAS
+    toggle_suspicious_user, update_user_risk_level, password_reset_confirm
 )
 from .integrations.abacatepay_webhook import abacatepay_webhook
 from rest_framework.routers import DefaultRouter
@@ -59,7 +59,8 @@ urlpatterns = [
     path('remover_carrinho/<int:item_id>/', remover_carrinho, name='remover_carrinho'),
     path('alterar-quantidade/<int:item_id>/', alterar_quantidade, name='alterar_quantidade'),
     path('api/carrinho/simular-frete/', simular_frete_carrinho, name='api_carrinho_simular_frete'),
-    path('meus-pedidos/', meus_pedidos, name='meus_pedidos'), 
+    path('meus-pedidos/', meus_pedidos, name='meus_pedidos'),
+    path('password-reset/<uidb64>/<token>/', password_reset_confirm, name='password_reset_confirm'), 
 
     # ADMIN
     path('admin-login/', admin_login, name='admin_login'),

@@ -10,7 +10,7 @@ from .public_views import (
     produtos_listagem, detalhes_produto, contato_envio, home
 )
 from .auth_views import (
-    LoginView, RegisterView, admin_login, logout_view
+    LoginView, RegisterView, admin_login, logout_view, password_reset_confirm
 )
 from .carrinho_views import (
     carrinho, carrinho_json, adicionar_carrinho,
