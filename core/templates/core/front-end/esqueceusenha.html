@@ -109,7 +109,7 @@
                         </div>
                         
                         <!-- Forgot Password Form -->
-                        <form class="forgot-form" action="{% url 'esqueceusenha' %}" method="POST">
+                        <form class="forgot-form" id="forgotForm">
                             {% csrf_token %}
                             <!-- Email Input -->
                             <div class="input-group">
@@ -208,5 +208,5 @@
     </footer>
 
     <script src="{% static 'core/front-end/js/script.js' %}"></script>
-</body>
+    <script src="{% static 'core/front-end/js/esqueceu_senha.js' %}"></script></body>
 </html>

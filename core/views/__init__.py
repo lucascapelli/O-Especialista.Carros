@@ -3,7 +3,7 @@ from .admin_views import (
     admin_index, delete_user, admin_pedidos, admin_produtos,
     atualizar_status_pedido, perfil_usuario, detalhes_pedido_admin,
     admin_user_profile, toggle_user_status, force_logout_user, send_password_reset,
-    toggle_suspicious_user, update_user_risk_level  # FUNÇÕES COMPLETAS
+    toggle_suspicious_user, update_user_risk_level
 )
 from .public_views import (
     index, login_page, esqueceu_senha_page, criar_conta_page,
@@ -23,7 +23,7 @@ from .produto_views import (
     ProdutoViewSet, produtos_destaque, buscar_produtos
 )
 from .api_views import (
-    check_auth, CheckAuthView, atualizar_perfil
+    check_auth, CheckAuthView, atualizar_perfil, api_esqueceu_senha
 )
 from .permissions import IsAdminOrReadOnly, IsAdminUser
 

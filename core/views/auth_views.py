@@ -17,7 +17,6 @@ import logging
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
-
 # ==== API LOGIN ====
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -51,7 +50,6 @@ class LoginView(APIView):
             status=status.HTTP_401_UNAUTHORIZED
         )
 
-
 # ==== API REGISTRO ====
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -79,7 +77,6 @@ class RegisterView(APIView):
             "details": errors
         }, status=status.HTTP_400_BAD_REQUEST)
 
-
 # ==== LOGIN ADMIN ====
 @csrf_protect
 def admin_login(request):
@@ -95,14 +92,12 @@ def admin_login(request):
 
         user = auth_auth(request, username=username, password=password)
         if user is not None and getattr(user, 'is_admin', False):
-            # ✅ Aqui estava o erro: passa o user, não a função
             auth_login(request, user)
 
-            # Tempo de sessão
             if not remember_me:
                 request.session.set_expiry(0)
             else:
-                request.session.set_expiry(1209600)  # 2 semanas
+                request.session.set_expiry(1209600)
 
             logger.info(f"Admin logado com sucesso: {user.email}")
             return redirect('admin_index')
@@ -114,8 +109,7 @@ def admin_login(request):
 
     return render(request, 'core/admin-front-end/admin-login.html')
 
-
-# ==== REDEFINIÇÃO DE SENHA ====
+# ==== CONFIRMAÇÃO DE REDEFINIÇÃO DE SENHA ====
 def password_reset_confirm(request, uidb64=None, token=None):
     """View para confirmar redefinição de senha - usuário define nova senha"""
     try:
@@ -142,7 +136,6 @@ def password_reset_confirm(request, uidb64=None, token=None):
     else:
         return render(request, 'core/front-end/password_reset_invalid.html', 
                      {'message': 'Link inválido ou expirado.'})
-
 
 # ==== LOGOUT ====
 def logout_view(request):
