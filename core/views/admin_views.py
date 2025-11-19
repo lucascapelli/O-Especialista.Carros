@@ -13,6 +13,14 @@ from core.models.orders import StatusPedido
 import logging
 import json
 
+# ===================== IMPORTAÇÕES PARA EMAIL =====================
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+from django.conf import settings
+
 logger = logging.getLogger(__name__)
 
 def calcular_stats_reais():
@@ -430,8 +438,6 @@ def admin_user_profile(request, user_id):
         logger.error(f"Erro ao buscar perfil do usuário {user_id}: {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-# NO admin_views.py - ATUALIZAR a função get_suspicious_activities
-
 def get_suspicious_activities(user):
     """Detecta atividades suspeitas do usuário - BASEADA EM DADOS REAIS"""
     atividades = []
@@ -572,30 +578,101 @@ def force_logout_user(request, user_id):
         logger.error(f"Erro ao forçar logout do usuário {user_id}: {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
+# ===================== FUNÇÃO ATUALIZADA - ENVIO REAL DE EMAIL =====================
 @csrf_protect
 @require_http_methods(["POST"])
 @login_required
 def send_password_reset(request, user_id):
-    """Envia link de redefinição de senha"""
+    """Envia link de redefinição de senha REAL - CORRIGIDA"""
     if not request.user.is_admin:
         return JsonResponse({'success': False, 'error': 'Permissão negada'}, status=403)
     
     try:
         user = get_object_or_404(User, id=user_id)
         
-        # Simulação de envio de email
-        logger.info(f"Link de reset enviado por admin: {request.user.email} - Para: {user.email}")
+        # Gerar token de reset
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        # Construir URL de reset
+        if hasattr(settings, 'FRONTEND_URL'):
+            # Se tiver URL do frontend configurada
+            reset_url = f"{settings.FRONTEND_URL}/password-reset/{uid}/{token}/"
+        else:
+            # URL do Django padrão
+            reset_path = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            reset_url = request.build_absolute_uri(reset_path)
+        
+        # CORREÇÃO: Usar nome completo de forma segura
+        user_full_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
+        if not user_full_name:
+            user_full_name = user.email
+        
+        site_name = getattr(settings, 'SITE_NAME', 'Sistema')
+        subject = f"Redefinição de Senha - {site_name}"
+        
+        message = f"""
+        Olá {user_full_name},
+        
+        O administrador do sistema solicitou a redefinição da sua senha.
+        
+        Para definir uma nova senha, clique no link abaixo:
+        {reset_url}
+        
+        Este link expira em 24 horas.
+        
+        Se você não solicitou esta redefinição, ignore este email.
+        
+        Atenciosamente,
+        Equipe {site_name}
+        """
+        
+        # Versão HTML do email (opcional)
+        html_message = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Redefinição de Senha</h2>
+            <p>Olá <strong>{user_full_name}</strong>,</p>
+            <p>O administrador do sistema solicitou a redefinição da sua senha.</p>
+            <p>Para definir uma nova senha, clique no botão abaixo:</p>
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{reset_url}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    Redefinir Senha
+                </a>
+            </div>
+            <p><strong>Este link expira em 24 horas.</strong></p>
+            <p>Se você não solicitou esta redefinição, ignore este email.</p>
+            <hr>
+            <p style="color: #666; font-size: 12px;">
+                Atenciosamente,<br>
+                Equipe {site_name}
+            </p>
+        </div>
+        """
+        
+        # Enviar email
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        
+        logger.info(f"Email de reset enviado por admin: {request.user.email} - Para: {user.email}")
         
         return JsonResponse({
             'success': True, 
-            'message': 'Link de redefinição de senha enviado com sucesso'
+            'message': f'Link de redefinição de senha enviado para {user.email}'
         })
         
     except Exception as e:
         logger.error(f"Erro ao enviar reset de senha para {user_id}: {str(e)}")
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-# ===================== NOVAS FUNÇÕES PARA COMPLETAR A TASK =====================
+        return JsonResponse({
+            'success': False, 
+            'error': f'Erro ao enviar email: {str(e)}'
+        }, status=500)
+# ===================== NOVAS FUNÇÕES PARA GESTÃO DE RISCO =====================
 
 @csrf_protect
 @require_http_methods(["POST"])

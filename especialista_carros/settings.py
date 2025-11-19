@@ -157,6 +157,24 @@ AUTHENTICATION_BACKENDS = [
 SESSION_COOKIE_AGE = 1209600  # 2 semanas em segundos
 
 # =============================================================================
+# CONFIGURAÇÕES DE EMAIL
+# =============================================================================
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")  # Ou seu servidor SMTP
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "seu-email@gmail.com")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "sua-senha-de-app")  # Senha de app para Gmail
+
+# Configurações do Site
+SITE_NAME = os.getenv("SITE_NAME", "Especialista Carros")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@especialistacarros.com")
+
+# URL do Frontend (opcional - se tiver frontend separado)
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8000")
+
+# =============================================================================
 # CONFIGURAÇÕES PARA NGROK E DESENVOLVIMENTO
 # =============================================================================
 
@@ -210,6 +228,10 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'debug.log'),
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -222,6 +244,11 @@ LOGGING = {
             'propagate': False,
         },
         'core': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'django.core.mail': {
             'handlers': ['console'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
