@@ -302,20 +302,24 @@ def admin_produtos(request):
         return redirect('admin_login')
     search_query = request.GET.get('search', '')
     categoria_filter = request.GET.get('categoria', '')
-    produtos = Produto.objects.all().order_by('-criado_em')
+    
+    # ✅ CORREÇÃO: Use data_criacao em vez de criado_em
+    produtos = Produto.objects.all().order_by('-data_criacao')
+    
     if search_query:
         produtos = produtos.filter(models.Q(nome__icontains=search_query) | models.Q(descricao__icontains=search_query))
     if categoria_filter:
         produtos = produtos.filter(categoria=categoria_filter)
+        
     paginator = Paginator(produtos, 10)
     page_number = request.GET.get('page', 1)
     produtos_page = paginator.get_page(page_number)
+    
     return render(request, 'core/admin-front-end/admin_produtos.html', {
         'produtos': produtos_page,
         'search_query': search_query,
         'categoria_filter': categoria_filter
     })
-
 # ===================== ATUALIZAR STATUS PEDIDO =====================
 @csrf_exempt
 @require_http_methods(["PUT"])

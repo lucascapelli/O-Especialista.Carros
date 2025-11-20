@@ -29,9 +29,38 @@ class ProdutoViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
+        """Update com proteção de imagem"""
         if not request.user.is_authenticated or not request.user.is_admin:
             return Response({'error': 'Permissão negada'}, status=403)
-        return super().update(request, *args, **kwargs)
+        
+        try:
+            instance = self.get_object()
+            
+            # ✅ DEBUG: Log dos dados recebidos
+            logger.info(f"Atualizando produto {instance.id}")
+            logger.info(f"Dados recebidos: {dict(request.data)}")
+            logger.info(f"Arquivos recebidos: {dict(request.FILES)}")
+            
+            # ✅ Se não enviou imagem nova, remove do data para não sobrescrever
+            data = request.data.copy()
+            if 'imagem' not in request.FILES:
+                data.pop('imagem', None)
+                logger.info("✅ Nenhuma imagem nova enviada - mantendo imagem atual")
+            else:
+                logger.info("🔄 Nova imagem enviada - atualizando...")
+            
+            serializer = self.get_serializer(instance, data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                logger.info(f"✅ Produto {instance.id} atualizado com sucesso")
+                return Response(serializer.data)
+            
+            logger.warning(f"❌ Erro na validação: {serializer.errors}")
+            return Response(serializer.errors, status=400)
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao atualizar produto: {str(e)}")
+            return Response({'error': 'Erro interno do servidor'}, status=500)
 
     def destroy(self, request, *args, **kwargs):
         if not request.user.is_authenticated or not request.user.is_admin:

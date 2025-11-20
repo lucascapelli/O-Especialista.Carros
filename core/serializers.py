@@ -35,9 +35,23 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class ProdutoSerializer(serializers.ModelSerializer):
+    imagem_url = serializers.SerializerMethodField()  # ✅ Campo para URL da imagem
+    
     class Meta:
         model = Produto
         fields = '__all__'
+    
+    def get_imagem_url(self, obj):
+        if obj.imagem and hasattr(obj.imagem, 'url'):
+            return obj.imagem.url
+        return None
+    
+    def update(self, instance, validated_data):
+        # ✅ PROTEÇÃO CRÍTICA: Se não enviou nova imagem, mantém a atual
+        if 'imagem' not in self.context['request'].FILES:
+            validated_data.pop('imagem', None)
+        
+        return super().update(instance, validated_data)
 
 # ==================== NOVOS SERIALIZERS PARA PEDIDOS ====================
 
