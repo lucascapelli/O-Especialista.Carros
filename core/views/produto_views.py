@@ -68,10 +68,12 @@ class ProdutoViewSet(viewsets.ModelViewSet):
         logger.info(f"Produto {kwargs.get('pk')} excluído por admin: {request.user.email}")
         return super().destroy(request, *args, **kwargs)
 
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def produtos_destaque(request):
-    produtos = Produto.objects.filter(estoque__gt=0)[:6]
+    # ✅ APENAS produtos ATIVOS em destaque
+    produtos = Produto.objects.filter(status='Ativo', estoque__gt=0)[:6]
     serializer = ProdutoSerializer(produtos, many=True)
     return Response({'produtos': serializer.data})
 
@@ -80,7 +82,8 @@ def produtos_destaque(request):
 def buscar_produtos(request):
     query = request.GET.get('q', '')
     categoria = request.GET.get('categoria', '')
-    produtos = Produto.objects.all()
+    # ✅ APENAS produtos ATIVOS na busca
+    produtos = Produto.objects.filter(status='Ativo')
     if query:
         produtos = produtos.filter(models.Q(nome__icontains=query) | models.Q(descricao__icontains=query))
     if categoria:

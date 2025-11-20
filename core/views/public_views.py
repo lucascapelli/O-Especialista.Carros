@@ -13,17 +13,21 @@ def home(request):
     return HttpResponse("Bem-vindo ao especialista de carros!")
 
 def index(request):
-    produtos = Produto.objects.all()[:8]
+    # ✅ APENAS produtos ATIVOS na home
+    produtos = Produto.objects.filter(status='Ativo')[:8]
     return render(request, 'core/front-end/index.html', {'produtos': produtos})
 
 def produtos_listagem(request):
-    produtos = Produto.objects.all()
+    # ✅ APENAS produtos ATIVOS na listagem
+    produtos = Produto.objects.filter(status='Ativo')
     return render(request, 'core/front-end/index.html', {'produtos': produtos})
 
 def detalhes_produto(request, produto_id):
     from django.shortcuts import get_object_or_404
+    # ✅ Permite ver detalhes mesmo de produtos inativos (para links compartilhados)
     produto = get_object_or_404(Produto, id=produto_id)
-    produtos_relacionados = Produto.objects.exclude(id=produto_id)[:4]
+    # ✅ Mas produtos relacionados só os ATIVOS
+    produtos_relacionados = Produto.objects.filter(status='Ativo').exclude(id=produto_id)[:4]
     return render(request, 'core/front-end/detalhes_produto.html', {
         'produto': produto,
         'produtos_relacionados': produtos_relacionados

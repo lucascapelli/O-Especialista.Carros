@@ -492,11 +492,21 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-lg font-semibold text-gray-800">Lista de Produtos</h3>
-            <div class="relative">
-                <input type="text" id="search-products" placeholder="Buscar produtos..."
-                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    aria-label="Buscar produtos">
-                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            <div class="flex gap-4 items-center">
+                <div class="relative">
+                    <input type="text" id="search-products" placeholder="Buscar produtos..."
+                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        aria-label="Buscar produtos">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                
+                <!-- Filtro de Status -->
+                <select id="status-filter" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Todos os status</option>
+                    <option value="Ativo">Ativos</option>
+                    <option value="Inativo">Inativos</option>
+                    <option value="Últimas unidades">Últimas unidades</option>
+                </select>
             </div>
         </div>
 

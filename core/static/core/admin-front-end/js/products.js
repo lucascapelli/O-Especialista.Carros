@@ -1,7 +1,7 @@
 // ====================
 // Debug inicial
 // ====================
-console.log('🔄 products.js carregado - VERSÃO CORRIGIDA');
+console.log('🔄 products.js carregado - VERSÃO COM FILTROS CORRIGIDOS');
 
 // ====================
 // Variáveis globais
@@ -9,13 +9,16 @@ console.log('🔄 products.js carregado - VERSÃO CORRIGIDA');
 let currentEditingProduct = null;
 
 // ====================
-// Inicialização segura dos produtos
+// Inicialização segura dos produtos - CORRIGIDA
 // ====================
 async function initializeProducts() {
     if (window._productsInitialized) return;
     window._productsInitialized = true;
 
     console.log("🔄 Inicializando produtos...");
+    
+    // ✅ CONFIGURAR FILTROS ANTES de buscar produtos
+    setupStatusFilter();
     
     await fetchProdutos('recent');
     await fetchProdutos('all');
@@ -26,9 +29,6 @@ async function initializeProducts() {
         form.dataset.listenerAdded = 'true';
         console.log("✅ Listener do formulário adicionado");
     }
-
-    const searchInput = document.getElementById('search-products');
-    if (searchInput) searchInput.addEventListener('input', handleSearch);
 
     console.log('✅ Sistema de produtos inicializado');
 }
@@ -114,6 +114,11 @@ function renderProdutos(produtos, tipo) {
             .replace(/'/g, "&#39;")
             .replace(/"/g, "&quot;");
 
+        // ✅ BOTÃO DE INATIVAR/ATIVAR - Ícone dinâmico baseado no status
+        const statusIcon = produto.status === 'Ativo' ? 'fa-eye-slash' : 'fa-eye';
+        const statusTitle = produto.status === 'Ativo' ? 'Inativar' : 'Ativar';
+        const statusColor = produto.status === 'Ativo' ? 'orange' : 'green';
+
         const row = `
             <tr class="product-row">
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -143,9 +148,12 @@ function renderProdutos(produtos, tipo) {
                             data-product='${produtoEscapado}'>
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="text-red-600 hover:text-red-900 delete-product" 
-                            data-product-id="${produto.id}">
-                        <i class="fas fa-trash"></i>
+                    <!-- ✅ BOTÃO DE INATIVAR/ATIVAR SUBSTITUINDO EXCLUIR -->
+                    <button class="text-${statusColor}-600 hover:text-${statusColor}-900 toggle-status-product" 
+                            data-product-id="${produto.id}" 
+                            data-current-status="${produto.status}"
+                            title="${statusTitle} Produto">
+                        <i class="fas ${statusIcon}"></i>
                     </button>
                 </td>
             </tr>`;
@@ -174,24 +182,57 @@ function addProductEventListeners() {
         });
     });
 
-    document.querySelectorAll('.delete-product').forEach(btn => {
+    // ✅ SUBSTITUIR: Botão de toggle status (inativar/ativar)
+    document.querySelectorAll('.toggle-status-product').forEach(btn => {
         btn.addEventListener('click', () => {
             const id = btn.getAttribute('data-product-id');
-            if (id) excluirProduto(id);
+            const currentStatus = btn.getAttribute('data-current-status');
+            if (id) toggleProductStatus(id, currentStatus);
         });
     });
 }
 
 // ====================
-// Busca
+// Filtro por Status - CORRIGIDO
 // ====================
-function handleSearch(event) {
-    const term = event.target.value.toLowerCase();
+function aplicarFiltros() {
+    const statusFiltro = document.getElementById('status-filter')?.value || '';
+    const termoBusca = document.getElementById('search-products')?.value.toLowerCase() || '';
+    
+    console.log(`🔍 Aplicando filtros - Status: "${statusFiltro}", Busca: "${termoBusca}"`);
+    
     document.querySelectorAll('#all-products-table-body .product-row').forEach(row => {
-        const name = row.querySelector('.product-name').textContent.toLowerCase();
-        const cat = row.querySelector('.product-category').textContent.toLowerCase();
-        row.style.display = name.includes(term) || cat.includes(term) ? '' : 'none';
+        const nome = row.querySelector('.product-name')?.textContent.toLowerCase() || '';
+        const categoria = row.querySelector('.product-category')?.textContent.toLowerCase() || '';
+        const statusElement = row.querySelector('span');
+        const status = statusElement ? statusElement.textContent.trim() : '';
+        
+        const matchBusca = !termoBusca || nome.includes(termoBusca) || categoria.includes(termoBusca);
+        const matchStatus = !statusFiltro || status === statusFiltro;
+        
+        const shouldShow = matchBusca && matchStatus;
+        row.style.display = shouldShow ? '' : 'none';
+        
+        console.log(`📦 Produto "${nome}" - Status: "${status}" - Mostrar: ${shouldShow}`);
     });
+}
+
+// ====================
+// Configurar Filtros - CORRIGIDO
+// ====================
+function setupStatusFilter() {
+    const statusFilter = document.getElementById('status-filter');
+    const searchInput = document.getElementById('search-products');
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', aplicarFiltros);
+        console.log('✅ Filtro de status configurado');
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', aplicarFiltros);
+        console.log('✅ Busca configurada');
+    }
 }
 
 // ====================
@@ -317,6 +358,40 @@ function handleProductSubmit(event) {
 }
 
 // ====================
+// Alternar Status do Produto (Inativar/Ativar)
+// ====================
+function toggleProductStatus(productId, currentStatus) {
+    const novoStatus = currentStatus === 'Ativo' ? 'Inativo' : 'Ativo';
+    const action = novoStatus === 'Inativo' ? 'inativar' : 'ativar';
+    
+    if (!confirm(`Tem certeza que deseja ${action} este produto?`)) return;
+    
+    fetch(`/api/produtos/${productId}/`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ status: novoStatus })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw err; });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(`✅ Produto ${action}do com sucesso:`, data);
+        alert(`✅ Produto ${action}do com sucesso!`);
+        reloadProducts();
+    })
+    .catch(err => {
+        console.error(`❌ Erro ao ${action} produto:`, err);
+        alert(`❌ Erro ao ${action} produto: ${err.message || 'Tente novamente'}`);
+    });
+}
+
+// ====================
 // Ações de produto - CORRIGIDO
 // ====================
 function editarProduto(produto) {
@@ -401,28 +476,6 @@ function verProduto(produto) {
     const descricao = produto.descricao || 'Sem descrição';
 
     alert(`📦 Produto: ${nome}\n🏷️ Categoria: ${categoria}\n💰 Preço: R$ ${preco}\n📊 Estoque: ${estoque}\n📈 Status: ${status}\n📝 Descrição: ${descricao}`);
-}
-
-function excluirProduto(id) {
-    if (!confirm('❌ Tem certeza que deseja excluir este produto?\nEsta ação não pode ser desfeita.')) return;
-    
-    fetch(`/api/produtos/${id}/`, { 
-        method: 'DELETE', 
-        headers: { 'X-CSRFToken': getCSRFToken() }, 
-        credentials: 'include' 
-    })
-    .then(response => {
-        if (response.ok) {
-            alert('✅ Produto excluído com sucesso!');
-            reloadProducts();
-        } else {
-            throw new Error('Erro ao excluir produto');
-        }
-    })
-    .catch(err => {
-        console.error('❌ Erro ao excluir produto:', err);
-        alert('❌ Erro ao excluir produto. Tente novamente.');
-    });
 }
 
 // ====================
