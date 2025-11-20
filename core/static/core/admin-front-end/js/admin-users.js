@@ -1,10 +1,11 @@
 // ====================
-// GERENCIAMENTO DE USUÁRIOS COM PAGINAÇÃO AJAX - VERSÃO FODA
+// GERENCIAMENTO DE USUÁRIOS COM PAGINAÇÃO AJAX - VERSÃO CORRIGIDA
 // ====================
 
 let currentUsersPage = 1;
 let currentUsersSearch = '';
 let isUsersSectionInitialized = false;
+let currentUserModal = null; // ✅ CONTROLE GLOBAL DO MODAL
 
 // ====================
 // PAGINAÇÃO E BUSCA COM AJAX
@@ -69,7 +70,7 @@ async function handleUsersSearch() {
 }
 
 // ====================
-// DELEGAÇÃO DE EVENTOS - SIMPLIFICADA (SÓ VISUALIZAR)
+// DELEGAÇÃO DE EVENTOS - CORRIGIDA
 // ====================
 
 function initializeUsersEventDelegation() {
@@ -79,28 +80,11 @@ function initializeUsersEventDelegation() {
     const usersSection = document.getElementById('usuarios-section');
     if (!usersSection) return;
     
-    // Delegação para paginação
-    usersSection.addEventListener('click', function(e) {
-        // Paginação
-        if (e.target.closest('.pagination-btn')) {
-            e.preventDefault();
-            const btn = e.target.closest('.pagination-btn');
-            const page = btn.getAttribute('data-page');
-            if (page && !btn.disabled) {
-                goToUsersPage(parseInt(page));
-            }
-            return;
-        }
-        
-        // APENAS BOTÃO DE VISUALIZAR - REMOVIDOS EDITAR E EXCLUIR
-        if (e.target.closest('.view-user')) {
-            e.preventDefault();
-            const btn = e.target.closest('.view-user');
-            const userId = btn.getAttribute('data-user-id');
-            viewUserProfile(userId);
-            return;
-        }
-    });
+    // ✅ REMOVER EVENT LISTENER ANTIGO PRIMEIRO
+    usersSection.removeEventListener('click', handleUsersSectionClick);
+    
+    // ✅ ADICIONAR NOVO EVENT LISTENER
+    usersSection.addEventListener('click', handleUsersSectionClick);
     
     // Configurar busca (elemento estático)
     const searchInput = document.getElementById('search-users-input');
@@ -130,6 +114,29 @@ function initializeUsersEventDelegation() {
     }
     
     console.log('✅ Delegação de eventos configurada');
+}
+
+// ✅ FUNÇÃO ÚNICA PARA HANDLE CLICK
+function handleUsersSectionClick(e) {
+    // Paginação
+    if (e.target.closest('.pagination-btn')) {
+        e.preventDefault();
+        const btn = e.target.closest('.pagination-btn');
+        const page = btn.getAttribute('data-page');
+        if (page && !btn.disabled) {
+            goToUsersPage(parseInt(page));
+        }
+        return;
+    }
+    
+    // APENAS BOTÃO DE VISUALIZAR - REMOVIDOS EDITAR E EXCLUIR
+    if (e.target.closest('.view-user')) {
+        e.preventDefault();
+        const btn = e.target.closest('.view-user');
+        const userId = btn.getAttribute('data-user-id');
+        viewUserProfile(userId);
+        return;
+    }
 }
 
 // ====================
@@ -181,11 +188,53 @@ function getPaymentStatusColor(status) {
 }
 
 // ====================
-// MODAL DE PERFIL DO USUÁRIO
+// SISTEMA DE MODAL - COMPLETAMENTE CORRIGIDO
+// ====================
+
+// ✅ FUNÇÃO PARA FECHAR MODAL
+function closeUserModal() {
+    console.log('🔒 Fechando modal de usuário');
+    
+    if (currentUserModal) {
+        // ✅ REMOVER CORRETAMENTE O MODAL DO DOM
+        currentUserModal.remove();
+        currentUserModal = null;
+        
+        // ✅ RESTAURAR O OVERFLOW DO BODY
+        document.body.style.overflow = 'auto';
+        
+        // ✅ REMOVER EVENT LISTENERS GLOBAIS
+        document.removeEventListener('keydown', handleModalEscKey);
+        document.removeEventListener('click', handleModalBackdropClick);
+        
+        console.log('✅ Modal fechado com sucesso');
+    }
+}
+
+// ✅ HANDLERS GLOBAIS PARA O MODAL
+function handleModalEscKey(e) {
+    if (e.key === 'Escape') {
+        closeUserModal();
+    }
+}
+
+function handleModalBackdropClick(e) {
+    if (e.target.classList.contains('user-modal-backdrop')) {
+        closeUserModal();
+    }
+}
+
+// ====================
+// MODAL DE PERFIL DO USUÁRIO - COMPLETAMENTE REESCRITO
 // ====================
 
 function showUserProfileModal(data) {
     console.log('🎯 Exibindo modal do perfil do usuário:', data.user.id);
+    
+    // ✅ FECHAR MODAL EXISTENTE ANTES DE ABRIR OUTRO
+    if (currentUserModal) {
+        closeUserModal();
+    }
     
     const riskLevelColors = {
         'low': 'bg-green-100 text-green-800',
@@ -200,144 +249,139 @@ function showUserProfileModal(data) {
     };
 
     const modalHtml = `
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-lg max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+        <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] p-4 user-modal-backdrop">
+            <div class="bg-white rounded-xl max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col shadow-2xl user-modal-content">
                 <!-- Header -->
-                <div class="p-6 border-b bg-gray-50">
+                <div class="p-6 border-b border-gray-200 bg-white">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="text-xl font-bold text-gray-800">Perfil Completo do Usuário</h3>
-                            <p class="text-gray-600">${data.user.full_name} • ${data.user.email}</p>
+                            <h3 class="text-2xl font-bold text-gray-900">Perfil Completo do Usuário</h3>
+                            <p class="text-gray-600 mt-1">${data.user.full_name} • ${data.user.email}</p>
                         </div>
-                        <button onclick="this.closest('.fixed').remove()" 
-                                class="text-gray-500 hover:text-gray-700 text-2xl">
+                        <button type="button" 
+                                class="text-gray-400 hover:text-gray-600 text-2xl transition-colors duration-200 close-modal-btn"
+                                onclick="closeUserModal()">
                             &times;
                         </button>
                     </div>
                 </div>
                 
                 <!-- Content -->
-                <div class="flex-1 overflow-y-auto p-6">
+                <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Coluna 1: Informações Básicas -->
-                        <div class="lg:col-span-1">
-                            <div class="bg-white border border-gray-200 rounded-lg p-6">
-                                <h4 class="font-semibold text-lg mb-4 text-gray-800 border-b pb-2">
+                        <div class="lg:col-span-1 space-y-6">
+                            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                <h4 class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
                                     <i class="fas fa-user-circle mr-2 text-blue-500"></i>
                                     Informações Pessoais
                                 </h4>
-                                <div class="space-y-3">
+                                <div class="space-y-4">
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600">Nome Completo</label>
-                                        <p class="text-gray-800">${data.user.full_name}</p>
+                                        <label class="text-sm font-medium text-gray-600 block mb-1">Nome Completo</label>
+                                        <p class="text-gray-800 font-medium">${data.user.full_name}</p>
                                     </div>
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600">Email</label>
-                                        <p class="text-gray-800">${data.user.email}</p>
+                                        <label class="text-sm font-medium text-gray-600 block mb-1">Email</label>
+                                        <p class="text-gray-800 font-medium">${data.user.email}</p>
                                     </div>
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600">Telefone</label>
+                                        <label class="text-sm font-medium text-gray-600 block mb-1">Telefone</label>
                                         <p class="text-gray-800">${data.user.phone || 'Não informado'}</p>
                                     </div>
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600">Status da Conta</label>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                        <label class="text-sm font-medium text-gray-600 block mb-1">Status da Conta</label>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${data.user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
                                             ${data.user.is_active ? 'Ativo' : 'Inativo'}
                                         </span>
                                     </div>
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600">Tipo de Usuário</label>
+                                        <label class="text-sm font-medium text-gray-600 block mb-1">Tipo de Usuário</label>
                                         <p class="text-gray-800">
-                                            ${data.user.is_staff ? 'Administrador' : 'Usuário Comum'}
+                                            ${data.user.is_staff ? '👑 Administrador' : '👤 Usuário Comum'}
                                             ${data.user.is_superuser ? ' (Superusuário)' : ''}
                                         </p>
                                     </div>
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600">Status de Suspeita</label>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.user.is_suspicious ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                                        <label class="text-sm font-medium text-gray-600 block mb-1">Status de Suspeita</label>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${data.user.is_suspicious ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
                                             ${data.user.is_suspicious ? '🔴 Suspeito' : '✅ Normal'}
                                         </span>
                                     </div>
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600">Nível de Risco</label>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${riskLevelColors[data.user.risk_level] || 'bg-gray-100 text-gray-800'}">
+                                        <label class="text-sm font-medium text-gray-600 block mb-1">Nível de Risco</label>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${riskLevelColors[data.user.risk_level] || 'bg-gray-100 text-gray-800'}">
                                             ${riskLevelText[data.user.risk_level] || 'Desconhecido'}
                                         </span>
                                     </div>
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600">Data de Cadastro</label>
+                                        <label class="text-sm font-medium text-gray-600 block mb-1">Data de Cadastro</label>
                                         <p class="text-gray-800">${data.user.date_joined ? new Date(data.user.date_joined).toLocaleDateString('pt-BR') : 'N/A'}</p>
                                     </div>
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600">Último Login</label>
+                                        <label class="text-sm font-medium text-gray-600 block mb-1">Último Login</label>
                                         <p class="text-gray-800">${data.user.last_login ? new Date(data.user.last_login).toLocaleDateString('pt-BR') + ' ' + new Date(data.user.last_login).toLocaleTimeString('pt-BR') : 'Nunca'}</p>
-                                    </div>
-                                    <div>
-                                        <label class="text-sm font-medium text-gray-600">Última Atividade</label>
-                                        <p class="text-gray-800">${data.user.last_activity ? new Date(data.user.last_activity).toLocaleString('pt-BR') : 'N/A'}</p>
-                                    </div>
-                                    <div>
-                                        <label class="text-sm font-medium text-gray-600">Troca de Senha Obrigatória</label>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.user.force_password_change ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800'}">
-                                            ${data.user.force_password_change ? '🔑 Pendente' : '✅ Concluída'}
-                                        </span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Estatísticas -->
-                            <div class="bg-white border border-gray-200 rounded-lg p-6 mt-6">
-                                <h4 class="font-semibold text-lg mb-4 text-gray-800 border-b pb-2">
+                            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                <h4 class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
                                     <i class="fas fa-chart-bar mr-2 text-green-500"></i>
                                     Estatísticas
                                 </h4>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <div class="text-center p-3 bg-blue-50 rounded-lg">
+                                    <div class="text-center p-4 bg-blue-50 rounded-lg border border-blue-100">
                                         <div class="text-2xl font-bold text-blue-600">${data.estatisticas.total_pedidos}</div>
-                                        <div class="text-sm text-blue-800">Total de Pedidos</div>
+                                        <div class="text-sm text-blue-800 font-medium">Total de Pedidos</div>
                                     </div>
-                                    <div class="text-center p-3 bg-green-50 rounded-lg">
+                                    <div class="text-center p-4 bg-green-50 rounded-lg border border-green-100">
                                         <div class="text-2xl font-bold text-green-600">R$ ${data.estatisticas.total_gasto.toFixed(2)}</div>
-                                        <div class="text-sm text-green-800">Total Gasto</div>
+                                        <div class="text-sm text-green-800 font-medium">Total Gasto</div>
                                     </div>
-                                    <div class="text-center p-3 bg-purple-50 rounded-lg">
+                                    <div class="text-center p-4 bg-purple-50 rounded-lg border border-purple-100">
                                         <div class="text-2xl font-bold text-purple-600">${data.estatisticas.pedidos_ativos}</div>
-                                        <div class="text-sm text-purple-800">Pedidos Ativos</div>
+                                        <div class="text-sm text-purple-800 font-medium">Pedidos Ativos</div>
                                     </div>
-                                    <div class="text-center p-3 bg-yellow-50 rounded-lg">
+                                    <div class="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-100">
                                         <div class="text-2xl font-bold text-yellow-600">R$ ${data.estatisticas.ticket_medio.toFixed(2)}</div>
-                                        <div class="text-sm text-yellow-800">Ticket Médio</div>
+                                        <div class="text-sm text-yellow-800 font-medium">Ticket Médio</div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Controles de Risco -->
-                            <div class="bg-white border border-gray-200 rounded-lg p-6 mt-6">
-                                <h4 class="font-semibold text-lg mb-4 text-gray-800 border-b pb-2">
+                            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                <h4 class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
                                     <i class="fas fa-shield-alt mr-2 text-red-500"></i>
                                     Controles de Risco
                                 </h4>
-                                <div class="space-y-3">
+                                <div class="space-y-4">
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600 mb-2">Marcar como Suspeito</label>
-                                        <button onclick="toggleSuspiciousUser(${data.user.id})" 
-                                                class="w-full px-4 py-2 text-sm font-medium ${data.user.is_suspicious ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} rounded-md transition-colors border">
+                                        <label class="text-sm font-medium text-gray-600 block mb-2">Marcar como Suspeito</label>
+                                        <button type="button" 
+                                                onclick="toggleSuspiciousUser(${data.user.id})" 
+                                                class="w-full px-4 py-3 text-sm font-medium ${data.user.is_suspicious ? 'bg-red-100 text-red-700 hover:bg-red-200 border-red-300' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300'} rounded-lg transition-all duration-200 border">
                                             ${data.user.is_suspicious ? '🔴 Remover Suspeita' : '⚠️ Marcar como Suspeito'}
                                         </button>
                                     </div>
                                     <div>
-                                        <label class="text-sm font-medium text-gray-600 mb-2">Nível de Risco</label>
+                                        <label class="text-sm font-medium text-gray-600 block mb-2">Nível de Risco</label>
                                         <div class="flex space-x-2">
-                                            <button onclick="updateUserRiskLevel(${data.user.id}, 'low')" 
-                                                    class="flex-1 px-3 py-2 text-xs font-medium ${data.user.risk_level === 'low' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-700'} rounded-md transition-colors border">
+                                            <button type="button" 
+                                                    onclick="updateUserRiskLevel(${data.user.id}, 'low')" 
+                                                    class="flex-1 px-3 py-2 text-xs font-medium ${data.user.risk_level === 'low' ? 'bg-green-600 text-white border-green-600' : 'bg-green-100 text-green-700 border-green-300'} rounded-md transition-all duration-200 border">
                                                 Baixo
                                             </button>
-                                            <button onclick="updateUserRiskLevel(${data.user.id}, 'medium')" 
-                                                    class="flex-1 px-3 py-2 text-xs font-medium ${data.user.risk_level === 'medium' ? 'bg-yellow-600 text-white' : 'bg-yellow-100 text-yellow-700'} rounded-md transition-colors border">
+                                            <button type="button" 
+                                                    onclick="updateUserRiskLevel(${data.user.id}, 'medium')" 
+                                                    class="flex-1 px-3 py-2 text-xs font-medium ${data.user.risk_level === 'medium' ? 'bg-yellow-600 text-white border-yellow-600' : 'bg-yellow-100 text-yellow-700 border-yellow-300'} rounded-md transition-all duration-200 border">
                                                 Médio
                                             </button>
-                                            <button onclick="updateUserRiskLevel(${data.user.id}, 'high')" 
-                                                    class="flex-1 px-3 py-2 text-xs font-medium ${data.user.risk_level === 'high' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-700'} rounded-md transition-colors border">
+                                            <button type="button" 
+                                                    onclick="updateUserRiskLevel(${data.user.id}, 'high')" 
+                                                    class="flex-1 px-3 py-2 text-xs font-medium ${data.user.risk_level === 'high' ? 'bg-red-600 text-white border-red-600' : 'bg-red-100 text-red-700 border-red-300'} rounded-md transition-all duration-200 border">
                                                 Alto
                                             </button>
                                         </div>
@@ -347,12 +391,12 @@ function showUserProfileModal(data) {
                         </div>
 
                         <!-- Coluna 2: Pedidos e Atividades -->
-                        <div class="lg:col-span-2">
+                        <div class="lg:col-span-2 space-y-6">
                             <!-- Alertas do Sistema -->
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                <div class="flex items-center mb-2">
-                                    <i class="fas fa-info-circle text-blue-600 mr-2"></i>
-                                    <h4 class="font-semibold text-blue-800">Sistema de Gestão de Usuários</h4>
+                            <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-5">
+                                <div class="flex items-center mb-3">
+                                    <i class="fas fa-info-circle text-blue-600 text-xl mr-3"></i>
+                                    <h4 class="font-semibold text-blue-800 text-lg">Sistema de Gestão de Usuários</h4>
                                 </div>
                                 <p class="text-blue-700 text-sm">
                                     <strong>Funcionalidades Ativas:</strong> Gestão de Risco, Controle de Contas, Análise de Pedidos e Pagamentos<br>
@@ -362,113 +406,117 @@ function showUserProfileModal(data) {
 
                             <!-- Atividades Suspeitas -->
                             ${data.atividades_suspeitas && data.atividades_suspeitas.length > 0 ? `
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                                <div class="flex items-center mb-2">
-                                    <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
-                                    <h4 class="font-semibold text-yellow-800">Alertas de Segurança</h4>
+                            <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200 rounded-xl p-5">
+                                <div class="flex items-center mb-3">
+                                    <i class="fas fa-exclamation-triangle text-yellow-600 text-xl mr-3"></i>
+                                    <h4 class="font-semibold text-yellow-800 text-lg">Alertas de Segurança</h4>
                                 </div>
-                                <ul class="list-disc list-inside text-yellow-700 space-y-1">
-                                    ${data.atividades_suspeitas.map(activity => `<li>${activity}</li>`).join('')}
+                                <ul class="list-disc list-inside text-yellow-700 space-y-2 text-sm">
+                                    ${data.atividades_suspeitas.map(activity => `<li class="font-medium">${activity}</li>`).join('')}
                                 </ul>
                             </div>
-                            ` : '<div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6"><div class="flex items-center"><i class="fas fa-check-circle text-green-600 mr-2"></i><h4 class="font-semibold text-green-800">Nenhum alerta de segurança detectado</h4></div></div>'}
+                            ` : '<div class="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-xl p-5"><div class="flex items-center"><i class="fas fa-check-circle text-green-600 text-xl mr-3"></i><h4 class="font-semibold text-green-800 text-lg">Nenhum alerta de segurança detectado</h4></div></div>'}
 
                             <!-- Últimos Pedidos -->
-                            <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                                <h4 class="font-semibold text-lg mb-4 text-gray-800 border-b pb-2">
+                            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                <h4 class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
                                     <i class="fas fa-shopping-bag mr-2 text-purple-500"></i>
                                     Últimos Pedidos
                                 </h4>
                                 ${data.pedidos && data.pedidos.length > 0 ? `
-                                <div class="overflow-x-auto">
+                                <div class="overflow-x-auto rounded-lg border border-gray-200">
                                     <table class="min-w-full text-sm">
                                         <thead class="bg-gray-50">
                                             <tr>
-                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedido</th>
-                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valor</th>
-                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Pedido</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Status</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Valor</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Data</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-gray-200">
+                                        <tbody class="bg-white divide-y divide-gray-200">
                                             ${data.pedidos.map(pedido => `
-                                            <tr class="hover:bg-gray-50">
-                                                <td class="px-4 py-3 font-medium text-gray-900">${pedido.numero_pedido || 'N/A'}</td>
-                                                <td class="px-4 py-3">
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(pedido.status)}">
+                                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                                <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">${pedido.numero_pedido || 'N/A'}</td>
+                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(pedido.status)}">
                                                         ${pedido.status || 'N/A'}
                                                     </span>
                                                 </td>
-                                                <td class="px-4 py-3 font-medium text-gray-900">R$ ${(pedido.total_final || 0).toFixed(2)}</td>
-                                                <td class="px-4 py-3 text-gray-500">${pedido.criado_em ? new Date(pedido.criado_em).toLocaleDateString('pt-BR') : 'N/A'}</td>
+                                                <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">R$ ${(pedido.total_final || 0).toFixed(2)}</td>
+                                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${pedido.criado_em ? new Date(pedido.criado_em).toLocaleDateString('pt-BR') : 'N/A'}</td>
                                             </tr>
                                             `).join('')}
                                         </tbody>
                                     </table>
                                 </div>
-                                ` : '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'}
+                                ` : '<p class="text-gray-500 text-center py-8 bg-gray-50 rounded-lg border border-gray-200">Nenhum pedido encontrado.</p>'}
                             </div>
 
                             <!-- Histórico de Pagamentos -->
-                            <div class="bg-white border border-gray-200 rounded-lg p-6">
-                                <h4 class="font-semibold text-lg mb-4 text-gray-800 border-b pb-2">
+                            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                <h4 class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
                                     <i class="fas fa-credit-card mr-2 text-green-500"></i>
                                     Histórico de Pagamentos
                                 </h4>
                                 ${data.pagamentos && data.pagamentos.length > 0 ? `
-                                <div class="overflow-x-auto">
+                                <div class="overflow-x-auto rounded-lg border border-gray-200">
                                     <table class="min-w-full text-sm">
                                         <thead class="bg-gray-50">
                                             <tr>
-                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedido</th>
-                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valor</th>
-                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Método</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Pedido</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Status</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Valor</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Método</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-gray-200">
+                                        <tbody class="bg-white divide-y divide-gray-200">
                                             ${data.pagamentos.map(pagamento => `
-                                            <tr class="hover:bg-gray-50">
-                                                <td class="px-4 py-3 font-medium text-gray-900">${pagamento.pedido_numero || 'N/A'}</td>
-                                                <td class="px-4 py-3">
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(pagamento.status)}">
+                                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                                <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">${pagamento.pedido_numero || 'N/A'}</td>
+                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(pagamento.status)}">
                                                         ${pagamento.status || 'N/A'}
                                                     </span>
                                                 </td>
-                                                <td class="px-4 py-3 font-medium text-gray-900">R$ ${(pagamento.valor || 0).toFixed(2)}</td>
-                                                <td class="px-4 py-3 text-gray-500">${pagamento.metodo || 'N/A'}</td>
+                                                <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">R$ ${(pagamento.valor || 0).toFixed(2)}</td>
+                                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${pagamento.metodo || 'N/A'}</td>
                                             </tr>
                                             `).join('')}
                                         </tbody>
                                     </table>
                                 </div>
-                                ` : '<p class="text-gray-500 text-center py-4">Nenhum pagamento encontrado.</p>'}
+                                ` : '<p class="text-gray-500 text-center py-8 bg-gray-50 rounded-lg border border-gray-200">Nenhum pagamento encontrado.</p>'}
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Footer com Ações -->
-                <div class="p-6 border-t bg-gray-50 flex justify-between items-center">
+                <div class="p-6 border-t border-gray-200 bg-white flex justify-between items-center">
                     <div class="text-sm text-gray-600">
-                        ID do usuário: ${data.user.id} • 
+                        ID do usuário: <span class="font-mono bg-gray-100 px-2 py-1 rounded">${data.user.id}</span> • 
                         Risco: <span class="font-medium ${riskLevelColors[data.user.risk_level] || 'bg-gray-100 text-gray-800'} px-2 py-1 rounded">${riskLevelText[data.user.risk_level] || 'Desconhecido'}</span>
                     </div>
                     <div class="flex space-x-3">
-                        <button onclick="toggleUserStatus(${data.user.id})" 
-                                class="px-4 py-2 text-sm font-medium ${data.user.is_active ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'} rounded-md transition-colors">
+                        <button type="button" 
+                                onclick="toggleUserStatus(${data.user.id})" 
+                                class="px-4 py-2 text-sm font-medium ${data.user.is_active ? 'bg-red-100 text-red-700 hover:bg-red-200 border-red-300' : 'bg-green-100 text-green-700 hover:bg-green-200 border-green-300'} rounded-lg transition-all duration-200 border">
                             ${data.user.is_active ? '❌ Desativar Conta' : '✅ Reativar Conta'}
                         </button>
-                        <button onclick="forceLogoutUser(${data.user.id})" 
-                                class="px-4 py-2 text-sm font-medium bg-orange-100 text-orange-700 hover:bg-orange-200 rounded-md transition-colors">
+                        <button type="button" 
+                                onclick="forceLogoutUser(${data.user.id})" 
+                                class="px-4 py-2 text-sm font-medium bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-300 rounded-lg transition-all duration-200 border">
                             🚪 Forçar Logout
                         </button>
-                        <button onclick="sendPasswordReset(${data.user.id})" 
-                                class="px-4 py-2 text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-md transition-colors">
+                        <button type="button" 
+                                onclick="sendPasswordReset(${data.user.id})" 
+                                class="px-4 py-2 text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-300 rounded-lg transition-all duration-200 border">
                             🔑 Enviar Reset
                         </button>
-                        <button onclick="this.closest('.fixed').remove()" 
-                                class="px-4 py-2 text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-md transition-colors">
+                        <button type="button" 
+                                onclick="closeUserModal()" 
+                                class="px-4 py-2 text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-300 rounded-lg transition-all duration-200 border close-modal-btn">
                             Fechar
                         </button>
                     </div>
@@ -477,21 +525,24 @@ function showUserProfileModal(data) {
         </div>
     `;
     
+    // ✅ INSERIR MODAL NO BODY
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     
-    // Adicionar evento de tecla ESC para fechar modal
-    const modal = document.querySelector('.fixed');
-    const handleEscKey = (e) => {
-        if (e.key === 'Escape') {
-            modal.remove();
-            document.removeEventListener('keydown', handleEscKey);
-        }
-    };
-    document.addEventListener('keydown', handleEscKey);
+    // ✅ SALVAR REFERÊNCIA DO MODAL ATUAL
+    currentUserModal = document.querySelector('.user-modal-backdrop');
+    
+    // ✅ PREVENIR SCROLL DO BODY
+    document.body.style.overflow = 'hidden';
+    
+    // ✅ ADICIONAR EVENT LISTENERS GLOBAIS
+    document.addEventListener('keydown', handleModalEscKey);
+    document.addEventListener('click', handleModalBackdropClick);
+    
+    console.log('✅ Modal aberto com sucesso - Z-INDEX: 100');
 }
 
 // ====================
-// FUNÇÕES DE GESTÃO AVANÇADA
+// FUNÇÕES DE GESTÃO AVANÇADA - ATUALIZADAS
 // ====================
 
 async function viewUserProfile(userId) {
@@ -537,8 +588,8 @@ async function toggleSuspiciousUser(userId) {
         
         if (data.success) {
             showNotification(data.message, 'success');
-            // Fechar modal e recarregar
-            document.querySelector('.fixed')?.remove();
+            // ✅ FECHAR MODAL CORRETAMENTE E RECARREGAR
+            closeUserModal();
             setTimeout(() => goToUsersPage(currentUsersPage), 1000);
         } else {
             showNotification('Erro: ' + data.error, 'error');
@@ -567,8 +618,8 @@ async function updateUserRiskLevel(userId, riskLevel) {
         
         if (data.success) {
             showNotification(data.message, 'success');
-            // Fechar modal e recarregar
-            document.querySelector('.fixed')?.remove();
+            // ✅ FECHAR MODAL CORRETAMENTE E RECARREGAR
+            closeUserModal();
             setTimeout(() => goToUsersPage(currentUsersPage), 1000);
         } else {
             showNotification('Erro: ' + data.error, 'error');
@@ -580,7 +631,7 @@ async function updateUserRiskLevel(userId, riskLevel) {
 }
 
 // ====================
-// FUNÇÕES DE CONTROLE DE USUÁRIO
+// FUNÇÕES DE CONTROLE DE USUÁRIO - ATUALIZADAS
 // ====================
 
 async function toggleUserStatus(userId) {
@@ -599,8 +650,8 @@ async function toggleUserStatus(userId) {
         
         if (data.success) {
             showNotification(data.message, 'success');
-            // Fechar modal e recarregar
-            document.querySelector('.fixed')?.remove();
+            // ✅ FECHAR MODAL CORRETAMENTE E RECARREGAR
+            closeUserModal();
             setTimeout(() => goToUsersPage(currentUsersPage), 1000);
         } else {
             showNotification('Erro: ' + data.error, 'error');
@@ -743,6 +794,10 @@ function initializeUsersSection() {
 // Resetar flag quando a seção for escondida
 function resetUsersSection() {
     isUsersSectionInitialized = false;
+    // ✅ FECHAR QUALQUER MODAL ABERTO
+    if (currentUserModal) {
+        closeUserModal();
+    }
 }
 
 // ====================
@@ -781,7 +836,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Adicionar CSS para animações
+// Adicionar CSS para animações e correções de z-index
 const style = document.createElement('style');
 style.textContent = `
     @keyframes fade-in {
@@ -790,6 +845,44 @@ style.textContent = `
     }
     .animate-fade-in {
         animation: fade-in 0.3s ease-out;
+    }
+    
+    /* ✅ CORREÇÕES CRÍTICAS PARA O MODAL */
+    .user-modal-backdrop {
+        z-index: 100 !important;
+    }
+    
+    .user-modal-content {
+        z-index: 101 !important;
+    }
+    
+    .close-modal-btn {
+        cursor: pointer !important;
+        z-index: 102 !important;
+        position: relative !important;
+    }
+    
+    /* ✅ PREVENIR INTERAÇÃO COM ELEMENTOS ATRÁS DO MODAL */
+    .user-modal-backdrop {
+        pointer-events: auto !important;
+    }
+    
+    .user-modal-backdrop ~ * {
+        pointer-events: none !important;
+    }
+    
+    .user-modal-content,
+    .user-modal-content * {
+        pointer-events: auto !important;
+    }
+    
+    /* ✅ GARANTIR QUE A SIDEBAR FIQUE ATRÁS DO MODAL */
+    #sidebar {
+        z-index: 40 !important;
+    }
+    
+    #backdrop {
+        z-index: 45 !important;
     }
 `;
 document.head.appendChild(style);
