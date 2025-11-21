@@ -1,0 +1,390 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nossos Produtos | O Especialista.Carros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'core/front-end/css/styles.css' %}">
+</head>
+
+<body class="font-sans bg-gray-50">
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/5511995366395" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="{% url 'index' %}" class="text-xl font-bold text-blue-900">O Especialista.Carros</a>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'index' %}#home"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Home</a>
+                    <a href="{% url 'produtos_listagem' %}"
+                        class="text-blue-600 font-semibold px-3 py-2 font-medium">Produtos</a>
+                    <a href="{% url 'index' %}#services"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Serviços</a>
+                    <a href="{% url 'index' %}#about"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Sobre Nós</a>
+                    <a href="{% url 'index' %}#blog"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Blog</a>
+                    <a href="{% url 'index' %}#contact"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Contato</a>
+                </div>
+
+                <!-- Login/Cart -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <!-- Ícone do Usuário com Menu Dropdown -->
+                    <div class="relative">
+                        <a id="user-icon" href="javascript:void(0)" class="text-gray-700 hover:text-blue-500">
+                            <i class="fas fa-user"></i>
+                        </a>
+                        <!-- Menu Dropdown do Usuário -->
+                        <div id="user-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <!-- Conteúdo será preenchido pelo JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Ícone do Carrinho -->
+                    <a href="{% url 'carrinho' %}" class="text-gray-700 hover:text-blue-500 relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count"
+                            class="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            0
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button
+                        class="mobile-menu-button p-2 rounded-md text-gray-700 hover:text-blue-500 hover:bg-gray-100 focus:outline-none">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu hidden md:hidden bg-white shadow-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="{% url 'index' %}#home"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Home</a>
+                <a href="{% url 'produtos_listagem' %}"
+                    class="block px-3 py-2 text-base font-medium text-blue-600 bg-gray-100">Produtos</a>
+                <a href="{% url 'index' %}#services"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Serviços</a>
+                <a href="{% url 'index' %}#about"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Sobre
+                    Nós</a>
+                <a href="{% url 'index' %}#blog"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Blog</a>
+                <a href="{% url 'index' %}#contact"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Contato</a>
+                <div class="pt-4 border-t border-gray-200">
+                    <div id="mobile-user-menu">
+                        <!-- Conteúdo será preenchido pelo JavaScript -->
+                    </div>
+                    <a href="{% url 'carrinho' %}"
+                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Carrinho</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <nav class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                <a href="{% url 'index' %}" class="hover:text-blue-600">Home</a>
+                <span><i class="fas fa-chevron-right text-xs"></i></span>
+                <span class="text-gray-900 font-medium">Todos os Produtos</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header da Página de Produtos -->
+    <section class="py-12 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-bold mb-4">Nossos Produtos Profissionais</h1>
+            <p class="text-xl text-blue-100 max-w-3xl mx-auto">
+                Descubra a linha completa de produtos que usamos e recomendamos para cuidados automotivos de excelência
+            </p>
+        </div>
+    </section>
+
+    <!-- Filtros e Categorias -->
+    <section class="py-8 bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+                <!-- Categorias -->
+                <div class="flex flex-wrap gap-2">
+                    <button class="categoria-btn px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition" data-categoria="todos">
+                        Todos os Produtos
+                    </button>
+                    <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="limpeza">
+                        Limpeza e Lavagem
+                    </button>
+                    <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="polimento">
+                        Polimento e Vitrificação
+                    </button>
+                    <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="interior">
+                        Interior e Estofados
+                    </button>
+                    <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="protecao">
+                        Proteção e Conservação
+                    </button>
+                </div>
+
+                <!-- Ordenação e Busca -->
+                <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                    <!-- Busca -->
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="Buscar produtos..." 
+                               class="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                    </div>
+
+                    <!-- Ordenação -->
+                    <select id="sort-select" class="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="nome">Ordenar por: Nome</option>
+                        <option value="preco_asc">Preço: Menor para Maior</option>
+                        <option value="preco_desc">Preço: Maior para Menor</option>
+                        <option value="recentes">Mais Recentes</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Grid de Produtos -->
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Contador de Produtos -->
+            <div class="flex justify-between items-center mb-8">
+                <p id="product-count" class="text-gray-600">
+                    Mostrando <span class="font-semibold">{{ produtos|length }}</span> produtos
+                </p>
+                
+                <!-- Visualização (Grid/Lista) -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-gray-600 text-sm">Visualização:</span>
+                    <button id="grid-view" class="p-2 text-blue-600 bg-blue-100 rounded">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button id="list-view" class="p-2 text-gray-400 hover:text-blue-600 rounded">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid de Produtos -->
+            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {% for produto in produtos %}
+                <div class="product-card bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100" data-categoria="{{ produto.categoria|default:'geral' }}" data-nome="{{ produto.nome|lower }}">
+                    <!-- Badge "Usamos" -->
+                    <div class="absolute top-4 left-4 z-10">
+                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                            <i class="fas fa-tools mr-1"></i>USAMOS
+                        </span>
+                    </div>
+                    
+                    <!-- Imagem do Produto -->
+                    <a href="{% url 'detalhes_produto' produto.id %}">
+                        <div class="relative h-56 overflow-hidden bg-gray-100">
+                            <img class="w-full h-full object-cover transition duration-500 hover:scale-110" 
+                                 src="{{ produto.imagem.url }}" alt="{{ produto.nome }}">
+                            <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition duration-300"></div>
+                        </div>
+                    </a>
+                    
+                    <!-- Informações do Produto -->
+                    <div class="p-5">
+                        <a href="{% url 'detalhes_produto' produto.id %}">
+                            <h3 class="text-lg font-bold text-gray-900 mb-2 hover:text-blue-600 transition duration-300">
+                                {{ produto.nome }}
+                            </h3>
+                        </a>
+                        
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ produto.descricao }}</p>
+                        
+                        <!-- Categoria -->
+                        <div class="mb-3">
+                            <span class="inline-block bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">
+                                {{ produto.categoria|default:"Geral" }}
+                            </span>
+                        </div>
+                        
+                        <!-- Preço e Ações -->
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <span class="text-2xl font-bold text-green-600">R$ {{ produto.preco }}</span>
+                                <span class="text-sm text-gray-500 block">ou 12x sem juros</span>
+                            </div>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div class="space-y-2">
+                            <button 
+                                class="btn-comprar w-full bg-gradient-to-r from-primary-start to-primary-end text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition duration-300 flex items-center justify-center"
+                                data-produto-id="{{ produto.id }}">
+                                <i class="fas fa-cart-plus mr-2"></i>COMPRAR AGORA
+                            </button>
+                            
+                            <a href="{% url 'detalhes_produto' produto.id %}" 
+                               class="block text-center text-blue-600 hover:text-blue-800 text-sm font-medium transition duration-300">
+                                <i class="fas fa-eye mr-1"></i>Ver detalhes e como usamos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-4 text-center py-12">
+                    <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-xl text-gray-500">Nenhum produto disponível no momento.</p>
+                    <p class="text-gray-600 mt-2">Em breve teremos novidades!</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- List View (hidden by default) -->
+            <div id="products-list" class="hidden space-y-6">
+                {% for produto in produtos %}
+                <div class="product-card bg-white rounded-xl overflow-hidden shadow-lg border border-gray-200" data-categoria="{{ produto.categoria|default:'geral' }}" data-nome="{{ produto.nome|lower }}">
+                    <div class="flex flex-col md:flex-row">
+                        <!-- Imagem -->
+                        <div class="md:w-1/4">
+                            <a href="{% url 'detalhes_produto' produto.id %}">
+                                <div class="relative h-48 md:h-full overflow-hidden bg-gray-100">
+                                    <img class="w-full h-full object-cover" 
+                                         src="{{ produto.imagem.url }}" alt="{{ produto.nome }}">
+                                    <div class="absolute top-4 left-4 z-10">
+                                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                                            <i class="fas fa-tools mr-1"></i>USAMOS
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <!-- Informações -->
+                        <div class="md:w-3/4 p-6">
+                            <div class="flex flex-col h-full justify-between">
+                                <div>
+                                    <a href="{% url 'detalhes_produto' produto.id %}">
+                                        <h3 class="text-xl font-bold text-gray-900 mb-2 hover:text-blue-600 transition duration-300">
+                                            {{ produto.nome }}
+                                        </h3>
+                                    </a>
+                                    
+                                    <p class="text-gray-600 mb-4">{{ produto.descricao }}</p>
+                                    
+                                    <div class="flex items-center space-x-4 mb-4">
+                                        <span class="inline-block bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm font-medium">
+                                            {{ produto.categoria|default:"Geral" }}
+                                        </span>
+                                        <div class="flex text-yellow-400">
+                                            {% for i in "12345" %}
+                                                <i class="fas fa-star"></i>
+                                            {% endfor %}
+                                            <span class="text-gray-500 text-sm ml-2">(42)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span class="text-3xl font-bold text-green-600">R$ {{ produto.preco }}</span>
+                                        <span class="text-sm text-gray-500 block">ou 12x sem juros</span>
+                                    </div>
+                                    
+                                    <div class="flex space-x-3">
+                                        <button 
+                                            class="btn-comprar bg-gradient-to-r from-primary-start to-primary-end text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transition duration-300 flex items-center"
+                                            data-produto-id="{{ produto.id }}">
+                                            <i class="fas fa-cart-plus mr-2"></i>COMPRAR
+                                        </button>
+                                        
+                                        <a href="{% url 'detalhes_produto' produto.id %}" 
+                                           class="bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition duration-300 flex items-center">
+                                            <i class="fas fa-eye mr-2"></i>Detalhes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginação (se necessário) -->
+            {% if produtos.has_other_pages %}
+            <div class="mt-12 flex justify-center">
+                <nav class="flex items-center space-x-2">
+                    {% if produtos.has_previous %}
+                    <a href="?page={{ produtos.previous_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    {% endif %}
+
+                    {% for num in produtos.paginator.page_range %}
+                        {% if produtos.number == num %}
+                        <span class="px-3 py-2 bg-blue-600 text-white border border-blue-600 rounded-md">{{ num }}</span>
+                        {% else %}
+                        <a href="?page={{ num }}" class="px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if produtos.has_next %}
+                    <a href="?page={{ produtos.next_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-4">Precisa de Ajuda para Escolher?</h2>
+            <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                Nossos especialistas estão prontos para te ajudar a escolher os produtos ideais para o seu veículo
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://wa.me/5511995366395" 
+                   class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition duration-300 flex items-center justify-center">
+                    <i class="fab fa-whatsapp mr-2 text-lg"></i>Falar com Especialista
+                </a>
+                <a href="{% url 'index' %}#services" 
+                   class="border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-blue-600 transition duration-300">
+                    <i class="fas fa-concierge-bell mr-2"></i>Conhecer Serviços
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-12 pb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- ... (mesmo footer do index) ... -->
+        </div>
+    </footer>
+
+    <script src="{% static 'core/front-end/js/scripts.js' %}"></script>
+    <script src="{% static 'core/front-end/js/produtos-listagem.js' %}"></script>
+</body>
+</html>

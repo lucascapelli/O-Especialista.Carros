@@ -20,7 +20,7 @@ def index(request):
 def produtos_listagem(request):
     # ✅ APENAS produtos ATIVOS na listagem
     produtos = Produto.objects.filter(status='Ativo')
-    return render(request, 'core/front-end/index.html', {'produtos': produtos})
+    return render(request, 'core/front-end/produtos_listagem.html', {'produtos': produtos})
 
 def detalhes_produto(request, produto_id):
     from django.shortcuts import get_object_or_404

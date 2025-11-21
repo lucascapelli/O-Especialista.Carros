@@ -138,7 +138,7 @@
         </div>
     </section>
 
-   <!-- Featured Products - Versão Profissional -->
+  <!-- Featured Products - Versão Profissional -->
 <section id="products" class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Cabeçalho Impactante -->
@@ -246,6 +246,19 @@
             {% endfor %}
         </div>
 
+        <!-- Botão para Ver Todos os Produtos -->
+        <div class="text-center mt-12">
+            <a href="{% url 'produtos_listagem' %}" 
+               class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold text-lg hover:shadow-xl transition duration-300 hover:scale-105">
+                <i class="fas fa-store mr-3"></i>
+                VER TODOS OS PRODUTOS
+                <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+            <p class="text-gray-600 mt-3 text-sm">
+                Explore nossa linha completa com +50 produtos profissionais
+            </p>
+        </div>
+
         <!-- CTA Final -->
         <div class="text-center mt-16 bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 text-white">
             <h3 class="text-2xl font-bold mb-4">QUER SABER MAIS SOBRE COMO USAMOS ESSES PRODUTOS?</h3>
@@ -255,9 +268,9 @@
                    class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition duration-300">
                     <i class="fas fa-calendar-check mr-2"></i>Agendar Avaliação
                 </a>
-                <a href="#services" 
+                <a href="{% url 'produtos_listagem' %}" 
                    class="border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-blue-600 transition duration-300">
-                    <i class="fas fa-concierge-bell mr-2"></i>Ver Serviços
+                    <i class="fas fa-boxes mr-2"></i>Ver Todos os Produtos
                 </a>
             </div>
         </div>
