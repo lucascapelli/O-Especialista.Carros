@@ -1,0 +1,372 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ produto.nome }} | O Especialista.Carros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'core/front-end/css/styles.css' %}">
+</head>
+
+<body class="font-sans bg-gray-50">
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/5511995366395" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="{% url 'index' %}" class="text-xl font-bold text-blue-900">O Especialista.Carros</a>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'index' %}#home"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Home</a>
+                    <a href="{% url 'index' %}#products"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Produtos</a>
+                    <a href="{% url 'index' %}#services"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Serviços</a>
+                    <a href="{% url 'index' %}#about"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Sobre Nós</a>
+                    <a href="{% url 'index' %}#blog"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Blog</a>
+                    <a href="{% url 'index' %}#contact"
+                        class="text-gray-700 hover:text-blue-500 px-3 py-2 font-medium">Contato</a>
+                </div>
+
+                <!-- Login/Cart -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <!-- Ícone do Usuário com Menu Dropdown -->
+                    <div class="relative">
+                        <a id="user-icon" href="javascript:void(0)" class="text-gray-700 hover:text-blue-500">
+                            <i class="fas fa-user"></i>
+                        </a>
+                        <!-- Menu Dropdown do Usuário -->
+                        <div id="user-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <!-- Conteúdo será preenchido pelo JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Ícone do Carrinho -->
+                    <a href="{% url 'carrinho' %}" class="text-gray-700 hover:text-blue-500 relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count"
+                            class="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            0
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button
+                        class="mobile-menu-button p-2 rounded-md text-gray-700 hover:text-blue-500 hover:bg-gray-100 focus:outline-none">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu hidden md:hidden bg-white shadow-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="{% url 'index' %}#home"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Home</a>
+                <a href="{% url 'index' %}#products"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Produtos</a>
+                <a href="{% url 'index' %}#services"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Serviços</a>
+                <a href="{% url 'index' %}#about"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Sobre
+                    Nós</a>
+                <a href="{% url 'index' %}#blog"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Blog</a>
+                <a href="{% url 'index' %}#contact"
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Contato</a>
+                <div class="pt-4 border-t border-gray-200">
+                    <div id="mobile-user-menu">
+                        <!-- Conteúdo será preenchido pelo JavaScript -->
+                    </div>
+                    <a href="{% url 'carrinho' %}"
+                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-500 hover:bg-gray-100">Carrinho</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <nav class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                <a href="{% url 'index' %}" class="hover:text-blue-600">Home</a>
+                <span><i class="fas fa-chevron-right text-xs"></i></span>
+                <a href="{% url 'index' %}#products" class="hover:text-blue-600">Produtos</a>
+                <span><i class="fas fa-chevron-right text-xs"></i></span>
+                <span class="text-gray-900 font-medium">{{ produto.nome }}</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Detalhes do Produto -->
+    <section class="py-8 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Imagem do Produto -->
+                <div>
+                    <div class="bg-gray-100 rounded-lg overflow-hidden mb-4">
+                        <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" 
+                             class="w-full h-96 object-cover">
+                    </div>
+                    <!-- Miniaturas (se tiver mais imagens) -->
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="bg-gray-100 rounded border-2 border-blue-500">
+                            <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" 
+                                 class="w-full h-20 object-cover">
+                        </div>
+                        <!-- Adicione mais miniaturas se disponível -->
+                    </div>
+                </div>
+
+                <!-- Informações do Produto -->
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ produto.nome }}</h1>
+                    
+                    <!-- Preço -->
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-green-600">R$ {{ produto.preco }}</span>
+                        <span class="text-sm text-gray-500 ml-2">à vista</span>
+                    </div>
+
+                    <!-- Descrição -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-2">Descrição do Produto</h3>
+                        <p class="text-gray-700 leading-relaxed">{{ produto.descricao }}</p>
+                    </div>
+
+                    <!-- Especificações Técnicas -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-3">Características</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Produto testado e aprovado por nossos especialistas</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Garantia de qualidade Especialista.Carros</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Entrega rápida para todo Brasil</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Botão Comprar -->
+                    <div class="mb-6">
+                        <button 
+                            class="btn-comprar-detalhes w-full bg-gradient-to-r from-primary-start to-primary-end text-white py-4 px-6 rounded-lg font-bold text-lg hover:shadow-lg transition duration-300 flex items-center justify-center"
+                            data-produto-id="{{ produto.id }}">
+                            <i class="fas fa-cart-plus mr-3"></i>
+                            COMPRAR AGORA
+                        </button>
+                    </div>
+
+                    <!-- Selos de Confiança -->
+                    <div class="grid grid-cols-3 gap-4 text-center text-xs text-gray-600">
+                        <div>
+                            <i class="fas fa-shield-alt text-2xl text-green-500 mb-1"></i>
+                            <p>Garantia<br>Quality</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-truck text-2xl text-blue-500 mb-1"></i>
+                            <p>Entrega<br>Rápida</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-medal text-2xl text-yellow-500 mb-1"></i>
+                            <p>Produto<br>Profissional</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção "Como Usamos Este Produto" -->
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">COMO USAMOS ESTE PRODUTO</h2>
+                <p class="text-xl text-gray-600">Veja nossos especialistas em ação com {{ produto.nome }}</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <!-- Vídeo/Imagem de demonstração -->
+                <div class="bg-gray-200 rounded-lg h-64 flex items-center justify-center">
+                    <div class="text-center text-gray-500">
+                        <i class="fas fa-play-circle text-6xl mb-4 opacity-50"></i>
+                        <p>Vídeo demonstrativo</p>
+                    </div>
+                </div>
+                
+                <!-- Depoimento do Especialista -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-primary-start to-primary-end rounded-full flex items-center justify-center text-white font-bold mr-4">
+                            EC
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">João Silva</h4>
+                            <p class="text-sm text-gray-600">Especialista em Detailing</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 italic">
+                        "Usamos o {{ produto.nome }} em todos os nossos serviços de detailing premium. 
+                        É um produto que entrega resultados profissionais e que recomendamos para quem 
+                        busca excelência no cuidado automotivo."
+                    </p>
+                    <div class="flex text-yellow-400 mt-3">
+                        {% for i in "12345" %}
+                            <i class="fas fa-star"></i>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Produtos Relacionados -->
+    <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8">PRODUTOS QUE TAMBÉM USAMOS</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for produto_rel in produtos_relacionados %}
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition duration-300">
+                    <a href="{% url 'detalhes_produto' produto_rel.id %}">
+                        <div class="h-48 bg-gray-100 overflow-hidden">
+                            <img class="w-full h-full object-cover hover:scale-105 transition duration-300" 
+                                 src="{{ produto_rel.imagem.url }}" alt="{{ produto_rel.nome }}">
+                        </div>
+                    </a>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">{{ produto_rel.nome }}</h3>
+                        <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ produto_rel.descricao }}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-bold text-green-600">R$ {{ produto_rel.preco }}</span>
+                            <button 
+                                class="btn-comprar-relacionado bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-300"
+                                data-produto-id="{{ produto_rel.id }}">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-12 pb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="text-lg font-bold mb-4">O Especialista.Carros</h4>
+                    <p class="text-gray-400">Especialistas em estética automotiva, oferecendo produtos e serviços
+                        premium para deixar seu veículo com aparência de novo.</p>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Links Rápidos</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'index' %}#home"
+                                class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
+                        <li><a href="{% url 'index' %}#products"
+                                class="text-gray-400 hover:text-white transition duration-300">Produtos</a></li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Serviços</a></li>
+                        <li><a href="{% url 'index' %}#about"
+                                class="text-gray-400 hover:text-white transition duration-300">Sobre Nós</a></li>
+                        <li><a href="{% url 'index' %}#blog"
+                                class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
+                        <li><a href="{% url 'index' %}#contact"
+                                class="text-gray-400 hover:text-white transition duration-300">Contato</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Serviços</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Lavagem Técnica</a></li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Polimento e
+                                Vitrificação</a></li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Higienização Interna</a>
+                        </li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Proteção Cerâmica</a>
+                        </li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Funilaria e Pintura</a>
+                        </li>
+                        <li><a href="{% url 'index' %}#services"
+                                class="text-gray-400 hover:text-white transition duration-300">Detalhamento Completo</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Formas de Pagamento</h4>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-white p-2 rounded flex items-center justify-center">
+                            <img src="{% static 'core/front-end/imgs/visa.png' %}" alt="Visa" class="h-8">
+                        </div>
+                        <div class="bg-white p-2 rounded flex items-center justify-center">
+                            <img src="{% static 'core/front-end/imgs/mastercard.png' %}" alt="Mastercard" class="h-8">
+                        </div>
+                        <div class="bg-white p-2 rounded flex items-center justify-center">
+                            <img src="{% static 'core/front-end/imgs/elo.png' %}" alt="Elo" class="h-8">
+                        </div>
+                        <div class="bg-white p-2 rounded flex items-center justify-center">
+                            <img src="{% static 'core/front-end/imgs/American Express.jfif' %}" alt="American Express"
+                                class="h-8">
+                        </div>
+                        <div class="bg-white p-2 rounded flex items-center justify-center">
+                            <img src="{% static 'core/front-end/imgs/Hipercard.png' %}" alt="Hipercard" class="h-8">
+                        </div>
+                        <div class="bg-white p-2 rounded flex items-center justify-center">
+                            <img src="{% static 'core/front-end/imgs/pix.png' %}" alt="Pix" class="h-8">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm mb-4 md:mb-0">© 2023 O Especialista.Carros. Todos os direitos
+                    reservados.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300 text-sm">Termos de
+                        Serviço</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300 text-sm">Política de
+                        Privacidade</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300 text-sm">FAQ</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'core/front-end/js/scripts.js' %}"></script>
+    <script src="{% static 'core/front-end/js/produtos.js' %}"></script>
+</body>
+</html>

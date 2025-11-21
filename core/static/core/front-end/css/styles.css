@@ -322,6 +322,53 @@
     transform: translateY(-2px);
 }
 
+/* ===== ESTILOS PARA SEÇÃO DE PRODUTOS ===== */
+
+/* Estilos para a seção de produtos */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    /* Propriedade padrão para compatibilidade futura */
+    display: -moz-box;
+    -moz-box-orient: vertical;
+    -moz-line-clamp: 2;
+    line-clamp: 2;
+    box-orient: vertical;
+}
+
+/* Garantir que as imagens tenham proporção consistente */
+.object-cover {
+    object-fit: cover;
+}
+
+/* Efeitos de hover para cards de produtos */
+.transform {
+    transform: translateY(0);
+    transition: all 0.3s ease;
+}
+
+.transform:hover {
+    transform: translateY(-8px);
+}
+
+/* Badge "USAMOS" */
+.absolute.top-4.left-4 {
+    z-index: 20;
+}
+
+/* Gradientes para botões (caso não estejam definidos no Tailwind) */
+.from-primary-start {
+    --tw-gradient-from: #1e3a8a;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(30, 58, 138, 0));
+}
+
+.to-primary-end {
+    --tw-gradient-to: #0ea5e9;
+}
+
+/* Melhorias para responsividade */
 @media (max-width: 768px) {
     .cart-item-details {
         flex-direction: column;
@@ -337,9 +384,77 @@
         justify-content: space-between;
         width: 100%;
     }
+    
+    /* Responsividade para produtos */
+    .product-grid {
+        grid-template-columns: repeat(1, 1fr) !important;
+    }
+}
+
+@media (min-width: 640px) and (max-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
 }
 
 /* Other styles (not used in login or registration pages but included for completeness) */
 .testimonial-card {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Animações suaves para transições */
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.transition-transform {
+    transition: transform 0.3s ease;
+}
+
+/* Estilos para os selos de credibilidade */
+.bg-blue-100 { background-color: #dbeafe; }
+.bg-green-100 { background-color: #dcfce7; }
+.bg-purple-100 { background-color: #f3e8ff; }
+.bg-orange-100 { background-color: #ffedd5; }
+
+.text-blue-600 { color: #2563eb; }
+.text-green-600 { color: #16a34a; }
+.text-purple-600 { color: #9333ea; }
+.text-orange-600 { color: #ea580c; }
+
+/* Garantir que os textos truncados funcionem bem */
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Melhorias de acessibilidade para focos */
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Loading states para botões */
+.btn-loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn-loading::after {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
