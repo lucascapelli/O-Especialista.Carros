@@ -123,50 +123,47 @@
         </div>
     </section>
 
-    <!-- Filtros e Categorias -->
-    <section class="py-8 bg-white border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-                <!-- Categorias -->
-                <div class="flex flex-wrap gap-2">
-                    <button class="categoria-btn px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition" data-categoria="todos">
-                        Todos os Produtos
-                    </button>
-                    <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="limpeza">
-                        Limpeza e Lavagem
-                    </button>
-                    <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="polimento">
-                        Polimento e Vitrificação
-                    </button>
-                    <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="interior">
-                        Interior e Estofados
-                    </button>
-                    <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="protecao">
-                        Proteção e Conservação
-                    </button>
+   <!-- Filtros e Categorias -->
+<section class="py-8 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+            <!-- Categorias - CORRIGIDAS para match com banco -->
+            <div class="flex flex-wrap gap-2">
+                <button class="categoria-btn px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition" data-categoria="todos">
+                    Todos os Produtos
+                </button>
+                <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="Lavagem">
+                    Limpeza e Lavagem
+                </button>
+                <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="Proteção">
+                    Proteção e Conservação
+                </button>
+                <!-- Adicione mais categorias conforme existem no seu banco -->
+                <button class="categoria-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 transition" data-categoria="Polimento">
+                    Polimento e Vitrificação
+                </button>
+            </div>
+
+            <!-- Ordenação e Busca -->
+            <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                <!-- Busca -->
+                <div class="relative">
+                    <input type="text" id="search-input" placeholder="Buscar produtos..." 
+                           class="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
                 </div>
 
-                <!-- Ordenação e Busca -->
-                <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-                    <!-- Busca -->
-                    <div class="relative">
-                        <input type="text" id="search-input" placeholder="Buscar produtos..." 
-                               class="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
-                    </div>
-
-                    <!-- Ordenação -->
-                    <select id="sort-select" class="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="nome">Ordenar por: Nome</option>
-                        <option value="preco_asc">Preço: Menor para Maior</option>
-                        <option value="preco_desc">Preço: Maior para Menor</option>
-                        <option value="recentes">Mais Recentes</option>
-                    </select>
-                </div>
+                <!-- Ordenação -->
+                <select id="sort-select" class="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="nome">Ordenar por: Nome</option>
+                    <option value="preco_asc">Preço: Menor para Maior</option>
+                    <option value="preco_desc">Preço: Maior para Menor</option>
+                    <option value="recentes">Mais Recentes</option>
+                </select>
             </div>
         </div>
-    </section>
-
+    </div>
+</section>
     <!-- Grid de Produtos -->
     <section class="py-12 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

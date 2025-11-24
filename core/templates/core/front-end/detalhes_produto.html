@@ -156,12 +156,12 @@
                         <div class="text-sm text-gray-600 mt-1">ou 12x de R$ {{ produto.preco|divisibleby:12|floatformat:2 }} sem juros</div>
                     </div>
 
-                    <!-- Descrição -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold mb-2">Descrição do Produto</h3>
-                        <p class="text-gray-700 leading-relaxed">{{ produto.descricao }}</p>
-                    </div>
-
+       <div class="mb-6">
+    <h3 class="text-lg font-semibold mb-4">Descrição do Produto</h3>
+    <div class="text-gray-700 space-y-4 produto-descricao">
+        {{ produto.descricao|safe }}
+    </div>
+</div>
                     <!-- Controles de Compra -->
                     <div class="mb-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
                         <h3 class="text-lg font-semibold mb-4">Adquirir Produto</h3>

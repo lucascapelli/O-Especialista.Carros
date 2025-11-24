@@ -296,6 +296,12 @@ function handleProductSubmit(event) {
         console.log(`   ${key}: ${value}`);
     }
 
+    // ✅ PERMITIR HTML NA DESCRRIÇÃO - não escapar tags
+    const descricao = formData.get('product-descricao');
+    if (descricao) {
+        console.log('✅ Descrição com HTML permitida');
+    }
+
     // ✅ VALIDAÇÃO CRÍTICA: Se é edição e não enviou nova imagem, remove o campo imagem
     if (isEdit && !formData.get('imagem')) {
         formData.delete('imagem');
