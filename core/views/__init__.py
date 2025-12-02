@@ -20,7 +20,7 @@ from .carrinho_views import (
 from .pagamento_views import criar_pagamento_abacatepay
 from .pedido_views import preparar_pagamento, criar_pedido_apos_pagamento, meus_pedidos
 from .produto_views import (
-    ProdutoViewSet, produtos_destaque, buscar_produtos
+    ProdutoViewSet, produtos_destaque, buscar_produtos, produto_detalhes_com_galeria, ImagemProdutoViewSet
 )
 from .api_views import (
     check_auth, CheckAuthView, atualizar_perfil, api_esqueceu_senha

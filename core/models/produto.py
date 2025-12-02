@@ -50,6 +50,18 @@ class Produto(models.Model):
     def __str__(self):
         return f"{self.nome} ({self.sku or 'Sem SKU'})"
     
+    def get_galeria_imagens(self):
+        """Método para debug - verificar se há imagens"""
+        try:
+            imagens = self.imagens.all().order_by('ordem')
+            print(f"🔍 DEBUG GALERIA - Produto {self.id}: {imagens.count()} imagens")
+            for img in imagens:
+                print(f"   - Imagem {img.id}: {img.imagem.name}, ordem: {img.ordem}, produto_id: {img.produto_id}")
+            return imagens
+        except Exception as e:
+            print(f"❌ DEBUG GALERIA ERRO: {e}")
+            return self.imagens.none()
+    
     @property
     def dimensoes_formatadas(self):
         """Retorna as dimensões formatadas para exibição"""
@@ -70,3 +82,54 @@ class Produto(models.Model):
             models.Index(fields=['categoria', 'status']),
             models.Index(fields=['data_criacao']),
         ]
+
+
+class ImagemProduto(models.Model):
+    produto = models.ForeignKey(
+        Produto, 
+        on_delete=models.CASCADE, 
+        related_name='imagens',
+        verbose_name="Produto"
+    )
+    imagem = models.ImageField(
+        upload_to='produtos/galeria/',
+        verbose_name="Imagem"
+    )
+    ordem = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Ordem de Exibição",
+        help_text="Define a ordem das imagens (0 = primeira)"
+    )
+    legenda = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name="Legenda",
+        help_text="Legenda opcional para a imagem"
+    )
+    is_principal = models.BooleanField(
+        default=False,
+        verbose_name="Imagem Principal",
+        help_text="Marcar como imagem principal do produto"
+    )
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Imagem do Produto"
+        verbose_name_plural = "Imagens do Produto"
+        ordering = ['ordem', 'data_criacao']
+        indexes = [
+            models.Index(fields=['produto', 'ordem']),
+            models.Index(fields=['produto', 'is_principal']),
+        ]
+
+    def __str__(self):
+        return f"Imagem {self.ordem} - {self.produto.nome}"
+
+    def save(self, *args, **kwargs):
+        # Garante que só tenha uma imagem principal por produto
+        if self.is_principal:
+            ImagemProduto.objects.filter(
+                produto=self.produto, 
+                is_principal=True
+            ).update(is_principal=False)
+        super().save(*args, **kwargs)

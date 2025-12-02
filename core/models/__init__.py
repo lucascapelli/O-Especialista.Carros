@@ -1,6 +1,6 @@
 from .base import BaseModel
 from .user import User
-from .produto import Produto
+from .produto import Produto, ImagemProduto
 from .servico import Servico
 from .carrinho import Carrinho, ItemCarrinho
 from .orders import Pedido, ItemPedido, StatusPedido

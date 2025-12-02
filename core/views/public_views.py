@@ -1,6 +1,6 @@
 # views/public_views.py
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
@@ -23,15 +23,22 @@ def produtos_listagem(request):
     return render(request, 'core/front-end/produtos_listagem.html', {'produtos': produtos})
 
 def detalhes_produto(request, produto_id):
-    from django.shortcuts import get_object_or_404
+    """View para página de detalhes do produto com galeria"""
     # ✅ Permite ver detalhes mesmo de produtos inativos (para links compartilhados)
     produto = get_object_or_404(Produto, id=produto_id)
-    # ✅ Mas produtos relacionados só os ATIVOS
-    produtos_relacionados = Produto.objects.filter(status='Ativo').exclude(id=produto_id)[:4]
-    return render(request, 'core/front-end/detalhes_produto.html', {
+    
+    # ✅ Produtos relacionados só os ATIVOS
+    produtos_relacionados = Produto.objects.filter(
+        categoria=produto.categoria,
+        status='Ativo'
+    ).exclude(id=produto.id)[:4]
+    
+    context = {
         'produto': produto,
-        'produtos_relacionados': produtos_relacionados
-    })
+        'produtos_relacionados': produtos_relacionados,
+    }
+    
+    return render(request, 'core/front-end/detalhes_produto.html', context)
 
 @require_http_methods(["POST"])
 @csrf_protect

@@ -1,7 +1,8 @@
+# core/serializers.py
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from django.db import models  # ✅ IMPORTANDO MODELS
-from .models import User, Produto, Pedido, ItemPedido, StatusPedido, Pagamento, Envio
+from django.db import models
+from .models import User, Produto, Pedido, ItemPedido, StatusPedido, Pagamento, Envio, ImagemProduto
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,8 +35,35 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
+# ==================== SERIALIZERS PARA IMAGEMPRODUTO ====================
+
+class ImagemProdutoSerializer(serializers.ModelSerializer):
+    imagem_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ImagemProduto
+        fields = ['id', 'produto', 'imagem', 'imagem_url', 'ordem', 'legenda', 'is_principal']  # ✅ ADICIONE 'produto'
+        read_only_fields = ['id']  # ✅ ADICIONE ESTA LINHA
+    
+    def get_imagem_url(self, obj):
+        if obj.imagem and hasattr(obj.imagem, 'url'):
+            return obj.imagem.url
+        return None
+    
+    def create(self, validated_data):
+        """Override para debug e garantir que produto seja salvo"""
+        print(f"🔍 SERIALIZER CREATE: Dados validados: {validated_data}")
+        try:
+            return super().create(validated_data)
+        except Exception as e:
+            print(f"❌ SERIALIZER CREATE ERRO: {e}")
+            raise
+
+# ==================== SERIALIZERS ATUALIZADOS PARA PRODUTO ====================
+
 class ProdutoSerializer(serializers.ModelSerializer):
-    imagem_url = serializers.SerializerMethodField()  # ✅ Campo para URL da imagem
+    imagem_url = serializers.SerializerMethodField()
+    imagens = ImagemProdutoSerializer(many=True, read_only=True)
     
     class Meta:
         model = Produto
@@ -47,11 +75,38 @@ class ProdutoSerializer(serializers.ModelSerializer):
         return None
     
     def update(self, instance, validated_data):
-        # ✅ PROTEÇÃO CRÍTICA: Se não enviou nova imagem, mantém a atual
         if 'imagem' not in self.context['request'].FILES:
             validated_data.pop('imagem', None)
-        
         return super().update(instance, validated_data)
+
+class ProdutoDetailSerializer(ProdutoSerializer):
+    """Serializer extendido para detalhes do produto com galeria completa"""
+    galeria_imagens = serializers.SerializerMethodField()
+    
+    class Meta(ProdutoSerializer.Meta):
+        fields = [
+            'id', 'nome', 'sku', 'descricao', 'preco', 'imagem', 'imagem_url',
+            'estoque', 'categoria', 'status', 'peso', 'altura', 'largura', 
+            'comprimento', 'data_criacao', 'imagens', 'galeria_imagens'
+        ]
+    
+    def get_galeria_imagens(self, obj):
+        """Retorna todas as imagens ordenadas da galeria"""
+        print(f"🔍 SERIALIZER DEBUG: Buscando galeria para produto {obj.id}")
+        
+        # Chama o método de debug do modelo
+        imagens = obj.get_galeria_imagens()
+        
+        print(f"🔍 SERIALIZER DEBUG: {len(imagens)} imagens serão serializadas")
+        
+        serializer_data = ImagemProdutoSerializer(imagens, many=True, context=self.context).data
+        print(f"🔍 SERIALIZER DEBUG: Dados serializados: {len(serializer_data)} itens")
+        
+        # Debug detalhado de cada imagem serializada
+        for i, img_data in enumerate(serializer_data):
+            print(f"🔍 SERIALIZER DEBUG: Imagem {i}: id={img_data.get('id')}, ordem={img_data.get('ordem')}, url={img_data.get('imagem_url')}")
+        
+        return serializer_data
 
 # ==================== NOVOS SERIALIZERS PARA PEDIDOS ====================
 
@@ -144,7 +199,6 @@ class PedidoDetailSerializer(serializers.ModelSerializer):
         return obj.usuario.email
     
     def get_cliente_telefone(self, obj):
-        # Se tiver telefone no usuário, adicione aqui
         return None
     
     def get_pagamento(self, obj):

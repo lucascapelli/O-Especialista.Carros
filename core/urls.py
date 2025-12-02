@@ -17,7 +17,7 @@ from .views import (
     force_logout_user, send_password_reset, toggle_suspicious_user, update_user_risk_level,
     
     # Produto Views
-    produtos_destaque, buscar_produtos, ProdutoViewSet,
+    produtos_destaque, buscar_produtos, ProdutoViewSet, produto_detalhes_com_galeria, ImagemProdutoViewSet,
     
     # API Views (APIs REST)
     atualizar_perfil, check_auth, CheckAuthView, api_esqueceu_senha,
@@ -33,6 +33,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'api/produtos', ProdutoViewSet, basename='produto')
+router.register(r'api/imagens-produto', ImagemProdutoViewSet, basename='imagem-produto')  # NOVA ROTA
 
 urlpatterns = [
     # PÁGINA INICIAL (ÚNICA)
@@ -61,6 +62,9 @@ urlpatterns = [
     # PRODUTOS
     path('api/produtos/destaque/', produtos_destaque, name='api_produtos_destaque'),
     path('api/produtos/buscar/', buscar_produtos, name='api_produtos_buscar'),
+    
+    # NOVA URL para detalhes do produto com galeria
+    path('api/produtos/<int:produto_id>/galeria/', produto_detalhes_com_galeria, name='produto-galeria'),
     
     # PAGAMENTO
     path('api/criar-pagamento-abacatepay/<int:pedido_id>/', criar_pagamento_abacatepay, name='criar_pagamento_abacatepay'),

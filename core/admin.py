@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Produto
+from .models import User, Produto, ImagemProduto
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
 class UserAdmin(BaseUserAdmin):
@@ -26,8 +26,41 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.register(User, UserAdmin)
 
-# ---------- Novo: Produto no Admin ----------
+# ---------- CONFIGURAÇÃO ATUALIZADA PARA PRODUTO E IMAGEMPRODUTO ----------
+
+class ImagemProdutoInline(admin.TabularInline):
+    model = ImagemProduto
+    extra = 1
+    fields = ['imagem', 'ordem', 'legenda', 'is_principal']
+    readonly_fields = ['data_criacao']
+
 @admin.register(Produto)
 class ProdutoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nome', 'preco', 'estoque')  # Colunas que aparecem na lista
-    search_fields = ('nome',)  # Campo de busca
+    inlines = [ImagemProdutoInline]
+    list_display = ['nome', 'categoria', 'status', 'estoque', 'preco']
+    list_filter = ['categoria', 'status']
+    search_fields = ['nome', 'sku', 'descricao']
+    
+    fieldsets = [
+        ('Informações Básicas', {
+            'fields': ['nome', 'sku', 'descricao', 'categoria', 'status']
+        }),
+        ('Preço e Estoque', {
+            'fields': ['preco', 'estoque']
+        }),
+        ('Dimensões para Frete', {
+            'fields': ['peso', 'altura', 'largura', 'comprimento']
+        }),
+        ('Imagem Principal (Compatibilidade)', {
+            'fields': ['imagem'],
+            'classes': ['collapse']
+        }),
+    ]
+
+@admin.register(ImagemProduto)
+class ImagemProdutoAdmin(admin.ModelAdmin):
+    list_display = ['produto', 'ordem', 'is_principal', 'data_criacao']
+    list_filter = ['produto', 'is_principal']
+    search_fields = ['produto__nome', 'legenda']
+    ordering = ['produto', 'ordem']
+    readonly_fields = ['data_criacao']

@@ -1,7 +1,7 @@
 // ====================
 // Debug inicial
 // ====================
-console.log('🔄 products.js carregado - VERSÃO COM FILTROS CORRIGIDOS');
+console.log('🔄 products.js carregado - VERSÃO COM GALERIA DE IMAGENS');
 
 // ====================
 // Variáveis globais
@@ -9,7 +9,7 @@ console.log('🔄 products.js carregado - VERSÃO COM FILTROS CORRIGIDOS');
 let currentEditingProduct = null;
 
 // ====================
-// Inicialização segura dos produtos - CORRIGIDA
+// Inicialização segura dos produtos
 // ====================
 async function initializeProducts() {
     if (window._productsInitialized) return;
@@ -38,7 +38,336 @@ async function initializeProducts() {
 // ====================
 document.addEventListener('DOMContentLoaded', () => {
     initializeProducts().catch(err => console.error('❌ Erro na inicialização:', err));
+    
+    // Configurar event listeners para a galeria
+    const galleryInput = document.getElementById('gallery-images');
+    if (galleryInput) {
+        galleryInput.addEventListener('change', function() {
+            const fileCount = this.files.length;
+            const btnUpload = document.getElementById('btn-upload-gallery');
+            if (btnUpload && fileCount > 0) {
+                btnUpload.textContent = `Upload (${fileCount} imagem${fileCount > 1 ? 'ns' : ''})`;
+            }
+        });
+    }
 });
+
+// ====================
+// Funções para Galeria de Imagens - VERSÃO CORRIGIDA
+// ====================
+
+// Carregar galeria de imagens do produto
+async function loadProductGallery(productId) {
+    try {
+        console.log(`🖼️ Carregando galeria do produto ${productId}`);
+        const response = await fetch(`/api/imagens-produto/?produto_id=${productId}`);
+        
+        if (!response.ok) throw new Error('Erro ao carregar galeria');
+        
+        const imagens = await response.json();
+        console.log(`📸 Galeria carregada: ${imagens.length} imagens`);
+        renderGalleryImages(imagens);
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar galeria:', error);
+        const galleryContainer = document.getElementById('gallery-images-list');
+        if (galleryContainer) {
+            galleryContainer.innerHTML = `
+                <div class="text-center py-4 text-red-500">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Erro ao carregar galeria
+                </div>
+            `;
+        }
+    }
+}
+
+// Renderizar imagens da galeria
+function renderGalleryImages(imagens) {
+    const galleryContainer = document.getElementById('gallery-images-list');
+    if (!galleryContainer) return;
+    
+    if (!imagens || imagens.length === 0) {
+        galleryContainer.innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-images text-4xl mb-2"></i>
+                <p>Nenhuma imagem na galeria</p>
+            </div>
+        `;
+        return;
+    }
+
+    galleryContainer.innerHTML = imagens.map((imagem, index) => `
+        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200" data-image-id="${imagem.id}">
+            <div class="flex items-center space-x-4">
+                <img src="${imagem.imagem_url || imagem.imagem}" 
+                     alt="${imagem.legenda || 'Imagem da galeria'}"
+                     class="w-16 h-16 object-cover rounded-lg border border-gray-300">
+                <div>
+                    <p class="font-medium text-gray-800">Imagem ${index + 1}</p>
+                    <div class="flex items-center space-x-4 text-sm text-gray-600">
+                        <span>Ordem: ${imagem.ordem}</span>
+                        <span class="flex items-center">
+                            <input type="checkbox" ${imagem.is_principal ? 'checked' : ''} 
+                                   onchange="togglePrincipalImage(${imagem.id}, this.checked)"
+                                   class="mr-1">
+                            Principal
+                        </span>
+                    </div>
+                    ${imagem.legenda ? `<p class="text-sm text-gray-500">${imagem.legenda}</p>` : ''}
+                </div>
+            </div>
+            <div class="flex space-x-2">
+                <button onclick="editImageCaption(${imagem.id}, '${imagem.legenda || ''}')" 
+                        class="text-blue-600 hover:text-blue-800 p-2 rounded transition duration-200"
+                        title="Editar legenda">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="updateImageOrder(${imagem.id}, ${imagem.ordem - 1})" 
+                        ${imagem.ordem <= 1 ? 'disabled' : ''}
+                        class="text-gray-600 hover:text-gray-800 p-2 rounded transition duration-200 ${imagem.ordem <= 1 ? 'opacity-50 cursor-not-allowed' : ''}"
+                        title="Mover para cima">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button onclick="updateImageOrder(${imagem.id}, ${imagem.ordem + 1})" 
+                        class="text-gray-600 hover:text-gray-800 p-2 rounded transition duration-200"
+                        title="Mover para baixo">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button onclick="deleteGalleryImage(${imagem.id})" 
+                        class="text-red-600 hover:text-red-800 p-2 rounded transition duration-200"
+                        title="Excluir imagem">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ====================
+// Upload de imagens para a galeria - VERSÃO MAIS ROBUSTA
+// ====================
+async function uploadGalleryImages(productId) {
+    const fileInput = document.getElementById('gallery-images');
+    const files = fileInput.files;
+    
+    if (!files || files.length === 0) {
+        showToast('❌ Selecione pelo menos uma imagem para upload', 'error');
+        return;
+    }
+
+    if (files.length > 10) {
+        showToast('❌ Máximo de 10 imagens por produto', 'error');
+        return;
+    }
+
+    const btnUpload = document.getElementById('btn-upload-gallery');
+    const originalText = btnUpload.innerHTML;
+    
+    try {
+        btnUpload.disabled = true;
+        btnUpload.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
+
+        console.log(`📤 Iniciando upload de ${files.length} imagens para o produto ${productId}`);
+        
+        // ✅ ENVIA UMA IMAGEM POR VEZ (mais confiável)
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const formData = new FormData();
+            
+            // ✅ CORREÇÃO: Usar números para produto_id
+            formData.append('produto', parseInt(productId));
+            formData.append('imagem', file);
+            formData.append('ordem', (i + 1).toString());
+            formData.append('legenda', '');
+            formData.append('is_principal', 'false');
+
+            console.log(`📁 Enviando imagem ${i + 1}: ${file.name}`);
+            console.log('📦 Dados do FormData:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`   ${key}:`, value);
+            }
+
+            const response = await fetch('/api/imagens-produto/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`❌ Erro na imagem ${i + 1}:`, errorText);
+                throw new Error(`Imagem ${i + 1}: ${response.status} ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log(`✅ Imagem ${i + 1} enviada:`, result);
+        }
+
+        showToast(`✅ ${files.length} imagem(ns) adicionada(s) à galeria!`, 'success');
+        
+        // Recarregar a galeria
+        await loadProductGallery(productId);
+        
+        // Limpar o input de arquivos
+        fileInput.value = '';
+        btnUpload.textContent = 'Upload de Imagens';
+
+    } catch (error) {
+        console.error('❌ Erro no upload da galeria:', error);
+        showToast(`❌ Erro ao enviar imagens: ${error.message}`, 'error');
+    } finally {
+        btnUpload.disabled = false;
+        btnUpload.innerHTML = originalText;
+    }
+}
+
+// Função auxiliar para mostrar toasts (se não existir)
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-500 text-white' :
+        type === 'error' ? 'bg-red-500 text-white' :
+        'bg-blue-500 text-white'
+    }`;
+    toast.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas ${
+                type === 'success' ? 'fa-check-circle' :
+                type === 'error' ? 'fa-exclamation-circle' :
+                'fa-info-circle'
+            } mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
+// Definir imagem como principal
+async function togglePrincipalImage(imageId, isPrincipal) {
+    try {
+        const response = await fetch(`/api/imagens-produto/${imageId}/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({
+                is_principal: isPrincipal
+            })
+        });
+
+        if (!response.ok) throw new Error('Erro ao atualizar imagem principal');
+
+        const data = await response.json();
+        console.log('✅ Imagem principal atualizada:', data);
+        
+        // Recarregar a galeria para atualizar os estados
+        const productId = document.getElementById('product-form').dataset.productId;
+        await loadProductGallery(productId);
+
+    } catch (error) {
+        console.error('❌ Erro ao definir imagem principal:', error);
+        alert('Erro ao definir imagem principal');
+    }
+}
+
+// Atualizar ordem da imagem
+async function updateImageOrder(imageId, newOrder) {
+    try {
+        const response = await fetch(`/api/imagens-produto/${imageId}/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({
+                ordem: newOrder
+            })
+        });
+
+        if (!response.ok) throw new Error('Erro ao atualizar ordem');
+
+        const data = await response.json();
+        console.log('✅ Ordem da imagem atualizada:', data);
+        
+        // Recarregar a galeria
+        const productId = document.getElementById('product-form').dataset.productId;
+        await loadProductGallery(productId);
+
+    } catch (error) {
+        console.error('❌ Erro ao atualizar ordem:', error);
+        alert('Erro ao atualizar ordem da imagem');
+    }
+}
+
+// Editar legenda da imagem
+async function editImageCaption(imageId, currentCaption) {
+    const newCaption = prompt('Digite a nova legenda para a imagem:', currentCaption);
+    
+    if (newCaption === null) return; // Usuário cancelou
+    
+    try {
+        const response = await fetch(`/api/imagens-produto/${imageId}/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({
+                legenda: newCaption
+            })
+        });
+
+        if (!response.ok) throw new Error('Erro ao atualizar legenda');
+
+        const data = await response.json();
+        console.log('✅ Legenda atualizada:', data);
+        
+        // Recarregar a galeria
+        const productId = document.getElementById('product-form').dataset.productId;
+        await loadProductGallery(productId);
+
+    } catch (error) {
+        console.error('❌ Erro ao atualizar legenda:', error);
+        alert('Erro ao atualizar legenda');
+    }
+}
+
+// Excluir imagem da galeria
+async function deleteGalleryImage(imageId) {
+    if (!confirm('Tem certeza que deseja excluir esta imagem da galeria?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/imagens-produto/${imageId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+            }
+        });
+
+        if (!response.ok) throw new Error('Erro ao excluir imagem');
+
+        console.log('✅ Imagem excluída com sucesso');
+        
+        // Recarregar a galeria
+        const productId = document.getElementById('product-form').dataset.productId;
+        await loadProductGallery(productId);
+
+    } catch (error) {
+        console.error('❌ Erro ao excluir imagem:', error);
+        alert('Erro ao excluir imagem');
+    }
+}
 
 // ====================
 // Buscar produtos
@@ -272,6 +601,31 @@ function resetProductForm() {
         const currentImageContainer = document.getElementById('current-image-container');
         if (currentImageContainer) currentImageContainer.classList.add('hidden');
         
+        // ✅ Esconde a seção da galeria
+        const gallerySection = document.getElementById('gallery-section');
+        if (gallerySection) gallerySection.classList.add('hidden');
+        
+        // ✅ Limpa a lista da galeria
+        const galleryList = document.getElementById('gallery-images-list');
+        if (galleryList) {
+            galleryList.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-images text-4xl mb-2"></i>
+                    <p>Nenhuma imagem na galeria</p>
+                </div>
+            `;
+        }
+        
+        // ✅ Limpa o input de galeria
+        const galleryInput = document.getElementById('gallery-images');
+        if (galleryInput) galleryInput.value = '';
+        
+        // ✅ Reseta o título do formulário
+        const formTitle = document.getElementById('product-form-title');
+        if (formTitle) {
+            formTitle.textContent = 'Adicionar Novo Produto';
+        }
+        
         // ✅ Limpa a variável global
         currentEditingProduct = null;
         
@@ -398,7 +752,7 @@ function toggleProductStatus(productId, currentStatus) {
 }
 
 // ====================
-// Ações de produto - CORRIGIDO
+// Ações de produto - ATUALIZADA COM GALERIA
 // ====================
 function editarProduto(produto) {
     console.log('🔄 Editando produto:', produto);
@@ -451,6 +805,13 @@ function editarProduto(produto) {
         }
     }
 
+    // ✅ MOSTRA a seção da galeria e carrega as imagens
+    const gallerySection = document.getElementById('gallery-section');
+    if (gallerySection) {
+        gallerySection.classList.remove('hidden');
+        loadProductGallery(produto.id);
+    }
+
     // ✅ ATUALIZA os dados de edição NO FORMULÁRIO
     if (form) {
         form.dataset.editMode = 'true';
@@ -462,6 +823,18 @@ function editarProduto(produto) {
             btn.innerHTML = '<i class="fas fa-edit mr-2"></i> Editando Produto';
             btn.dataset.editingId = produto.id;
         }
+
+        // ✅ Atualiza o título do formulário
+        const formTitle = document.getElementById('product-form-title');
+        if (formTitle) {
+            formTitle.textContent = `Editando Produto: ${produto.nome}`;
+        }
+    }
+
+    // ✅ Configura o botão de upload da galeria
+    const btnUploadGallery = document.getElementById('btn-upload-gallery');
+    if (btnUploadGallery) {
+        btnUploadGallery.onclick = () => uploadGalleryImages(produto.id);
     }
 
     // ✅ ABRE o formulário se estiver fechado
