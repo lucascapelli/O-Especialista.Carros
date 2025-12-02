@@ -103,38 +103,48 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <!-- Galeria de Imagens -->
                 <div class="space-y-4">
-                    <!-- Imagem Principal -->
-                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-                        <img id="main-image" src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" class="w-full h-96 object-cover transition duration-500 hover:scale-105 cursor-zoom-in">
-                    </div>
-                    
-                    <!-- Miniaturas - Galeria Dinâmica -->
-                    <div class="grid grid-cols-4 gap-3" id="galeria-miniaturas">
-                        {% for imagem in produto.imagens.all %}
-                        <div class="thumbnail-item {% if forloop.first %}active border-2 border-blue-500{% else %}border-2 border-gray-200{% endif %} bg-white rounded-xl p-1.5 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer" data-image-src="{{ imagem.imagem.url }}">
-                            <img src="{{ imagem.imagem.url }}" alt="{{ imagem.legenda|default:produto.nome }}" class="w-full h-20 object-cover rounded-lg">
-                        </div>
-                        {% empty %}
-                        <!-- Fallback: se não tiver imagens na galeria, usa a imagem principal -->
-                        <div class="thumbnail-item active border-2 border-blue-500 bg-white rounded-xl p-1.5 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-                            <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" class="w-full h-20 object-cover rounded-lg">
-                        </div>
-                        {% endfor %}
-                    </div>
+    <!-- Imagem Principal - Agora responsiva -->
+    <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+        <div class="aspect-[4/3] sm:aspect-[3/2]"> <!-- Responsivo: 4:3 mobile, 3:2 desktop -->
+            <img id="main-image" 
+                 src="{{ produto.imagem.url }}" 
+                 alt="{{ produto.nome }}" 
+                 class="w-full h-full object-contain p-4 transition duration-500 hover:scale-105 cursor-zoom-in">
+        </div>
+    </div>
+    
+    <!-- Miniaturas - Galeria Dinâmica -->
+    <div class="grid grid-cols-4 gap-3" id="galeria-miniaturas">
+        {% for imagem in produto.imagens.all %}
+        <div class="thumbnail-item {% if forloop.first %}active ring-2 ring-blue-500 ring-offset-2{% else %}border border-gray-200{% endif %} bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer aspect-square overflow-hidden" 
+             data-image-src="{{ imagem.imagem.url }}">
+            <img src="{{ imagem.imagem.url }}" 
+                 alt="{{ imagem.legenda|default:produto.nome }}" 
+                 class="w-full h-full object-contain p-1">
+        </div>
+        {% empty %}
+        <!-- Fallback -->
+        <div class="thumbnail-item active ring-2 ring-blue-500 ring-offset-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer aspect-square overflow-hidden">
+            <img src="{{ produto.imagem.url }}" 
+                 alt="{{ produto.nome }}" 
+                 class="w-full h-full object-contain p-1">
+        </div>
+        {% endfor %}
+    </div>
 
-                    <!-- Badges de Confiança -->
-                    <div class="flex flex-wrap gap-2 pt-4">
-                        <div class="bg-green-50 border border-green-200 text-green-700 px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                            <i class="fas fa-shield-alt mr-1"></i> Garantia 30 Dias
-                        </div>
-                        <div class="bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                            <i class="fas fa-truck mr-1"></i> Frete Grátis*
-                        </div>
-                        <div class="bg-purple-50 border border-purple-200 text-purple-700 px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                            <i class="fas fa-medal mr-1"></i> Original
-                        </div>
-                    </div>
-                </div>
+    <!-- Badges de Confiança -->
+    <div class="flex flex-wrap gap-2 pt-4">
+        <div class="bg-green-50 border border-green-200 text-green-700 px-3 py-1 rounded-full text-sm font-medium flex items-center">
+            <i class="fas fa-shield-alt mr-1"></i> Garantia 30 Dias
+        </div>
+        <div class="bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1 rounded-full text-sm font-medium flex items-center">
+            <i class="fas fa-truck mr-1"></i> Frete Grátis*
+        </div>
+        <div class="bg-purple-50 border border-purple-200 text-purple-700 px-3 py-1 rounded-full text-sm font-medium flex items-center">
+            <i class="fas fa-medal mr-1"></i> Original
+        </div>
+    </div>
+</div>
 
                 <!-- Informações do Produto -->
                 <div>
