@@ -1,12 +1,13 @@
 // ====================
 // Debug inicial
 // ====================
-console.log('🔄 products.js carregado - VERSÃO COM GALERIA DE IMAGENS');
+console.log('🔄 products.js carregado - VERSÃO COM MODAL PADRÃO USUÁRIOS');
 
 // ====================
 // Variáveis globais
 // ====================
 let currentEditingProduct = null;
+let currentProductModal = null; // ✅ Controle global do modal
 
 // ====================
 // Inicialização segura dos produtos
@@ -53,10 +54,177 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ====================
-// Funções para Galeria de Imagens - VERSÃO CORRIGIDA
+// SISTEMA DE MODAL - PADRÃO USUÁRIOS
 // ====================
 
-// Carregar galeria de imagens do produto
+// ✅ FUNÇÃO PARA FECHAR MODAL
+function closeProductModal() {
+    console.log('🔒 Fechando modal de produto');
+    
+    const modal = document.getElementById('product-view-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        currentProductModal = null;
+        
+        // ✅ REMOVER EVENT LISTENERS GLOBAIS
+        document.removeEventListener('keydown', handleProductModalEscKey);
+        
+        console.log('✅ Modal fechado com sucesso');
+    }
+}
+
+// ✅ HANDLER PARA TECLA ESC
+function handleProductModalEscKey(e) {
+    if (e.key === 'Escape') {
+        closeProductModal();
+    }
+}
+
+// ✅ FUNÇÃO PRINCIPAL PARA MOSTRAR MODAL
+async function showProductModal(product) {
+    console.log('🎯 Exibindo modal do produto:', product.id);
+    
+    // ✅ FECHAR MODAL EXISTENTE ANTES DE ABRIR OUTRO
+    if (currentProductModal) {
+        closeProductModal();
+    }
+    
+    // ✅ CARREGAR GALERIA DO PRODUTO
+    let galleryImages = [];
+    try {
+        const response = await fetch(`/api/imagens-produto/?produto_id=${product.id}`);
+        if (response.ok) {
+            galleryImages = await response.json();
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar galeria:', error);
+    }
+    
+    // ✅ CALCULAR NÍVEL DE ESTOQUE
+    const stockNum = parseInt(product.estoque) || 0;
+    const stockLevel = stockNum <= 5 ? 'low' : stockNum <= 20 ? 'medium' : 'high';
+    const stockWidth = stockLevel === 'low' ? '25%' : stockLevel === 'medium' ? '50%' : '75%';
+    const stockColor = stockLevel === 'low' ? 'bg-red-500' : stockLevel === 'medium' ? 'bg-yellow-500' : 'bg-green-500';
+    const stockTextColor = stockLevel === 'low' ? 'text-red-600' : stockLevel === 'medium' ? 'text-yellow-600' : 'text-green-600';
+    
+    // ✅ PREENCHER DADOS BÁSICOS
+    document.getElementById('modal-product-name').textContent = product.nome || 'Produto sem nome';
+    document.getElementById('modal-product-sku').textContent = `SKU: ${product.sku || 'N/A'} • ${product.categoria || 'Sem categoria'}`;
+    
+    // Imagem principal
+    const mainImage = document.getElementById('modal-product-image');
+    mainImage.src = product.imagem || product.imagem_url || 'https://via.placeholder.com/300';
+    mainImage.alt = product.nome || 'Imagem do produto';
+    
+    // Status e estoque
+    const statusElement = document.getElementById('modal-product-status');
+    statusElement.textContent = product.status || 'Desconhecido';
+    statusElement.className = `inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(product.status)}`;
+    
+    document.getElementById('modal-product-stock').textContent = product.estoque || 0;
+    document.getElementById('modal-product-stock').className = `text-2xl font-bold ${stockTextColor} mr-2`;
+    
+    const stockBar = document.getElementById('modal-stock-bar');
+    stockBar.className = `h-2.5 rounded-full ${stockColor}`;
+    stockBar.style.width = stockWidth;
+    
+    // Dimensões
+    document.getElementById('modal-product-weight').textContent = product.peso || '0.000';
+    document.getElementById('modal-product-height').textContent = product.altura || '0.00';
+    document.getElementById('modal-product-width').textContent = product.largura || '0.00';
+    document.getElementById('modal-product-length').textContent = product.comprimento || '0.00';
+    
+    // Informações detalhadas
+    document.getElementById('modal-product-full-name').textContent = product.nome || 'Não informado';
+    document.getElementById('modal-product-sku-full').textContent = product.sku || 'N/A';
+    document.getElementById('modal-product-category').textContent = product.categoria || 'Sem categoria';
+    document.getElementById('modal-product-price').textContent = `R$ ${parseFloat(product.preco || 0).toFixed(2)}`;
+    
+    const descElement = document.getElementById('modal-product-description');
+    descElement.innerHTML = product.descricao 
+        ? product.descricao.replace(/\n/g, '<br>')
+        : '<p class="text-gray-500 italic">Nenhuma descrição informada</p>';
+    
+    // Galeria de imagens
+    const galleryContainer = document.getElementById('modal-product-gallery');
+    if (galleryImages.length > 0) {
+        galleryContainer.innerHTML = galleryImages.map((img, index) => `
+            <div class="relative group">
+                <img src="${img.imagem_url || img.imagem}" 
+                     alt="Imagem ${index + 1} da galeria"
+                     class="w-full h-32 object-cover rounded-lg border border-gray-300 group-hover:opacity-90 transition duration-200">
+                ${img.is_principal ? `
+                <span class="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">Principal</span>
+                ` : ''}
+            </div>
+        `).join('');
+    } else {
+        galleryContainer.innerHTML = `
+            <div class="col-span-4 text-center py-8 text-gray-500">
+                <i class="fas fa-images text-4xl mb-3 opacity-50"></i>
+                <p>Nenhuma imagem na galeria</p>
+                <p class="text-sm mt-1">Adicione imagens na edição do produto</p>
+            </div>
+        `;
+    }
+    
+    // Informações técnicas
+    document.getElementById('modal-product-id').textContent = product.id || 'N/A';
+    
+    const createdDate = product.created_at ? new Date(product.created_at).toLocaleDateString('pt-BR') : 'N/A';
+    document.getElementById('modal-product-created').textContent = createdDate;
+    
+    // ✅ CONFIGURAR BOTÕES DE AÇÃO DINAMICAMENTE
+    const editBtn = document.getElementById('modal-edit-product-btn');
+    const statusBtn = document.getElementById('modal-toggle-status-btn');
+    
+    if (editBtn) {
+        // Remover listeners antigos
+        editBtn.replaceWith(editBtn.cloneNode(true));
+        const newEditBtn = document.getElementById('modal-edit-product-btn');
+        
+        newEditBtn.onclick = () => {
+            closeProductModal();
+            setTimeout(() => editarProduto(product), 100);
+        };
+    }
+    
+    if (statusBtn) {
+        // Remover listeners antigos
+        statusBtn.replaceWith(statusBtn.cloneNode(true));
+        const newStatusBtn = document.getElementById('modal-toggle-status-btn');
+        
+        const statusIcon = product.status === 'Ativo' ? 'fa-eye-slash' : 'fa-eye';
+        const statusText = product.status === 'Ativo' ? 'Inativar' : 'Ativar';
+        const statusColor = product.status === 'Ativo' ? 'yellow' : 'green';
+        
+        newStatusBtn.innerHTML = `<i class="fas ${statusIcon} mr-2"></i>${statusText}`;
+        newStatusBtn.className = `px-4 py-2 text-sm font-medium bg-${statusColor}-100 text-${statusColor}-700 hover:bg-${statusColor}-200 border-${statusColor}-300 rounded-lg transition-all duration-200 border flex items-center`;
+        
+        newStatusBtn.onclick = () => {
+            closeProductModal();
+            setTimeout(() => toggleProductStatus(product.id, product.status), 100);
+        };
+    }
+    
+    // ✅ MOSTRAR MODAL
+    const modal = document.getElementById('product-view-modal');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    currentProductModal = modal;
+    
+    // ✅ ADICIONAR EVENT LISTENERS GLOBAIS
+    document.addEventListener('keydown', handleProductModalEscKey);
+    
+    console.log('✅ Modal do produto aberto com sucesso');
+}
+
+// ====================
+// FUNÇÕES DE GESTÃO DE PRODUTOS (mantenha as existentes)
+// ====================
+
+// Funções para Galeria de Imagens...
 async function loadProductGallery(productId) {
     try {
         console.log(`🖼️ Carregando galeria do produto ${productId}`);
@@ -82,7 +250,6 @@ async function loadProductGallery(productId) {
     }
 }
 
-// Renderizar imagens da galeria
 function renderGalleryImages(imagens) {
     const galleryContainer = document.getElementById('gallery-images-list');
     if (!galleryContainer) return;
@@ -144,9 +311,6 @@ function renderGalleryImages(imagens) {
     `).join('');
 }
 
-// ====================
-// Upload de imagens para a galeria - VERSÃO MAIS ROBUSTA
-// ====================
 async function uploadGalleryImages(productId) {
     const fileInput = document.getElementById('gallery-images');
     const files = fileInput.files;
@@ -170,23 +334,15 @@ async function uploadGalleryImages(productId) {
 
         console.log(`📤 Iniciando upload de ${files.length} imagens para o produto ${productId}`);
         
-        // ✅ ENVIA UMA IMAGEM POR VEZ (mais confiável)
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             const formData = new FormData();
             
-            // ✅ CORREÇÃO: Usar números para produto_id
             formData.append('produto', parseInt(productId));
             formData.append('imagem', file);
             formData.append('ordem', (i + 1).toString());
             formData.append('legenda', '');
             formData.append('is_principal', 'false');
-
-            console.log(`📁 Enviando imagem ${i + 1}: ${file.name}`);
-            console.log('📦 Dados do FormData:');
-            for (let [key, value] of formData.entries()) {
-                console.log(`   ${key}:`, value);
-            }
 
             const response = await fetch('/api/imagens-produto/', {
                 method: 'POST',
@@ -208,10 +364,8 @@ async function uploadGalleryImages(productId) {
 
         showToast(`✅ ${files.length} imagem(ns) adicionada(s) à galeria!`, 'success');
         
-        // Recarregar a galeria
         await loadProductGallery(productId);
         
-        // Limpar o input de arquivos
         fileInput.value = '';
         btnUpload.textContent = 'Upload de Imagens';
 
@@ -224,7 +378,6 @@ async function uploadGalleryImages(productId) {
     }
 }
 
-// Função auxiliar para mostrar toasts (se não existir)
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
@@ -250,7 +403,6 @@ function showToast(message, type = 'info') {
     }, 5000);
 }
 
-// Definir imagem como principal
 async function togglePrincipalImage(imageId, isPrincipal) {
     try {
         const response = await fetch(`/api/imagens-produto/${imageId}/`, {
@@ -269,7 +421,6 @@ async function togglePrincipalImage(imageId, isPrincipal) {
         const data = await response.json();
         console.log('✅ Imagem principal atualizada:', data);
         
-        // Recarregar a galeria para atualizar os estados
         const productId = document.getElementById('product-form').dataset.productId;
         await loadProductGallery(productId);
 
@@ -279,7 +430,6 @@ async function togglePrincipalImage(imageId, isPrincipal) {
     }
 }
 
-// Atualizar ordem da imagem
 async function updateImageOrder(imageId, newOrder) {
     try {
         const response = await fetch(`/api/imagens-produto/${imageId}/`, {
@@ -298,7 +448,6 @@ async function updateImageOrder(imageId, newOrder) {
         const data = await response.json();
         console.log('✅ Ordem da imagem atualizada:', data);
         
-        // Recarregar a galeria
         const productId = document.getElementById('product-form').dataset.productId;
         await loadProductGallery(productId);
 
@@ -308,11 +457,10 @@ async function updateImageOrder(imageId, newOrder) {
     }
 }
 
-// Editar legenda da imagem
 async function editImageCaption(imageId, currentCaption) {
     const newCaption = prompt('Digite a nova legenda para a imagem:', currentCaption);
     
-    if (newCaption === null) return; // Usuário cancelou
+    if (newCaption === null) return;
     
     try {
         const response = await fetch(`/api/imagens-produto/${imageId}/`, {
@@ -331,7 +479,6 @@ async function editImageCaption(imageId, currentCaption) {
         const data = await response.json();
         console.log('✅ Legenda atualizada:', data);
         
-        // Recarregar a galeria
         const productId = document.getElementById('product-form').dataset.productId;
         await loadProductGallery(productId);
 
@@ -341,7 +488,6 @@ async function editImageCaption(imageId, currentCaption) {
     }
 }
 
-// Excluir imagem da galeria
 async function deleteGalleryImage(imageId) {
     if (!confirm('Tem certeza que deseja excluir esta imagem da galeria?')) {
         return;
@@ -359,7 +505,6 @@ async function deleteGalleryImage(imageId) {
 
         console.log('✅ Imagem excluída com sucesso');
         
-        // Recarregar a galeria
         const productId = document.getElementById('product-form').dataset.productId;
         await loadProductGallery(productId);
 
@@ -438,12 +583,10 @@ function renderProdutos(produtos, tipo) {
         const estoque = !isNaN(parseInt(produto.estoque)) ? parseInt(produto.estoque) : 0;
         const status = produto.status || 'Desconhecido';
         
-        // ✅ CORREÇÃO: Escapar corretamente o JSON
         const produtoEscapado = JSON.stringify(produto)
             .replace(/'/g, "&#39;")
             .replace(/"/g, "&quot;");
 
-        // ✅ BOTÃO DE INATIVAR/ATIVAR - Ícone dinâmico baseado no status
         const statusIcon = produto.status === 'Ativo' ? 'fa-eye-slash' : 'fa-eye';
         const statusTitle = produto.status === 'Ativo' ? 'Inativar' : 'Ativar';
         const statusColor = produto.status === 'Ativo' ? 'orange' : 'green';
@@ -477,7 +620,6 @@ function renderProdutos(produtos, tipo) {
                             data-product='${produtoEscapado}'>
                         <i class="fas fa-edit"></i>
                     </button>
-                    <!-- ✅ BOTÃO DE INATIVAR/ATIVAR SUBSTITUINDO EXCLUIR -->
                     <button class="text-${statusColor}-600 hover:text-${statusColor}-900 toggle-status-product" 
                             data-product-id="${produto.id}" 
                             data-current-status="${produto.status}"
@@ -500,7 +642,11 @@ function addProductEventListeners() {
     document.querySelectorAll('.view-product').forEach(btn => {
         btn.addEventListener('click', () => {
             const data = btn.getAttribute('data-product');
-            if (data) verProduto(JSON.parse(data.replace(/&#39;/g, "'").replace(/&quot;/g, '"')));
+            if (data) {
+                const produto = JSON.parse(data.replace(/&#39;/g, "'").replace(/&quot;/g, '"'));
+                console.log('👁️ Abrindo modal para:', produto.nome);
+                showProductModal(produto); // Agora usa o modal padrão
+            }
         });
     });
 
@@ -511,7 +657,6 @@ function addProductEventListeners() {
         });
     });
 
-    // ✅ SUBSTITUIR: Botão de toggle status (inativar/ativar)
     document.querySelectorAll('.toggle-status-product').forEach(btn => {
         btn.addEventListener('click', () => {
             const id = btn.getAttribute('data-product-id');
@@ -522,7 +667,7 @@ function addProductEventListeners() {
 }
 
 // ====================
-// Filtro por Status - CORRIGIDO
+// Filtro por Status
 // ====================
 function aplicarFiltros() {
     const statusFiltro = document.getElementById('status-filter')?.value || '';
@@ -547,7 +692,7 @@ function aplicarFiltros() {
 }
 
 // ====================
-// Configurar Filtros - CORRIGIDO
+// Configurar Filtros
 // ====================
 function setupStatusFilter() {
     const statusFilter = document.getElementById('status-filter');
@@ -590,22 +735,18 @@ function resetProductForm() {
         delete form.dataset.editMode;
         delete form.dataset.productId;
         
-        // ✅ Reseta o botão para "Adicionar Produto"
         const btn = document.querySelector('.btn-add-product');
         if (btn) {
             btn.innerHTML = '<i class="fas fa-plus mr-2"></i> Adicionar Produto';
             delete btn.dataset.editingId;
         }
         
-        // ✅ Esconde a visualização da imagem atual
         const currentImageContainer = document.getElementById('current-image-container');
         if (currentImageContainer) currentImageContainer.classList.add('hidden');
         
-        // ✅ Esconde a seção da galeria
         const gallerySection = document.getElementById('gallery-section');
         if (gallerySection) gallerySection.classList.add('hidden');
         
-        // ✅ Limpa a lista da galeria
         const galleryList = document.getElementById('gallery-images-list');
         if (galleryList) {
             galleryList.innerHTML = `
@@ -616,17 +757,14 @@ function resetProductForm() {
             `;
         }
         
-        // ✅ Limpa o input de galeria
         const galleryInput = document.getElementById('gallery-images');
         if (galleryInput) galleryInput.value = '';
         
-        // ✅ Reseta o título do formulário
         const formTitle = document.getElementById('product-form-title');
         if (formTitle) {
             formTitle.textContent = 'Adicionar Novo Produto';
         }
         
-        // ✅ Limpa a variável global
         currentEditingProduct = null;
         
         console.log('🔄 Formulário resetado para modo criação');
@@ -634,7 +772,7 @@ function resetProductForm() {
 }
 
 // ====================
-// Formulário - CORRIGIDO
+// Formulário
 // ====================
 function handleProductSubmit(event) {
     event.preventDefault();
@@ -644,19 +782,16 @@ function handleProductSubmit(event) {
     const isEdit = form.dataset.editMode === 'true';
     const id = form.dataset.productId;
 
-    // ✅ DEBUG MELHORADO - Verifique TODOS os campos
     console.log('📦 Dados do formulário sendo enviados:');
     for (let [key, value] of formData.entries()) {
         console.log(`   ${key}: ${value}`);
     }
 
-    // ✅ PERMITIR HTML NA DESCRRIÇÃO - não escapar tags
     const descricao = formData.get('product-descricao');
     if (descricao) {
         console.log('✅ Descrição com HTML permitida');
     }
 
-    // ✅ VALIDAÇÃO CRÍTICA: Se é edição e não enviou nova imagem, remove o campo imagem
     if (isEdit && !formData.get('imagem')) {
         formData.delete('imagem');
         console.log('🔄 Modo edição - removendo campo imagem vazio para manter imagem atual');
@@ -665,7 +800,6 @@ function handleProductSubmit(event) {
     const button = form.querySelector('button[type="submit"]');
     const originalText = button.textContent;
 
-    // ✅ VALIDAÇÃO DO ID NA EDIÇÃO
     if (isEdit && !id) {
         alert('❌ Erro: ID do produto não encontrado para edição.');
         return;
@@ -683,7 +817,6 @@ function handleProductSubmit(event) {
         method, 
         headers: { 
             'X-CSRFToken': getCSRFToken(),
-            // ❌ NÃO enviar Content-Type para FormData - o browser define automaticamente com boundary
         }, 
         body: formData,
         credentials: 'include' 
@@ -699,7 +832,6 @@ function handleProductSubmit(event) {
         alert(`✅ Produto ${isEdit ? 'atualizado' : 'cadastrado'} com sucesso!`);
         reloadProducts();
         
-        // ✅ LIMPEZA COMPLETA do formulário
         resetProductForm();
         
         if (typeof toggleAddProductForm === 'function') {
@@ -752,15 +884,13 @@ function toggleProductStatus(productId, currentStatus) {
 }
 
 // ====================
-// Ações de produto - ATUALIZADA COM GALERIA
+// Ações de produto
 // ====================
 function editarProduto(produto) {
     console.log('🔄 Editando produto:', produto);
     
-    // ✅ Guarda o produto atual globalmente
     currentEditingProduct = produto;
     
-    // ✅ LIMPA completamente o formulário primeiro
     const form = document.getElementById('product-form');
     if (form) {
         form.reset();
@@ -790,7 +920,6 @@ function editarProduto(produto) {
         }
     });
 
-    // ✅ MOSTRA a imagem atual
     const currentImageContainer = document.getElementById('current-image-container');
     const currentImagePreview = document.getElementById('current-image-preview');
     if (currentImageContainer && currentImagePreview) {
@@ -805,14 +934,12 @@ function editarProduto(produto) {
         }
     }
 
-    // ✅ MOSTRA a seção da galeria e carrega as imagens
     const gallerySection = document.getElementById('gallery-section');
     if (gallerySection) {
         gallerySection.classList.remove('hidden');
         loadProductGallery(produto.id);
     }
 
-    // ✅ ATUALIZA os dados de edição NO FORMULÁRIO
     if (form) {
         form.dataset.editMode = 'true';
         form.dataset.productId = produto.id;
@@ -824,37 +951,23 @@ function editarProduto(produto) {
             btn.dataset.editingId = produto.id;
         }
 
-        // ✅ Atualiza o título do formulário
         const formTitle = document.getElementById('product-form-title');
         if (formTitle) {
             formTitle.textContent = `Editando Produto: ${produto.nome}`;
         }
     }
 
-    // ✅ Configura o botão de upload da galeria
     const btnUploadGallery = document.getElementById('btn-upload-gallery');
     if (btnUploadGallery) {
         btnUploadGallery.onclick = () => uploadGalleryImages(produto.id);
     }
 
-    // ✅ ABRE o formulário se estiver fechado
     if (typeof toggleAddProductForm === 'function') {
         const formEl = document.getElementById('add-product-form');
         if (formEl && formEl.classList.contains('hidden')) {
             toggleAddProductForm();
         }
     }
-}
-
-function verProduto(produto) {
-    const nome = produto.nome || 'Sem nome';
-    const categoria = produto.categoria || 'Sem categoria';
-    const preco = !isNaN(parseFloat(produto.preco)) ? parseFloat(produto.preco).toFixed(2) : '0.00';
-    const estoque = !isNaN(parseInt(produto.estoque)) ? parseInt(produto.estoque) : 0;
-    const status = produto.status || 'Desconhecido';
-    const descricao = produto.descricao || 'Sem descrição';
-
-    alert(`📦 Produto: ${nome}\n🏷️ Categoria: ${categoria}\n💰 Preço: R$ ${preco}\n📊 Estoque: ${estoque}\n📈 Status: ${status}\n📝 Descrição: ${descricao}`);
 }
 
 // ====================
@@ -874,9 +987,48 @@ function toggleAddProductForm() {
     if (form) {
         form.classList.toggle('hidden');
         
-        // ✅ Se estiver FECHANDO o formulário, reseta
         if (form.classList.contains('hidden')) {
             resetProductForm();
         }
     }
 }
+
+// ====================
+// Adicionar CSS para animações (igual ao dos usuários)
+// ====================
+const productModalStyle = document.createElement('style');
+productModalStyle.textContent = `
+    .product-modal-backdrop {
+        z-index: 100 !important;
+    }
+    
+    .prose {
+        color: #374151;
+        line-height: 1.6;
+    }
+    
+    .prose p {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    
+    .prose br {
+        margin-bottom: 0.5em;
+    }
+    
+    .close-modal-btn {
+        cursor: pointer !important;
+        z-index: 102 !important;
+        position: relative !important;
+    }
+    
+    /* ✅ GARANTIR QUE A SIDEBAR FIQUE ATRÁS DO MODAL */
+    #sidebar {
+        z-index: 40 !important;
+    }
+    
+    #backdrop {
+        z-index: 45 !important;
+    }
+`;
+document.head.appendChild(productModalStyle);

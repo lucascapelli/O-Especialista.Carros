@@ -334,254 +334,471 @@
                                 data-section="produtos" onclick="showSection('produtos')">Ver todos os produtos</a>
                         </div>
                     </div>
-                </section> <!-- 👈 AQUI FECHA A DASHBOARD-SECTION -->
-<!-- Produtos Section -->
-<section id="produtos-section" class="section-content hidden">
-    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-800">Produtos</h2>
-            <p class="text-gray-600">Gerencie seus produtos e galeria de imagens</p>
-        </div>
-        <button
-            class="btn-add-product bg-gradient-to-r from-primary-start to-primary-end text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            onclick="toggleAddProductForm()">
-            <i class="fas fa-plus mr-2"></i> Adicionar Produto
-        </button>
-    </div>
+                </section>
 
-    <!-- Add Product Form -->
-    <div id="add-product-form" class="bg-white rounded-lg shadow p-6 mb-6 hidden">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4" id="product-form-title">Adicionar Novo Produto</h3>
-
-        <form id="product-form" action="/api/produtos/" method="post" enctype="multipart/form-data">
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="product-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome
-                        do Produto</label>
-                    <input type="text" id="product-nome" name="nome" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <div>
-                    <label for="product-sku"
-                        class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                    <input type="text" id="product-sku" name="sku" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <div>
-                    <label for="product-preco"
-                        class="block text-sm font-medium text-gray-700 mb-1">Preço</label>
-                    <input type="number" id="product-preco" name="preco" required min="0" step="0.01"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <div>
-                    <label for="product-estoque"
-                        class="block text-sm font-medium text-gray-700 mb-1">Estoque</label>
-                    <input type="number" id="product-estoque" name="estoque" required min="0"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <div>
-                    <label for="product-categoria"
-                        class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                    <select id="product-categoria" name="categoria" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Selecione uma categoria</option>
-                        <option value="Lavagem">Lavagem</option>
-                        <option value="Polimento">Polimento</option>
-                        <option value="Proteção">Proteção</option>
-                        <option value="Acessórios">Acessórios</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="product-status"
-                        class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select id="product-status" name="status" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="Ativo">Ativo</option>
-                        <option value="Inativo">Inativo</option>
-                        <option value="Últimas unidades">Últimas unidades</option>
-                    </select>
-                </div>
-
-                <!-- Campos de Dimensões para Jadlog -->
-                <div>
-                    <label for="product-peso" class="block text-sm font-medium text-gray-700 mb-1">
-                        Peso (kg) *
-                    </label>
-                    <input type="number" id="product-peso" name="peso" required min="0.001" step="0.001"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value="0.100" placeholder="Ex: 0.500 para 500g">
-                </div>
-
-                <div>
-                    <label for="product-altura" class="block text-sm font-medium text-gray-700 mb-1">
-                        Altura (cm) *
-                    </label>
-                    <input type="number" id="product-altura" name="altura" required min="0.1" step="0.1"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value="1.00">
-                </div>
-
-                <div>
-                    <label for="product-largura" class="block text-sm font-medium text-gray-700 mb-1">
-                        Largura (cm) *
-                    </label>
-                    <input type="number" id="product-largura" name="largura" required min="0.1" step="0.1"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value="1.00">
-                </div>
-
-                <div>
-                    <label for="product-comprimento" class="block text-sm font-medium text-gray-700 mb-1">
-                        Comprimento (cm) *
-                    </label>
-                    <input type="number" id="product-comprimento" name="comprimento" required min="0.1" step="0.1"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value="1.00">
-                </div>
-
-                <div class="md:col-span-2">
-                    <label for="product-descricao"
-                        class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                    <textarea id="product-descricao" name="descricao" rows="3"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
-
-                <div class="md:col-span-2">
-                    <label for="product-imagem"
-                        class="block text-sm font-medium text-gray-700 mb-1">Imagem Principal do Produto</label>
-                    <input type="file" id="product-imagem" name="imagem" accept="image/*"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <!-- Visualização da Imagem Atual (apenas em edição) -->
-                <div id="current-image-container" class="hidden md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Imagem Principal Atual</label>
-                    <div class="flex items-center space-x-4">
-                        <img id="current-image-preview" src="" 
-                             class="h-20 w-20 object-cover rounded-lg border border-gray-300"
-                             alt="Imagem atual do produto">
+                <!-- Produtos Section -->
+                <section id="produtos-section" class="section-content hidden">
+                    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <p class="text-sm text-gray-600">Imagem principal atual do produto</p>
-                            <p class="text-xs text-gray-500">Para alterar, selecione uma nova imagem acima</p>
+                            <h2 class="text-2xl font-bold text-gray-800">Produtos</h2>
+                            <p class="text-gray-600">Gerencie seus produtos e galeria de imagens</p>
                         </div>
+                        <button
+                            class="btn-add-product bg-gradient-to-r from-primary-start to-primary-end text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            onclick="toggleAddProductForm()">
+                            <i class="fas fa-plus mr-2"></i> Adicionar Produto
+                        </button>
                     </div>
-                </div>
 
-                <!-- Seção de Galeria de Imagens (apenas em edição) -->
-                <div id="gallery-section" class="hidden md:col-span-2">
-                    <div class="border-t pt-6 mt-6">
-                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Galeria de Imagens</h4>
-                        
-                        <!-- Upload de Novas Imagens para Galeria -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Adicionar Imagens à Galeria
-                            </label>
-                            <input type="file" id="gallery-images" multiple accept="image/*"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <p class="text-sm text-gray-500 mt-1">
-                                Selecione múltiplas imagens para adicionar à galeria do produto
-                            </p>
-                            <button type="button" id="btn-upload-gallery" 
-                                class="mt-2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200">
-                                <i class="fas fa-upload mr-2"></i>Upload das Imagens
-                            </button>
+                    <!-- Add Product Form -->
+                    <div id="add-product-form" class="bg-white rounded-lg shadow p-6 mb-6 hidden">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4" id="product-form-title">Adicionar Novo
+                            Produto</h3>
+
+                        <form id="product-form" action="/api/produtos/" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="product-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome
+                                        do Produto</label>
+                                    <input type="text" id="product-nome" name="nome" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="product-sku"
+                                        class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                                    <input type="text" id="product-sku" name="sku" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="product-preco"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Preço</label>
+                                    <input type="number" id="product-preco" name="preco" required min="0" step="0.01"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="product-estoque"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Estoque</label>
+                                    <input type="number" id="product-estoque" name="estoque" required min="0"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="product-categoria"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                                    <select id="product-categoria" name="categoria" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Selecione uma categoria</option>
+                                        <option value="Lavagem">Lavagem</option>
+                                        <option value="Polimento">Polimento</option>
+                                        <option value="Proteção">Proteção</option>
+                                        <option value="Acessórios">Acessórios</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="product-status"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <select id="product-status" name="status" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="Ativo">Ativo</option>
+                                        <option value="Inativo">Inativo</option>
+                                        <option value="Últimas unidades">Últimas unidades</option>
+                                    </select>
+                                </div>
+
+                                <!-- Campos de Dimensões para Jadlog -->
+                                <div>
+                                    <label for="product-peso" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Peso (kg) *
+                                    </label>
+                                    <input type="number" id="product-peso" name="peso" required min="0.001" step="0.001"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value="0.100" placeholder="Ex: 0.500 para 500g">
+                                </div>
+
+                                <div>
+                                    <label for="product-altura" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Altura (cm) *
+                                    </label>
+                                    <input type="number" id="product-altura" name="altura" required min="0.1" step="0.1"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value="1.00">
+                                </div>
+
+                                <div>
+                                    <label for="product-largura" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Largura (cm) *
+                                    </label>
+                                    <input type="number" id="product-largura" name="largura" required min="0.1"
+                                        step="0.1"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value="1.00">
+                                </div>
+
+                                <div>
+                                    <label for="product-comprimento"
+                                        class="block text-sm font-medium text-gray-700 mb-1">
+                                        Comprimento (cm) *
+                                    </label>
+                                    <input type="number" id="product-comprimento" name="comprimento" required min="0.1"
+                                        step="0.1"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value="1.00">
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="product-descricao"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                    <textarea id="product-descricao" name="descricao" rows="3"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="product-imagem"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Imagem Principal do
+                                        Produto</label>
+                                    <input type="file" id="product-imagem" name="imagem" accept="image/*"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <!-- Visualização da Imagem Atual (apenas em edição) -->
+                                <div id="current-image-container" class="hidden md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Imagem Principal
+                                        Atual</label>
+                                    <div class="flex items-center space-x-4">
+                                        <img id="current-image-preview" src=""
+                                            class="h-20 w-20 object-cover rounded-lg border border-gray-300"
+                                            alt="Imagem atual do produto">
+                                        <div>
+                                            <p class="text-sm text-gray-600">Imagem principal atual do produto</p>
+                                            <p class="text-xs text-gray-500">Para alterar, selecione uma nova imagem
+                                                acima</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Seção de Galeria de Imagens (apenas em edição) -->
+                                <div id="gallery-section" class="hidden md:col-span-2">
+                                    <div class="border-t pt-6 mt-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Galeria de Imagens</h4>
+
+                                        <!-- Upload de Novas Imagens para Galeria -->
+                                        <div class="mb-6">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                Adicionar Imagens à Galeria
+                                            </label>
+                                            <input type="file" id="gallery-images" multiple accept="image/*"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <p class="text-sm text-gray-500 mt-1">
+                                                Selecione múltiplas imagens para adicionar à galeria do produto
+                                            </p>
+                                            <button type="button" id="btn-upload-gallery"
+                                                class="mt-2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200">
+                                                <i class="fas fa-upload mr-2"></i>Upload das Imagens
+                                            </button>
+                                        </div>
+
+                                        <!-- Lista de Imagens da Galeria -->
+                                        <div id="gallery-images-list" class="space-y-4">
+                                            <div class="text-center py-8 text-gray-500">
+                                                <i class="fas fa-images text-4xl mb-2"></i>
+                                                <p>Nenhuma imagem na galeria</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 flex justify-end space-x-3">
+                                <button type="button"
+                                    class="btn-cancel-product bg-gray-200 text-gray-800 py-2 px-4 rounded-md font-medium hover:bg-gray-300 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                    onclick="toggleAddProductForm()">Cancelar</button>
+                                <button type="submit"
+                                    class="bg-gradient-to-r from-primary-start to-primary-end text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Salvar Produto
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Products Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-800">Lista de Produtos</h3>
+                            <div class="flex gap-4 items-center">
+                                <div class="relative">
+                                    <input type="text" id="search-products" placeholder="Buscar produtos..."
+                                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        aria-label="Buscar produtos">
+                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                </div>
+
+                                <!-- Filtro de Status -->
+                                <select id="status-filter"
+                                    class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Todos os status</option>
+                                    <option value="Ativo">Ativos</option>
+                                    <option value="Inativo">Inativos</option>
+                                    <option value="Últimas unidades">Últimas unidades</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <!-- Lista de Imagens da Galeria -->
-                        <div id="gallery-images-list" class="space-y-4">
-                            <div class="text-center py-8 text-gray-500">
-                                <i class="fas fa-images text-4xl mb-2"></i>
-                                <p>Nenhuma imagem na galeria</p>
+                        <div class="table-responsive">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Produto</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Categoria</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Preço</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Estoque</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="all-products-table-body">
+                                    <tr>
+                                        <td colspan="6"
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                            Carregando produtos...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                            <div class="text-sm text-gray-500" id="products-count">
+                                Mostrando produtos...
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="mt-6 flex justify-end space-x-3">
-                <button type="button"
-                    class="btn-cancel-product bg-gray-200 text-gray-800 py-2 px-4 rounded-md font-medium hover:bg-gray-300 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                    onclick="toggleAddProductForm()">Cancelar</button>
-                <button type="submit"
-                    class="bg-gradient-to-r from-primary-start to-primary-end text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Salvar Produto
-                </button>
-            </div>
-        </form>
-    </div>
+                    <!-- Modal de Visualização de Produto -->
+                    <div id="product-view-modal"
+                        class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] p-4 hidden product-modal-backdrop">
+                        <div
+                            class="bg-white rounded-xl max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col shadow-2xl user-modal-content">
+                            <!-- Header -->
+                            <div class="p-6 border-b border-gray-200 bg-white">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-gray-900" id="modal-product-name">Nome do
+                                            Produto</h3>
+                                        <p class="text-gray-600 mt-1" id="modal-product-sku">SKU: </p>
+                                    </div>
+                                    <button type="button"
+                                        class="text-gray-400 hover:text-gray-600 text-2xl transition-colors duration-200 close-modal-btn"
+                                        onclick="closeProductModal()">
+                                        &times;
+                                    </button>
+                                </div>
+                            </div>
 
-    <!-- Products Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-gray-800">Lista de Produtos</h3>
-            <div class="flex gap-4 items-center">
-                <div class="relative">
-                    <input type="text" id="search-products" placeholder="Buscar produtos..."
-                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        aria-label="Buscar produtos">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                </div>
-                
-                <!-- Filtro de Status -->
-                <select id="status-filter" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Todos os status</option>
-                    <option value="Ativo">Ativos</option>
-                    <option value="Inativo">Inativos</option>
-                    <option value="Últimas unidades">Últimas unidades</option>
-                </select>
-            </div>
-        </div>
+                            <!-- Content -->
+                            <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <!-- Coluna 1: Informações Básicas -->
+                                    <div class="lg:col-span-1 space-y-6">
+                                        <!-- Imagem Principal -->
+                                        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                            <h4
+                                                class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
+                                                <i class="fas fa-image mr-2 text-blue-500"></i>
+                                                Imagem Principal
+                                            </h4>
+                                            <div class="flex justify-center">
+                                                <img id="modal-product-image" src="" alt="Imagem do produto"
+                                                    class="max-h-64 rounded-lg border border-gray-300 object-contain">
+                                            </div>
+                                        </div>
 
-        <div class="table-responsive">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Produto</th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Categoria</th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Preço</th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Estoque</th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status</th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Ações</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200" id="all-products-table-body">
-                    <tr>
-                        <td colspan="6"
-                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                            Carregando produtos...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                                        <!-- Status e Estoque -->
+                                        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                            <h4
+                                                class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
+                                                <i class="fas fa-chart-line mr-2 text-green-500"></i>
+                                                Status e Estoque
+                                            </h4>
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <label class="text-sm font-medium text-gray-600 block mb-1">Status
+                                                        do Produto</label>
+                                                    <span id="modal-product-status"
+                                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"></span>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm font-medium text-gray-600 block mb-1">Estoque
+                                                        Disponível</label>
+                                                    <div class="flex items-center">
+                                                        <span id="modal-product-stock"
+                                                            class="text-2xl font-bold text-gray-900 mr-2"></span>
+                                                        <span class="text-gray-600">unidades</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm font-medium text-gray-600 block mb-1">Nível de
+                                                        Estoque</label>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                                        <div id="modal-stock-bar" class="h-2.5 rounded-full"></div>
+                                                    </div>
+                                                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                                        <span>Baixo</span>
+                                                        <span>Alto</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
-        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-            <div class="text-sm text-gray-500" id="products-count">
-                Mostrando produtos...
-            </div>
-        </div>
-    </div>
-</section>
+                                        <!-- Dimensões -->
+                                        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                            <h4
+                                                class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
+                                                <i class="fas fa-ruler-combined mr-2 text-purple-500"></i>
+                                                Dimensões para Envio
+                                            </h4>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div
+                                                    class="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                                    <div class="text-lg font-bold text-blue-600"
+                                                        id="modal-product-weight"></div>
+                                                    <div class="text-sm text-blue-800">Peso (kg)</div>
+                                                </div>
+                                                <div
+                                                    class="text-center p-3 bg-green-50 rounded-lg border border-green-100">
+                                                    <div class="text-lg font-bold text-green-600"
+                                                        id="modal-product-height"></div>
+                                                    <div class="text-sm text-green-800">Altura (cm)</div>
+                                                </div>
+                                                <div
+                                                    class="text-center p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                                                    <div class="text-lg font-bold text-yellow-600"
+                                                        id="modal-product-width"></div>
+                                                    <div class="text-sm text-yellow-800">Largura (cm)</div>
+                                                </div>
+                                                <div class="text-center p-3 bg-red-50 rounded-lg border border-red-100">
+                                                    <div class="text-lg font-bold text-red-600"
+                                                        id="modal-product-length"></div>
+                                                    <div class="text-sm text-red-800">Comprimento (cm)</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Coluna 2: Informações Detalhadas -->
+                                    <div class="lg:col-span-2 space-y-6">
+                                        <!-- Informações Gerais -->
+                                        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                            <h4
+                                                class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
+                                                <i class="fas fa-info-circle mr-2 text-gray-500"></i>
+                                                Informações do Produto
+                                            </h4>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div>
+                                                    <label class="text-sm font-medium text-gray-600 block mb-1">Nome do
+                                                        Produto</label>
+                                                    <p class="text-gray-800 font-medium" id="modal-product-full-name">
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <label
+                                                        class="text-sm font-medium text-gray-600 block mb-1">SKU</label>
+                                                    <p class="text-gray-800 font-medium" id="modal-product-sku-full">
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <label
+                                                        class="text-sm font-medium text-gray-600 block mb-1">Categoria</label>
+                                                    <p class="text-gray-800" id="modal-product-category"></p>
+                                                </div>
+                                                <div>
+                                                    <label
+                                                        class="text-sm font-medium text-gray-600 block mb-1">Preço</label>
+                                                    <p class="text-gray-800 font-medium text-xl"
+                                                        id="modal-product-price"></p>
+                                                </div>
+                                                <div class="md:col-span-2">
+                                                    <label
+                                                        class="text-sm font-medium text-gray-600 block mb-1">Descrição</label>
+                                                    <div class="prose max-w-none" id="modal-product-description"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Galeria de Imagens -->
+                                        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                            <h4
+                                                class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
+                                                <i class="fas fa-images mr-2 text-yellow-500"></i>
+                                                Galeria de Imagens
+                                            </h4>
+                                            <div id="modal-product-gallery"
+                                                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                                <!-- As imagens da galeria serão inseridas aqui -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Estatísticas (pode ser expandido) -->
+                                        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                            <h4
+                                                class="font-semibold text-lg mb-4 text-gray-800 border-b border-gray-100 pb-3">
+                                                <i class="fas fa-chart-bar mr-2 text-green-500"></i>
+                                                Estatísticas (Em Desenvolvimento)
+                                            </h4>
+                                            <div class="text-center py-8 text-gray-500">
+                                                <i class="fas fa-chart-line text-4xl mb-3"></i>
+                                                <p>As estatísticas de vendas deste produto estarão disponíveis em breve
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer com Ações -->
+                            <div class="p-6 border-t border-gray-200 bg-white flex justify-between items-center">
+                                <div class="text-sm text-gray-600">
+                                    ID do produto: <span class="font-mono bg-gray-100 px-2 py-1 rounded"
+                                        id="modal-product-id"></span> •
+                                    Criado em: <span id="modal-product-created"></span>
+                                </div>
+                                <div class="flex space-x-3">
+                                    <button type="button" id="modal-edit-product-btn"
+                                        class="px-4 py-2 text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-300 rounded-lg transition-all duration-200 border flex items-center">
+                                        <i class="fas fa-edit mr-2"></i>Editar Produto
+                                    </button>
+                                    <button type="button" id="modal-toggle-status-btn"
+                                        class="px-4 py-2 text-sm font-medium bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-yellow-300 rounded-lg transition-all duration-200 border flex items-center">
+                                        <i class="fas fa-eye-slash mr-2"></i>Inativar/Ativar
+                                    </button>
+                                    <button type="button" onclick="closeProductModal()"
+                                        class="px-4 py-2 text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-300 rounded-lg transition-all duration-200 border flex items-center">
+                                        <i class="fas fa-times mr-2"></i>Fechar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Vendas Section - SEM CLASSE HIDDEN -->
                 <section id="vendas-section" class="section-content">
                     <div class="mb-6">
