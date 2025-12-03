@@ -213,7 +213,7 @@
                             </h3>
                         </a>
                         
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ produto.descricao }}</p>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ produto.descricao|striptags|truncatechars:100 }}</p>
                         
                         <!-- Categoria -->
                         <div class="mb-3">
@@ -284,7 +284,7 @@
                                         </h3>
                                     </a>
                                     
-                                    <p class="text-gray-600 mb-4">{{ produto.descricao }}</p>
+                                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ produto.descricao|striptags|truncatechars:247 }}</p>
                                     
                                     <div class="flex items-center space-x-4 mb-4">
                                         <span class="inline-block bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm font-medium">

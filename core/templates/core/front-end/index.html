@@ -225,7 +225,8 @@
                             </h3>
                         </a>
 
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ produto.descricao }}</p>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ produto.descricao|striptags|truncatechars:100 }}</p>
+
 
                         <div class="flex items-center justify-between mb-3">
                             <div>
