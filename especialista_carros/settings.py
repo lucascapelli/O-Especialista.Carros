@@ -36,12 +36,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-     # Adicionado para o app core para a execução do projeto
+    # Adicionado para o app core para a execução do projeto
     'core',
     # Django REST Framework
     'rest_framework',
     'corsheaders',
-    'django_extensions'
+    'django_extensions',
+    # Apps para avaliações
+    'django_celery_results',
+    'django_celery_beat',
+    'django_ratelimit',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_ratelimit.middleware.RatelimitMiddleware',
 ]
 
 ROOT_URLCONF = 'especialista_carros.urls'
@@ -81,11 +87,15 @@ WSGI_APPLICATION = 'especialista_carros.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv("DB_NAME"),
-        'USER': os.getenv("DB_USER"),
-        'PASSWORD': os.getenv("DB_PASSWORD"),
-        'HOST': os.getenv("DB_HOST"),
-        'PORT': os.getenv("DB_PORT"),
+        'NAME': os.getenv("DB_NAME", "especialista_carros"),
+        'USER': os.getenv("DB_USER", "root"),
+        'PASSWORD': os.getenv("DB_PASSWORD", "Root@123"),
+        'HOST': os.getenv("DB_HOST", "localhost"),
+        'PORT': os.getenv("DB_PORT", "3306"),
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        }
     }
 }
 
@@ -114,9 +124,9 @@ AUTH_USER_MODEL = 'core.User'  # Onde 'core' é o nome do seu app e 'User' é o 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
@@ -144,7 +154,17 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ]
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '1000/day',
+    },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
 
 # Configurações de autenticação
@@ -161,11 +181,12 @@ SESSION_COOKIE_AGE = 1209600  # 2 semanas em segundos
 # =============================================================================
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")  # Ou seu servidor SMTP
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "seu-email@gmail.com")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "sua-senha-de-app")  # Senha de app para Gmail
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_TIMEOUT = 30
 
 # Configurações do Site
 SITE_NAME = os.getenv("SITE_NAME", "Especialista Carros")
@@ -173,6 +194,7 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@especialistacarros
 
 # URL do Frontend (opcional - se tiver frontend separado)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8000")
+SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
 
 # =============================================================================
 # CONFIGURAÇÕES PARA NGROK E DESENVOLVIMENTO
@@ -213,29 +235,183 @@ CORS_ALLOW_CREDENTIALS = True
 # CONFIGURAÇÕES ABACATEPAY
 # =============================================================================
 
-ABACATEPAY_API_KEY = os.getenv("ABACATEPAY_API_KEY")
-ABACATEPAY_API_URL = os.getenv("ABACATEPAY_API_URL")
-SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
+ABACATEPAY_API_KEY = os.getenv("ABACATEPAY_API_KEY", "")
+ABACATEPAY_API_URL = os.getenv("ABACATEPAY_API_URL", "https://www.abacatepay.com/api")
 
 # =============================================================================
-# LOGGING PARA DEBUG
+# CONFIGURAÇÕES JADLOG (opcional)
 # =============================================================================
+
+JADLOG_API_URL = os.getenv("JADLOG_API_URL", "")
+JADLOG_TOKEN = os.getenv("JADLOG_TOKEN", "")
+JADLOG_CODREM = os.getenv("JADLOG_CODREM", "")
+
+# =============================================================================
+# AVALIAÇÕES CONFIG
+# =============================================================================
+
+AVALIACOES_CONFIG = {
+    'MAX_MIDIAS_PER_AVALIACAO': 5,
+    'MAX_FILE_SIZE_MB': 50,
+    'MAX_FILE_SIZE_MB_VIDEO': 500,  # 500MB para vídeos
+    'ALLOWED_IMAGE_EXTENSIONS': ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    'ALLOWED_VIDEO_EXTENSIONS': ['mp4', 'mov', 'avi', 'mkv', 'webm'],
+    'MODERACAO_OBRIGATORIA': False,  # Post-moderation (publica primeiro)
+    'CACHE_TIMEOUT': 300,
+    'PAGINACAO_ITEMS': 10,
+    'RATE_LIMITS': {
+        'avaliacao_create': '5/hour',
+        'midia_upload': '10/hour',
+        'like_action': '60/minute',
+        'denuncia': '3/hour',
+    },
+    'LGPD_RETENTION_DAYS': 365,
+    'S3_MULTIPART_THRESHOLD': 100 * 1024 * 1024,  # 100MB
+}
+
+# =============================================================================
+# RATE LIMITING
+# =============================================================================
+
+RATELIMIT_ENABLE = True
+RATELIMIT_USE_CACHE = 'default'
+RATELIMIT_VIEW = 'core.views.avaliacao_views.rate_limit_exceeded'
+
+# =============================================================================
+# CACHE
+# =============================================================================
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+            'SOCKET_CONNECT_TIMEOUT': 5,  # seconds
+            'SOCKET_TIMEOUT': 5,  # seconds
+        }
+    },
+    'session': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/2',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    },
+}
+
+# =============================================================================
+# CELERY
+# =============================================================================
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'django-db'  # Usando django_celery_results
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'America/Sao_Paulo'
+CELERY_ENABLE_UTC = True
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_BEAT_SCHEDULE = {
+    'limpar-avaliacoes-temporarias': {
+        'task': 'core.tasks.avaliacao_tasks.limpar_avaliacoes_temporarias',
+        'schedule': 86400.0,  # Diário
+        'options': {'queue': 'periodic'},
+    },
+    'processar-pendentes-moderacao': {
+        'task': 'core.tasks.avaliacao_tasks.processar_moderacao_avaliacao',
+        'schedule': 3600.0,  # A cada hora
+        'args': (),  # Tasks específicas serão disparadas via signals
+        'options': {'queue': 'moderacao'},
+    },
+}
+
+# =============================================================================
+# S3 CONFIG (opcional - se usar)
+# =============================================================================
+
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=31536000',
+}
+AWS_DEFAULT_ACL = 'private'
+AWS_QUERYSTRING_AUTH = True
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+
+# Configuração de storage
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+else:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# =============================================================================
+# LOGGING PARA OBSERVABILITY
+# =============================================================================
+
+# Cria diretório de logs se não existir
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOGS_DIR, exist_ok=True)
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} {levelname} {name} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'metrics': {
+            'format': '{asctime} METRIC {name} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
         'file': {
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'debug.log'),
+            'formatter': 'verbose',
         },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
+        'avaliacoes_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGS_DIR, 'avaliacoes.log'),
+            'formatter': 'verbose',
+        },
+        'moderacao_file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGS_DIR, 'moderacao.log'),
+            'formatter': 'verbose',
+        },
+        'metrics_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGS_DIR, 'metrics.log'),
+            'formatter': 'metrics',
+        },
+        'celery_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGS_DIR, 'celery.log'),
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
@@ -248,6 +424,26 @@ LOGGING = {
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
+        'core.avaliacoes': {
+            'handlers': ['avaliacoes_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'core.moderacao': {
+            'handlers': ['moderacao_file', 'console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'metrics': {
+            'handlers': ['metrics_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': ['celery_file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
         'django.core.mail': {
             'handlers': ['console'],
             'level': 'DEBUG' if DEBUG else 'INFO',
@@ -255,3 +451,23 @@ LOGGING = {
         },
     },
 }
+
+# =============================================================================
+# CONFIGURAÇÕES ADICIONAIS
+# =============================================================================
+
+# Configuração do ClamAV (opcional)
+CLAMAV_SERVER = os.environ.get('CLAMAV_SERVER', 'localhost')
+CLAMAV_PORT = 3310
+
+# Configuração de upload
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
+
+# Configuração de segurança (produção)
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 ano
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
