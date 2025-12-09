@@ -27,8 +27,13 @@ from .api_views import (
 )
 from .permissions import IsAdminOrReadOnly, IsAdminUser
 
-# VIEWS DE SHIPPING
 from .shipping_views import (
     simular_frete_api,
     rastrear_pedido_api
+)
+from .avaliacao_views import (
+    criar_avaliacao, 
+    listar_avaliacoes_api, 
+    like_avaliacao, 
+    excluir_minha_avaliacao
 )

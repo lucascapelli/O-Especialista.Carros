@@ -1,8 +1,8 @@
 # core/admin.py
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.core.exceptions import ImproperlyConfigured  # Adicione esta importação
-from .models import User, Produto, ImagemProduto
+from django.core.exceptions import ImproperlyConfigured
+from .models import User, Produto, ImagemProduto, Avaliacao, MidiaAvaliacao, AvaliacaoLike, AvaliacaoUtil, DenunciaAvaliacao
 
 # Importação segura dos forms
 try:
@@ -85,3 +85,28 @@ if Produto is not None:
         search_fields = ['produto__nome', 'legenda']
         ordering = ['produto', 'ordem']
         readonly_fields = ['data_criacao']
+
+# ---------- CONFIGURAÇÃO PARA AVALIAÇÕES ----------
+@admin.register(Avaliacao)
+class AvaliacaoAdmin(admin.ModelAdmin):
+    list_display = ['produto', 'usuario', 'nota_geral', 'status', 'created_at']
+    list_filter = ['status', 'nota_geral']
+    search_fields = ['titulo', 'comentario']
+
+@admin.register(MidiaAvaliacao)
+class MidiaAvaliacaoAdmin(admin.ModelAdmin):
+    list_display = ['avaliacao', 'tipo', 'aprovado', 'created_at']
+    list_filter = ['tipo', 'aprovado']
+
+@admin.register(AvaliacaoLike)
+class AvaliacaoLikeAdmin(admin.ModelAdmin):
+    list_display = ['avaliacao', 'usuario', 'tipo', 'created_at']
+
+@admin.register(AvaliacaoUtil)
+class AvaliacaoUtilAdmin(admin.ModelAdmin):
+    list_display = ['avaliacao', 'usuario', 'util', 'created_at']
+
+@admin.register(DenunciaAvaliacao)
+class DenunciaAvaliacaoAdmin(admin.ModelAdmin):
+    list_display = ['avaliacao', 'usuario', 'motivo', 'status', 'created_at']
+    list_filter = ['status', 'motivo']

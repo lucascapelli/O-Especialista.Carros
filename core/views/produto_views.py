@@ -1,16 +1,89 @@
 # views/produto_views.py
+from django.shortcuts import render, get_object_or_404
+from django.core.cache import cache
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
-from ..models import Produto, ImagemProduto
+from ..models import Produto, ImagemProduto, Avaliacao
 from ..serializers import ProdutoSerializer, ImagemProdutoSerializer, ProdutoDetailSerializer
 from .permissions import IsAdminOrReadOnly
 import logging
 from django.db import models
 
 logger = logging.getLogger(__name__)
+
+# FUNÇÃO DE DETALHES DO PRODUTO (Template Django)
+def detalhes_produto(request, produto_id):
+    """View para página de detalhes do produto com template Django"""
+    try:
+        # Obtém o produto com todas as relações necessárias
+        produto = get_object_or_404(
+            Produto.objects.select_related('categoria')
+            .prefetch_related('imagens'),
+            id=produto_id,
+            status='Ativo'
+        )
+        
+        # AVALIAÇÕES - Cache implementado
+        cache_key = f'produto_{produto_id}_avaliacoes_context'
+        avaliacoes_context = cache.get(cache_key)
+        
+        if not avaliacoes_context:
+            # Avaliações principais (aprovadas)
+            avaliacoes = Avaliacao.objects.filter(
+                produto=produto, 
+                status='aprovado'
+            ).select_related('usuario').prefetch_related('midias')[:5]
+            
+            # Estatísticas
+            estatisticas = {
+                'media': produto.media_avaliacoes or 0.0,
+                'total': produto.total_avaliacoes,
+                'distribuicao': produto.distribuicao_avaliacoes,
+                'recomendacao_percent': produto.percentual_recomendacao or 100,
+                'com_midia': produto.avaliacoes_com_midia.count(),
+            }
+            
+            # Mídias para galeria (máximo 12)
+            midias_destaque = []
+            for av in Avaliacao.objects.filter(
+                produto=produto, 
+                status='aprovado',
+                midias__isnull=False
+            ).prefetch_related('midias')[:6]:
+                for midia in av.midias.filter(aprovado=True)[:2]:  # Máx 2 por avaliação
+                    if len(midias_destaque) < 12:
+                        midias_destaque.append(midia)
+            
+            avaliacoes_context = {
+                'avaliacoes': avaliacoes,
+                'estatisticas': estatisticas,
+                'midias_destaque': midias_destaque,
+            }
+            
+            # Cache por 5 minutos
+            cache.set(cache_key, avaliacoes_context, 300)
+        
+        # Produtos relacionados
+        produtos_relacionados = Produto.objects.filter(
+            categoria=produto.categoria,
+            status='Ativo'
+        ).exclude(id=produto.id)[:4]
+        
+        context = {
+            'produto': produto,
+            'produtos_relacionados': produtos_relacionados,
+            **avaliacoes_context,  # Desempacota tudo
+        }
+        
+        return render(request, 'core/front-end/detalhes_produto.html', context)
+        
+    except Exception as e:
+        logger.error(f"Erro na view detalhes_produto para ID {produto_id}: {str(e)}")
+        return render(request, 'core/front-end/404.html', status=404)
+
 
 # SUA ProdutoViewSet EXISTENTE - ATUALIZE para usar o serializer correto
 class ProdutoViewSet(viewsets.ModelViewSet):
@@ -85,8 +158,8 @@ class ProdutoViewSet(viewsets.ModelViewSet):
         logger.info(f"Produto {kwargs.get('pk')} excluído por admin: {request.user.email}")
         return super().destroy(request, *args, **kwargs)
 
-# views/produto_views.py - SUBSTITUA A ImagemProdutoViewSet
 
+# views/produto_views.py - SUBSTITUA A ImagemProdutoViewSet
 class ImagemProdutoViewSet(viewsets.ModelViewSet):
     queryset = ImagemProduto.objects.all()
     serializer_class = ImagemProdutoSerializer
@@ -152,8 +225,8 @@ class ImagemProdutoViewSet(viewsets.ModelViewSet):
             # Upload único
             print(f"🔍 UPLOAD DEBUG: Modo upload único")
             return super().create(request, *args, **kwargs)
-        
-        
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def produtos_destaque(request):
@@ -161,6 +234,7 @@ def produtos_destaque(request):
     produtos = Produto.objects.filter(status='Ativo', estoque__gt=0)[:6]
     serializer = ProdutoSerializer(produtos, many=True)  # Use o serializer básico
     return Response({'produtos': serializer.data})
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -180,6 +254,7 @@ def buscar_produtos(request):
         'total': produtos.count(),
         'produtos': serializer.data
     })
+
 
 # ADICIONE esta view para a página de detalhes do produto
 @api_view(['GET'])

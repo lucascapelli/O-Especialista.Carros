@@ -1,4 +1,7 @@
-from django.db import models
+# models/produto.py
+from django.db import models, transaction
+from django.db.models import Q
+from django.core.exceptions import ValidationError
 
 class Produto(models.Model):
     nome = models.CharField(max_length=255)
@@ -121,15 +124,45 @@ class ImagemProduto(models.Model):
             models.Index(fields=['produto', 'ordem']),
             models.Index(fields=['produto', 'is_principal']),
         ]
+        # REMOVIDO: UniqueConstraint com condition (não suportado pelo MariaDB)
+        # constraints = [
+        #     UniqueConstraint(
+        #         fields=['produto'],
+        #         condition=Q(is_principal=True),
+        #         name='unique_principal_por_produto'
+        #     )
+        # ]
 
     def __str__(self):
         return f"Imagem {self.ordem} - {self.produto.nome}"
 
-    def save(self, *args, **kwargs):
-        # Garante que só tenha uma imagem principal por produto
+    def clean(self):
+        """Validação em nível de aplicação para garantir apenas uma imagem principal"""
+        super().clean()
+        
         if self.is_principal:
-            ImagemProduto.objects.filter(
-                produto=self.produto, 
+            # Verifica se já existe outra imagem principal para este produto
+            existing_principal = ImagemProduto.objects.filter(
+                produto=self.produto,
                 is_principal=True
-            ).update(is_principal=False)
-        super().save(*args, **kwargs)
+            ).exclude(pk=self.pk if self.pk else None).exists()
+            
+            if existing_principal:
+                raise ValidationError(
+                    "Já existe uma imagem principal para este produto. "
+                    "Desmarque a imagem principal existente antes de definir uma nova."
+                )
+
+    def save(self, *args, **kwargs):
+        # Validação antes de salvar
+        self.clean()
+        
+        with transaction.atomic():
+            # Garante que só tenha uma imagem principal por produto
+            if self.is_principal:
+                # Usar exclude(pk=self.pk) para evitar atualizar a própria instância
+                ImagemProduto.objects.filter(
+                    produto=self.produto, 
+                    is_principal=True
+                ).exclude(pk=self.pk).update(is_principal=False)
+            super().save(*args, **kwargs)

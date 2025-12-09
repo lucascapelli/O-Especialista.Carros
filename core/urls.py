@@ -26,14 +26,17 @@ from .views import (
     criar_pagamento_abacatepay, preparar_pagamento, criar_pedido_apos_pagamento, meus_pedidos,
     
     # Shipping Views
-    simular_frete_api, rastrear_pedido_api
+    simular_frete_api, rastrear_pedido_api,
+    
+    # Avaliações Views
+    criar_avaliacao, listar_avaliacoes_api, like_avaliacao, excluir_minha_avaliacao,
 )
 from .integrations.abacatepay_webhook import abacatepay_webhook
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'api/produtos', ProdutoViewSet, basename='produto')
-router.register(r'api/imagens-produto', ImagemProdutoViewSet, basename='imagem-produto')  # NOVA ROTA
+router.register(r'api/imagens-produto', ImagemProdutoViewSet, basename='imagem-produto')
 
 urlpatterns = [
     # PÁGINA INICIAL (ÚNICA)
@@ -52,7 +55,7 @@ urlpatterns = [
     # ========== APIs REST ==========
     path('api/login/', LoginView.as_view(), name='api-login'),
     path('api/register/', RegisterView.as_view(), name='api-register'),
-    path('api/esqueceu-senha/', api_esqueceu_senha, name='api_esqueceu_senha'),  # ✅ NOVA API
+    path('api/esqueceu-senha/', api_esqueceu_senha, name='api_esqueceu_senha'),
     
     # AUTENTICAÇÃO E PERFIL
     path('api/auth/check/', CheckAuthView.as_view(), name='api_auth_check'),
@@ -78,6 +81,12 @@ urlpatterns = [
     # ADMIN APIs
     path('api/admin/pedidos/<int:pedido_id>/detalhes/', detalhes_pedido_admin, name='admin_pedido_detalhes'),
     path('api/admin/pedidos/<int:pedido_id>/status/', atualizar_status_pedido, name='admin_pedido_status_api'),
+
+    # ========== AVALIAÇÕES ==========
+    path('avaliacao/criar/<int:produto_id>/', criar_avaliacao, name='criar_avaliacao'),
+    path('api/avaliacoes/<int:produto_id>/listar/', listar_avaliacoes_api, name='listar_avaliacoes_api'),
+    path('api/avaliacoes/<int:avaliacao_id>/like/', like_avaliacao, name='like_avaliacao'),
+    path('api/avaliacoes/<int:avaliacao_id>/excluir/', excluir_minha_avaliacao, name='excluir_minha_avaliacao'),
 
     # ========== PÁGINAS DO USUÁRIO ==========
     path('perfil/', perfil_usuario, name='perfil'),
